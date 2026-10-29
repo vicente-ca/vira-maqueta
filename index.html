@@ -1,0 +1,1649 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#F3F0EB" id="themeColor">
+<title>Vira · maqueta de la app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- tipografías sin bloquear el primer dibujo: con display=swap se ve la letra de respaldo hasta que lleguen -->
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<style>
+:root{
+  --ink:#1B2230; --ink-muted:#57534E; --primary:#4A62D6; --on-primary:#FFFFFF;
+  --primary-deep:#2F45B0; --primary-soft:#AFC0FF; --primary-ink:#4A62D6; --signal:#F0B44C; --on-signal:#1B2230; --signal-tint:#F8E6C2;
+  --canvas:#F3F0EB; --surface:#FFFFFF; --hairline:#D9D4CC; --danger:#D64545;
+  --pc:#DEE3FB; --on-pc:#1E2F86;
+  --sc-low:#F8F6F2; --sc:#ECE8E1; --sc-high:#E4DFD7; --outline:#8C857D;
+  --night:#1B2230; --night-ink:#F3F0EB; --night-c:#242C3B; --night-ch:#2E3748; --night-line:#3A4356; --night-muted:#A9ADB6;
+  --font-display:"Barlow Semi Condensed","Bahnschrift","DIN Alternate",sans-serif;
+  --font-text:"Atkinson Hyperlegible Next","Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --font-system:Roboto,"Segoe UI",system-ui,sans-serif;
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+  --ease-in-out:cubic-bezier(0.77,0,0.175,1);
+  --ease-drawer:cubic-bezier(0.32,0.72,0,1);
+  --screen-h:892px; --sys-top:40px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+html{-webkit-text-size-adjust:100%}
+/* a pantalla completa en el teléfono es una app: sin "tirar para recargar" ni rebote de la página */
+html:has(body.full),body.full{overscroll-behavior:none}
+body{background:var(--canvas);color:var(--ink);font-family:var(--font-text);-webkit-font-smoothing:antialiased;overflow:hidden;-webkit-tap-highlight-color:transparent}
+::selection{background:var(--primary-soft);color:var(--ink)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;text-align:inherit}
+/* iOS hace zoom al enfocar un campo con letra menor a 16 px */
+@media (pointer:coarse){select,input:not([type=range]){font-size:16px}}
+button:focus-visible,[tabindex]:focus-visible,input:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.screen.dark button:focus-visible{outline-color:var(--primary-soft)}
+.ic{flex:none;display:block}
+.num{font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- escenario ---------- */
+.stage{height:100dvh;display:grid;grid-template-columns:auto minmax(300px,380px);gap:clamp(24px,4vw,64px);align-items:center;justify-content:center;padding:20px 32px}
+.device-wrap{position:relative;width:calc(432px*var(--s,1));height:calc(912px*var(--s,1))}
+.device{position:absolute;top:0;left:0;width:432px;height:912px;transform:scale(var(--s,1));transform-origin:0 0;border-radius:54px;background:#10141C;padding:10px;
+  box-shadow:0 40px 70px -30px rgba(27,34,48,.55),0 4px 10px rgba(27,34,48,.18),inset 0 0 0 1.5px #2B313D,inset 0 0 0 4px #0B0E14}
+.device::before,.device::after{content:"";position:absolute;right:-3px;width:4px;border-radius:0 3px 3px 0;background:#232936}
+.device::before{top:190px;height:64px}
+.device::after{top:290px;height:110px}
+.screen{position:relative;width:412px;height:var(--screen-h);border-radius:44px;overflow:hidden;background:var(--canvas);color:var(--ink);isolation:isolate;contain:layout paint;--sys:var(--ink)}
+.screen.dark{--sys:var(--night-ink)}
+/* tema oscuro de la app (noche) */
+.screen.night{--canvas:#151B27;--ink:#F3F0EB;--ink-muted:#A9ADB6;--hairline:#2E3748;--sc-low:#1D2433;--sc:#1E2534;--sc-high:#2A3243;--outline:#6E7685;--pc:#2C3A78;--on-pc:#DDE3FF;--primary-ink:#AFC0FF;--sys:var(--night-ink)}
+.screen.night .btn-filled:disabled{background:#2A3243;color:#7D8494}
+.screen.night .snack .act{color:var(--primary-deep)}
+.screen.night .dots i{background:#3A4356}
+.view,.navbar,.list,.sheet,.dialog{transition:background-color 300ms ease,color 300ms ease}
+
+/* barra de estado del sistema */
+.sysbar{position:absolute;inset:0 0 auto;height:40px;z-index:60;display:flex;align-items:center;justify-content:space-between;padding:6px 26px 0 30px;color:var(--sys);font:500 14px/1 var(--font-system);pointer-events:none;transition:color 300ms ease}
+.sysbar .l,.sysbar .r{display:flex;align-items:center;gap:7px}
+.sysbar .notif{display:flex;gap:5px;opacity:0;transition:opacity 300ms ease}
+.sysbar .notif.on{opacity:1}
+.punch{position:absolute;top:13px;left:50%;width:13px;height:13px;margin-left:-6.5px;border-radius:50%;background:#05070A;z-index:70;box-shadow:inset 0 0 0 2px #10141C}
+.gesture{position:absolute;bottom:8px;left:50%;width:110px;height:4px;margin-left:-55px;border-radius:4px;background:var(--sys);opacity:.82;z-index:60;pointer-events:none;transition:background-color 300ms ease}
+
+/* vistas */
+.view{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--canvas)}
+.view[hidden]{display:none}
+
+/* barra superior */
+.appbar{height:64px;margin-top:var(--sys-top);flex:none;display:flex;align-items:center;gap:10px;padding:0 8px 0 18px}
+.appbar .name{font:600 26px/1 var(--font-display);letter-spacing:-.01em}
+.appbar .sp{flex:1}
+.iconbtn{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;color:var(--ink-muted);position:relative;overflow:hidden;flex:none}
+.logo .arc{fill:none;stroke:var(--primary);stroke-width:10}
+.logo .dot{fill:var(--signal)}
+
+/* pestañas */
+.tabs{position:relative;flex:1;min-height:0}
+.tab{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;padding:0 20px 24px;overscroll-behavior:contain}
+.tab::-webkit-scrollbar{display:none}
+.tab[hidden]{display:none}
+.h1{font:600 30px/1.08 var(--font-display);letter-spacing:-.01em;text-wrap:balance}
+.support{font-size:16px;line-height:1.45;color:var(--ink-muted);margin-top:6px;text-wrap:pretty}
+
+/* inicio */
+#tabPulseras{display:flex;flex-direction:column}
+#tabPulseras[hidden]{display:none}
+#tabPulseras .pair{container-type:size}
+#tabPulseras .band{--strap:clamp(40px,calc(50cqh - 132px),96px)}
+.pair{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;min-height:360px;padding:6px 0}
+.slot{display:flex;flex-direction:column;align-items:center;text-align:center;position:relative}
+.bandbtn{border-radius:30px;display:block;position:relative;z-index:2}
+.slot .side{font:600 22px/1.1 var(--font-display);margin-top:4px}
+.slot .conn{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:500;color:var(--ink-muted);margin-top:5px}
+.slot .conn i{width:8px;height:8px;border-radius:50%;background:var(--primary);transition:background-color 300ms ease}
+.slot .batt{display:inline-flex;align-items:center;gap:9px;height:48px;padding:0 14px;border-radius:24px;font:600 21px/1 var(--font-display);margin-top:2px;transition:color 300ms ease}
+.bat{width:27px;height:14px;border:2px solid currentColor;border-radius:4px;position:relative;display:inline-block;flex:none}
+.bat::after{content:"";position:absolute;right:-5px;top:3px;width:3px;height:4px;border-radius:0 1.5px 1.5px 0;background:currentColor}
+.bat i{position:absolute;inset:2px;border-radius:1.5px;background:currentColor;transform-origin:left;transition:transform 600ms var(--ease-out)}
+.slot[data-state=off] .conn i{background:#B4ADA4}
+.slot[data-state=off] .batt{color:#8C857D}
+.slot[data-state=low] .batt{color:var(--danger)}
+
+/* componente pulsera */
+.band{--u:3.7px;--mw:calc(var(--u)*30);--mh:calc(var(--u)*40);--sw:calc(var(--u)*19);--strap:58px;--amp:1;position:relative;width:calc(var(--mw) + 40px);height:calc(var(--mh) + var(--strap)*2);display:grid;place-items:center;flex:none}
+.band .strap{position:absolute;left:50%;width:var(--sw);margin-left:calc(var(--sw)/-2);height:calc(var(--strap) + 20px);
+  background:repeating-linear-gradient(180deg,rgba(175,192,255,.26) 0 1.5px,transparent 1.5px 7px),linear-gradient(90deg,#2A3EA3,#3A52C6 28%,#3A52C6 72%,#2A3EA3);transition:filter 400ms ease,opacity 400ms ease}
+.band .strap.t{top:0;clip-path:polygon(10% 0,90% 0,100% 100%,0 100%)}
+.band .strap.b{bottom:0;clip-path:polygon(0 0,100% 0,90% 100%,10% 100%)}
+.band .strap::after{content:"";position:absolute;inset:0;pointer-events:none}
+.band .strap.t::after{background:linear-gradient(to bottom,rgba(14,20,46,.62),rgba(14,20,46,0) 70%)}
+.band .strap.b::after{background:linear-gradient(to top,rgba(14,20,46,.62),rgba(14,20,46,0) 70%)}
+.band.empty .strap::after{display:none}
+.band .module{position:relative;z-index:1;width:var(--mw);height:var(--mh);border-radius:calc(var(--u)*6.5);
+  background:linear-gradient(158deg,#2C3549 0%,#1D2433 42%,#161C28 100%);
+  box-shadow:0 12px 22px -10px rgba(27,34,48,.6),0 3px 6px rgba(27,34,48,.22),inset 0 1px 0 rgba(255,255,255,.09),inset 0 -2px 0 rgba(0,0,0,.28);
+  transition:filter 400ms ease,opacity 400ms ease}
+.band .relief{position:absolute;top:calc(var(--u)*4.5);font:700 calc(var(--u)*8)/1 var(--font-display);color:#3F4A63;text-shadow:0 -1px 0 rgba(0,0,0,.65),0 1px 0 rgba(255,255,255,.14)}
+.band[data-side=L] .relief{left:calc(var(--u)*5)}
+.band[data-side=R] .relief{right:calc(var(--u)*5)}
+.band .knob{position:absolute;bottom:calc(var(--u)*5);left:50%;width:calc(var(--u)*10);height:calc(var(--u)*10);margin-left:calc(var(--u)*-5);border-radius:50%;border:calc(var(--u)*.55) solid var(--primary-soft);border-right-color:transparent;rotate:-45deg;opacity:.85}
+.band .knob::after{content:"";position:absolute;inset:0;margin:auto;width:calc(var(--u)*2.2);height:calc(var(--u)*2.2);border-radius:50%;background:#E8ECF8}
+.band .led{position:absolute;top:24%;bottom:24%;width:calc(var(--u)*1.7);border-radius:99px;background:#4C3F27;transition:background-color 160ms ease}
+.band[data-side=L] .led{right:calc(var(--u)*-.55)}
+.band[data-side=R] .led{left:calc(var(--u)*-.55)}
+.band .spill{position:absolute;top:50%;width:calc(var(--u)*30);height:calc(var(--mh)*1.1);margin-top:calc(var(--mh)*-.55);border-radius:50%;
+  background:radial-gradient(closest-side,rgba(240,180,76,.55),rgba(240,180,76,.18) 55%,transparent);opacity:0;pointer-events:none;transition:opacity 160ms ease;z-index:0}
+.band[data-side=L] .spill{left:calc(50% + var(--mw)/2 - var(--u)*15)}
+.band[data-side=R] .spill{right:calc(50% + var(--mw)/2 - var(--u)*15)}
+.band.lit .led{background:var(--signal)}
+.band.lit .spill{opacity:1}
+.band.lit.blink .led,.band.lit.blink .spill{animation:ledblink 1s ease-in-out infinite}
+@keyframes ledblink{50%{opacity:.18}}
+.band .ripple{position:absolute;left:50%;top:50%;width:var(--mw);height:var(--mh);margin:calc(var(--mh)/-2) 0 0 calc(var(--mw)/-2);border-radius:calc(var(--u)*6.5);border:2px solid var(--primary);pointer-events:none;z-index:0}
+.band.buzz .module{animation:buzz 84ms linear infinite}
+@keyframes buzz{
+  0%{translate:0 0;rotate:0deg}
+  25%{translate:calc(-1.3px*var(--amp)) calc(.4px*var(--amp));rotate:calc(-.8deg*var(--amp))}
+  50%{translate:calc(1.2px*var(--amp)) calc(-.35px*var(--amp));rotate:calc(.7deg*var(--amp))}
+  75%{translate:calc(-.9px*var(--amp)) calc(-.4px*var(--amp));rotate:calc(-.45deg*var(--amp))}
+  100%{translate:0 0;rotate:0deg}}
+.band.off .module{filter:saturate(.2) brightness(1.35);opacity:.55}
+.band.off .strap{filter:saturate(0) brightness(1.5);opacity:.6}
+
+/* estado y acciones */
+.statusrow{display:flex;align-items:center;gap:10px;margin:2px 2px 0;min-height:48px;font-size:16px;line-height:1.35}
+.statusrow .ic{color:var(--primary-ink)}
+.statusrow.warn .ic{color:var(--danger)}
+.livedot{width:10px;height:10px;border-radius:50%;background:var(--primary);flex:none;position:relative}
+.livedot::after{content:"";position:absolute;inset:0;border-radius:50%;background:inherit;animation:live 1.8s var(--ease-out) infinite}
+@keyframes live{from{opacity:.55;scale:1}to{opacity:0;scale:2.6}}
+.actions{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.btn{height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:600;font-size:16px;position:relative;overflow:hidden;transition:transform 160ms var(--ease-out),background-color 250ms ease,color 250ms ease;flex:none}
+.btn:active{transform:scale(.97)}
+.btn-filled{height:56px;background:var(--primary);color:var(--on-primary);font-size:17px}
+.btn-filled.on{background:var(--primary-deep)}
+.btn-filled:disabled{background:#D9D4CC;color:#7A746C;cursor:default}
+.btn-text{color:var(--primary-ink);padding:0 12px}
+.btn-tonal{background:var(--pc);color:var(--on-pc);padding:0 18px}
+.btn .lbl{display:inline-flex;align-items:center;gap:10px;transition:filter 200ms ease,opacity 200ms ease}
+.btn .lbl.swap{filter:blur(2px);opacity:.4}
+
+/* aviso de pedido */
+.orderband{display:flex;align-items:center;gap:12px;background:var(--signal);color:var(--on-signal);border-radius:16px;padding:12px 10px 12px 16px;margin:2px 0 12px;font-size:15.5px;line-height:1.35}
+.orderband b{display:block;font-weight:700}
+.orderband .btn{height:44px;padding:0 14px;color:var(--on-signal);background:rgba(27,34,48,.12);font-size:15px;margin-left:auto}
+
+/* navegación inferior */
+.navbar{flex:none;height:104px;padding:12px 8px 24px;display:grid;grid-template-columns:repeat(3,1fr);background:var(--sc);position:relative;z-index:5}
+.navitem{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12.5px;font-weight:600;color:var(--ink-muted)}
+.navitem .pill{width:64px;height:32px;border-radius:16px;display:grid;place-items:center;position:relative;overflow:hidden;transition:background-color 200ms ease,color 200ms ease}
+.navitem[aria-selected=true]{color:var(--ink)}
+.navitem[aria-selected=true] .pill{background:var(--pc);color:var(--on-pc)}
+
+/* ---------- En ruta ---------- */
+.route{background:var(--night);color:var(--night-ink);z-index:30}
+.route .morph{position:absolute;inset:0;background:var(--primary-deep);opacity:0;pointer-events:none;z-index:8}
+.rhead{margin-top:var(--sys-top);height:64px;flex:none;display:flex;align-items:center;gap:6px;padding:0 18px 0 4px}
+.rhead .iconbtn{color:var(--night-ink)}
+.chiplive{display:inline-flex;align-items:center;gap:10px;height:36px;padding:0 14px;border-radius:18px;background:var(--night-c);font-weight:600;font-size:15px}
+.chiplive .livedot{background:var(--primary-soft)}
+.rhead .src{margin-left:auto;font-size:14px;color:var(--night-muted)}
+.routeorder{padding:0 16px;min-height:0}
+.routeorder .orderband{margin:6px 0 0}
+.turn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 28px;position:relative;z-index:3}
+.turn .arrow{width:128px;height:128px;color:var(--primary-soft);margin-bottom:10px}
+.turn .arrow svg{width:100%;height:100%;overflow:visible}
+.turn .arrow path{fill:none;stroke:currentColor;stroke-width:13;stroke-linecap:round;stroke-linejoin:round}
+.turn .dist{font:600 88px/1 var(--font-display);letter-spacing:-.02em}
+.turn .dist small{font-size:.5em;letter-spacing:0;margin-left:6px}
+.turn .instr{font:600 40px/1.05 var(--font-display);margin-top:8px;text-wrap:balance}
+.turn .street{font-size:18px;color:var(--night-muted);margin-top:10px}
+.turn .tb{transition:filter 220ms ease,opacity 220ms ease,transform 220ms var(--ease-out)}
+.turn.swap .tb{filter:blur(4px);opacity:0;transform:translateY(6px)}
+.rfoot{flex:none;padding:0 20px 44px;display:flex;flex-direction:column;gap:14px;position:relative;z-index:3}
+.minis{display:flex;justify-content:space-between;align-items:center;padding:0 4px}
+.mini{display:flex;align-items:center;gap:8px;font:600 18px/1 var(--font-display)}
+.mini.r{flex-direction:row-reverse}
+.mini .band{--u:1.15px;--strap:9px;width:calc(var(--mw) + 6px)}
+.mini .band .spill{display:none}
+.mini .lab{display:flex;flex-direction:column;gap:3px}
+.mini.r .lab{align-items:flex-end}
+.mini .lab span{font:500 13px var(--font-text);color:var(--night-muted)}
+.btn-route{height:56px;background:var(--night-ch);color:var(--night-ink);font-size:17px}
+.edge{position:absolute;top:12%;bottom:12%;width:150px;pointer-events:none;z-index:2;opacity:0}
+.edge.l{left:0;background:radial-gradient(90px 50% at 0% 50%,rgba(175,192,255,.42),transparent)}
+.edge.r{right:0;background:radial-gradient(90px 50% at 100% 50%,rgba(175,192,255,.42),transparent)}
+.edge svg{position:absolute;top:50%;margin-top:-80px;width:80px;height:160px;overflow:visible}
+.edge.l svg{left:-14px}
+.edge.r svg{right:-14px}
+.edge path{fill:none;stroke:var(--primary-soft);stroke-width:7;stroke-linecap:round}
+
+/* notificación del sistema (heads-up) */
+.headsup{position:absolute;top:44px;left:10px;right:10px;z-index:55;background:#FBFAF8;color:#1F1F1F;border-radius:26px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;
+  box-shadow:0 12px 30px -12px rgba(0,0,0,.5),0 2px 6px rgba(0,0,0,.12);transform:translateY(calc(-100% - 60px));transition:transform 450ms var(--ease-out);font-family:var(--font-system)}
+.headsup.on{transform:none}
+.headsup .appic{width:38px;height:38px;border-radius:50%;background:#E4DFD7;display:grid;place-items:center;color:#4E4A45;flex:none}
+.headsup .meta{font-size:12.5px;color:#625E58}
+.headsup b{display:block;font-weight:500;font-size:15px;margin-top:2px}
+.headsup p{font-size:14px;color:#3D3A36;margin-top:1px}
+
+/* hoja inferior y diálogos */
+.scrim{position:absolute;inset:0;background:rgba(27,34,48,.42);z-index:45;opacity:0;transition:opacity 250ms ease;pointer-events:none}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:46;background:var(--sc-low);border-radius:28px 28px 0 0;padding:8px 24px 44px;transform:translateY(105%);transition:transform 500ms var(--ease-drawer);touch-action:none;max-height:86%;overflow:auto}
+.sheet.on{transform:none}
+.sheet .handle{width:32px;height:4px;border-radius:2px;background:var(--outline);margin:8px auto 18px;opacity:.55}
+.sheet h3{font:600 26px/1.1 var(--font-display)}
+.brow{display:flex;align-items:center;gap:14px;padding:14px 0}
+.brow + .brow{border-top:1px solid var(--hairline)}
+.brow .band{--u:1.3px;--strap:12px;width:auto}
+.brow .tx{flex:1}
+.brow .tx b{display:block;font:600 20px/1.1 var(--font-display)}
+.brow .tx span{font-size:14px;color:var(--ink-muted)}
+.brow .pct{font:600 32px/1 var(--font-display)}
+.brow.low .pct{color:var(--danger)}
+.note{font-size:14px;line-height:1.45;color:var(--ink-muted);margin-top:6px}
+.dialog{position:absolute;left:28px;right:28px;top:50%;z-index:47;background:var(--sc-low);border-radius:28px;padding:24px 24px 16px;margin-top:-120px;opacity:0;transform:scale(.96);transition:opacity 250ms var(--ease-out),transform 250ms var(--ease-out);pointer-events:none}
+.dialog.on{opacity:1;transform:none;pointer-events:auto}
+.dialog h3{font:600 24px/1.15 var(--font-display)}
+.dialog p{margin-top:12px;color:var(--ink-muted);line-height:1.45;font-size:15.5px}
+.dialog .acts{display:flex;justify-content:flex-end;gap:4px;margin-top:20px}
+
+/* actividad */
+.summary{font-size:16px;line-height:1.45;margin-top:12px}
+.timeline{position:relative;margin-top:20px;padding-bottom:16px}
+.timeline::before{content:"";position:absolute;left:50%;top:4px;bottom:0;width:2px;margin-left:-1px;background:var(--hairline)}
+.ev{position:relative;display:grid;grid-template-columns:1fr 1fr;margin-bottom:16px}
+.ev::after{content:"";position:absolute;left:50%;top:6px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 3px var(--canvas)}
+.ev .c{grid-column:1;text-align:right;padding-right:22px}
+.ev.R .c{grid-column:2;text-align:left;padding:0 0 0 22px}
+.ev .time{font-size:13px;color:var(--ink-muted);font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.ev .sidek{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;background:var(--ink);color:var(--canvas);font:700 12px/1 var(--font-display)}
+.ev .what{font:600 19px/1.15 var(--font-display);margin-top:3px}
+.ev .where{font-size:14px;color:var(--ink-muted);margin-top:1px}
+.ev.O{grid-template-columns:1fr}
+.ev.O::after{background:var(--signal)}
+.ev.O .c{grid-column:1;text-align:left;padding:12px 14px;border-radius:16px;background:var(--signal);color:var(--on-signal);position:relative;z-index:1;display:flex;align-items:center;gap:12px;margin-top:18px}
+.ev.O .c .time,.ev.O .c .where{color:inherit}
+.ev.O.seen .c{background:var(--signal-tint)}
+.ev.O .c .btn{margin-left:auto;height:44px;padding:0 14px;background:rgba(27,34,48,.12);font-size:15px}
+.ev.fresh{animation:evin 500ms var(--ease-out) backwards}
+@keyframes evin{from{opacity:0;transform:translateY(-10px)}}
+.empty{padding:48px 12px;text-align:center;color:var(--ink-muted);line-height:1.5}
+
+/* ajustes */
+.sect{margin-top:24px}
+.sect > h3{font-size:14px;font-weight:700;color:var(--primary-ink);margin:0 4px 8px}
+.list{background:var(--sc-low);border-radius:20px;overflow:hidden}
+.li{display:flex;align-items:center;gap:14px;min-height:64px;padding:12px 16px;width:100%;text-align:left;position:relative}
+.li + .li,.li + .seg-wrap,.seg-wrap + .li{border-top:1px solid var(--hairline)}
+.li > .ic{color:var(--ink-muted)}
+.li .tx{flex:1;min-width:0}
+.li .tx b{display:block;font-weight:600;font-size:16px;line-height:1.3}
+.li .tx span{display:block;font-size:14px;color:var(--ink-muted);margin-top:2px;line-height:1.4}
+.li.danger .tx b,.li.danger > .ic{color:var(--danger)}
+.seg-wrap{padding:14px 16px 16px}
+.seg-wrap .tx b{font-weight:600;font-size:16px}
+.seg{display:flex;height:48px;border:1px solid var(--outline);border-radius:24px;overflow:hidden;margin-top:10px}
+.seg button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:600;font-size:15px;transition:background-color 200ms ease,color 200ms ease}
+.seg button + button{border-left:1px solid var(--outline)}
+.seg button[aria-pressed=true]{background:var(--pc);color:var(--on-pc)}
+.seg button .ic{display:none}
+.seg button[aria-pressed=true] .ic{display:block;animation:segin 200ms var(--ease-out)}
+@keyframes segin{from{opacity:0;transform:scale(.8)}}
+.switch{position:relative;width:52px;height:32px;border-radius:16px;border:2px solid var(--outline);background:var(--sc-high);flex:none;transition:background-color 200ms ease,border-color 200ms ease}
+.switch::after{content:"";position:absolute;top:50%;left:2px;width:24px;height:24px;margin-top:-12px;border-radius:50%;background:var(--outline);transform:scale(.667);transition:transform 250ms var(--ease-out),background-color 200ms ease}
+.switch[aria-checked=true]{background:var(--primary);border-color:var(--primary)}
+.switch[aria-checked=true]::after{transform:translateX(20px) scale(1);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234A62D6' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/16px no-repeat}
+.range{-webkit-appearance:none;appearance:none;width:100%;height:44px;background:transparent;margin-top:4px;--v:33%}
+.range::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(to right,var(--primary) 0 var(--v),var(--pc) var(--v) 100%)}
+.range::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--primary);margin-top:-8px;box-shadow:0 1px 3px rgba(27,34,48,.3)}
+.range::-moz-range-track{height:6px;border-radius:3px;background:var(--pc)}
+.range::-moz-range-progress{height:6px;border-radius:3px;background:var(--primary)}
+.range::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:var(--primary)}
+.ver{font-size:13px;color:var(--ink-muted);text-align:center;margin:26px 0 8px;line-height:1.5}
+
+/* ---------- inicio de la app (splash) ---------- */
+.splash{align-items:center;justify-content:center;gap:18px;z-index:20}
+.splash .logo .arc{stroke-dasharray:80;stroke-dashoffset:80}
+.splash .word{font:600 44px/1 var(--font-display);letter-spacing:-.01em;opacity:0}
+
+/* ---------- guía ---------- */
+.onb{z-index:12}
+.onb .skip{position:absolute;top:calc(var(--sys-top) + 8px);right:12px;z-index:3}
+.pager{flex:1;overflow:hidden;position:relative;touch-action:pan-y;cursor:grab}
+.pager:active{cursor:grabbing}
+.track{display:flex;height:100%;transition:transform 450ms var(--ease-drawer)}
+.track.drag{transition:none}
+.page{flex:0 0 100%;display:flex;flex-direction:column;padding:calc(var(--sys-top) + 64px) 28px 0}
+.ill{height:340px;display:flex;align-items:center;justify-content:center;gap:34px;position:relative;flex:none}
+.ill .band{--u:3.15px;--strap:44px}
+.ill .bigarrow{position:absolute;top:-6px;left:50%;width:96px;height:96px;margin-left:-48px;color:var(--primary-ink)}
+.ill .bigarrow path{fill:none;stroke:currentColor;stroke-width:12;stroke-linecap:round;stroke-linejoin:round}
+.ill .mini-order{position:absolute;top:0;left:6px;right:6px;font-size:14px;padding:10px 12px}
+.ill.withtop{padding-top:70px}
+.ill .tag{position:absolute;bottom:0;font-size:13.5px;font-weight:700;color:var(--ink-muted)}
+.page h2{font:600 34px/1.05 var(--font-display);margin-top:14px;letter-spacing:-.01em;text-wrap:balance}
+.page p{font-size:17px;line-height:1.5;color:var(--ink-muted);margin-top:12px;text-wrap:pretty}
+.onbfoot{flex:none;padding:0 24px 48px;display:flex;align-items:center;gap:16px}
+.dots{display:flex;gap:12px;flex:1;padding-left:6px}
+.dots{position:relative}
+.dots i{width:8px;height:8px;border-radius:4px;background:var(--hairline)}
+.dots b{position:absolute;left:0;top:0;width:20px;height:8px;border-radius:4px;background:var(--primary);transition:transform 350ms var(--ease-out)}
+.onbfoot .btn-filled{padding:0 28px;min-width:168px}
+
+/* ---------- permisos y emparejar ---------- */
+.flow{z-index:12}
+.flow .appbar{padding-left:4px}
+.flow .appbar .ttl{font:600 22px/1 var(--font-display)}
+.flow .body{flex:1;overflow-y:auto;padding:0 20px;scrollbar-width:none;display:flex;flex-direction:column}
+.flow .body::-webkit-scrollbar{display:none}
+.flow .foot{flex:none;padding:12px 20px 44px;display:flex;flex-direction:column;gap:10px}
+.perm .list{margin-top:20px}
+.perm .li{min-height:84px;align-items:center}
+.perm .li > .ic{color:var(--primary-ink)}
+.perm .grant{height:40px;padding:0 16px;font-size:15px;border-radius:20px}
+.perm .ok{display:inline-flex;align-items:center;gap:6px;color:var(--primary-ink);font-weight:700;font-size:15px;height:40px;padding:0 4px}
+.privacy{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;color:var(--ink-muted);margin-top:16px}
+.privacy .ic{color:var(--ink-muted);margin-top:1px}
+.pairv .pair{min-height:380px;flex:1}
+.band.empty .module{background:none;border:2px dashed var(--outline);box-shadow:none}
+.band.empty .strap{background:none;border-left:2px dashed var(--hairline);border-right:2px dashed var(--hairline)}
+.band.empty .led,.band.empty .knob,.band.empty .relief,.band.empty .spill{display:none}
+.searching .band.empty{animation:breathe 1.6s ease-in-out infinite}
+@keyframes breathe{50%{opacity:.45}}
+.slot .sub{font-size:14px;color:var(--ink-muted);margin-top:5px;min-height:20px}
+.floatband{position:absolute;z-index:6;pointer-events:none}
+.ask{border-radius:20px;background:var(--sc-low);padding:16px;margin-top:4px}
+.ask p{font-size:16px;line-height:1.4;font-weight:600}
+.ask .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.ask .two button{height:64px;border-radius:16px;background:var(--pc);color:var(--on-pc);font:600 22px/1 var(--font-display);display:flex;align-items:center;justify-content:center;gap:8px}
+
+/* ---------- interfaz del sistema Android ---------- */
+.sysdlg{position:absolute;left:24px;right:24px;top:50%;z-index:58;background:#F4F0EC;color:#1F1F1F;border-radius:28px;padding:24px 20px 18px;font-family:var(--font-system);text-align:center;margin-top:-170px;opacity:0;transform:scale(.96);transition:opacity 250ms var(--ease-out),transform 250ms var(--ease-out);pointer-events:none}
+.sysdlg.on{opacity:1;transform:none;pointer-events:auto}
+.sysdlg .sic{display:flex;justify-content:center;color:#3E4A7A;margin-bottom:14px}
+.sysdlg h4{font-weight:400;font-size:21px;line-height:1.3}
+.sysdlg h4 b{font-weight:500}
+.sysdlg p{font-size:14px;line-height:1.45;color:#4A4744;margin-top:12px;text-align:left}
+.sysdlg .stack{display:flex;flex-direction:column;gap:4px;margin-top:20px}
+.sysdlg .stack button{height:52px;border-radius:6px;background:#E9E3DD;font:500 15px var(--font-system);color:#1F1F1F;text-align:center}
+.sysdlg .stack button:first-child{border-radius:20px 20px 6px 6px}
+.sysdlg .stack button:last-child{border-radius:6px 6px 20px 20px}
+.sysscrim{position:absolute;inset:0;background:rgba(0,0,0,.42);z-index:57;opacity:0;transition:opacity 250ms ease;pointer-events:none}
+.sysscrim.on{opacity:1;pointer-events:auto}
+.syssheet{position:absolute;left:0;right:0;bottom:0;z-index:58;background:#F4F0EC;color:#1F1F1F;border-radius:28px 28px 0 0;padding:22px 0 40px;font-family:var(--font-system);transform:translateY(105%);transition:transform 500ms var(--ease-drawer)}
+.syssheet.on{transform:none}
+.syssheet h4{font-weight:400;font-size:21px;line-height:1.3;padding:0 24px;text-align:center}
+.syssheet .subt{font-size:14px;color:#4A4744;padding:8px 24px 0;text-align:center;line-height:1.4}
+.syssheet .bar{height:4px;margin:18px 24px 6px;border-radius:2px;background:#DDD6CF;overflow:hidden;position:relative}
+.syssheet .bar::after{content:"";position:absolute;top:0;bottom:0;width:40%;border-radius:2px;background:#3E4A7A;animation:indet 1.2s var(--ease-in-out) infinite}
+.syssheet .bar.done::after{animation:none;width:100%;opacity:0}
+@keyframes indet{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+.syssheet .dev{display:flex;align-items:center;gap:16px;width:100%;height:60px;padding:0 24px;font-size:16px;color:#1F1F1F}
+.syssheet .dev .ic{color:#4A4744}
+.syssheet .dev small{display:block;font-size:13px;color:#625E58}
+.syssheet .cancel{display:block;margin:14px auto 0;height:44px;padding:0 20px;border-radius:22px;color:#3E4A7A;font:500 15px var(--font-system)}
+.syspage{background:#F7F5F2;color:#1F1F1F;font-family:var(--font-system);z-index:56}
+.syspage .sp-top{margin-top:var(--sys-top);height:64px;display:flex;align-items:center;padding:0 4px;flex:none}
+.syspage .sp-top .iconbtn{color:#1F1F1F}
+.syspage h3{font-weight:400;font-size:32px;line-height:1.2;padding:12px 24px 24px}
+.syspage .grp{margin:0 16px;border-radius:24px;background:#FFFFFF;overflow:hidden}
+.syspage .grp .r{display:flex;align-items:center;gap:16px;min-height:72px;padding:12px 20px;width:100%;text-align:left}
+.syspage .grp .r + .r{border-top:1px solid #ECE8E3}
+.syspage .grp .ai{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#E6E1DB;flex:none}
+.syspage .grp .ai.vira{background:var(--canvas)}
+.syspage .grp .t{flex:1;font-size:17px}
+.syspage .grp .t small{display:block;font-size:13.5px;color:#625E58;margin-top:2px}
+.syspage .hint{font-size:13.5px;color:#625E58;padding:16px 28px;line-height:1.45}
+.syspage .switch{border-color:#79747E;background:#E6E0E9}
+.syspage .switch::after{background:#79747E}
+.syspage .switch[aria-checked=true]{background:#3E4A7A;border-color:#3E4A7A}
+.syspage .switch[aria-checked=true]::after{background-color:#fff}
+
+/* snackbar */
+.snack{position:absolute;left:12px;right:12px;bottom:116px;z-index:50;display:flex;align-items:center;gap:8px;min-height:52px;padding:6px 8px 6px 16px;border-radius:8px;background:var(--ink);color:var(--canvas);font-size:15px;line-height:1.35;
+  box-shadow:0 8px 20px -8px rgba(27,34,48,.5);transform:translateY(calc(100% + 140px));opacity:0;transition:transform 400ms ease,opacity 400ms ease;pointer-events:none}
+.snack.on{transform:none;opacity:1;pointer-events:auto}
+.snack .msg{flex:1;padding:8px 0}
+.snack .act{height:40px;padding:0 12px;border-radius:20px;color:var(--primary-soft);font-weight:700;font-size:15px}
+.screen.dark .snack{background:var(--night-ch);bottom:130px}
+
+/* toque fantasma del recorrido */
+.touch{position:absolute;left:0;top:0;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(27,34,48,.22);border:2px solid rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(27,34,48,.3);z-index:90;opacity:0;pointer-events:none;transition:opacity 200ms ease}
+.touch.on{opacity:1}
+
+/* ripple tipo Material */
+.rp{position:relative;overflow:hidden;isolation:isolate}
+.rp .wave{position:absolute;border-radius:50%;background:currentColor;opacity:.14;pointer-events:none;z-index:-1}
+
+/* ---------- panel de presentación ---------- */
+.panel{display:flex;flex-direction:column;gap:20px;min-width:0;max-height:calc(100dvh - 40px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--hairline) transparent;padding:4px 4px 8px}
+.panel > *{flex:none}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .t b{display:block;font:600 30px/1 var(--font-display);letter-spacing:-.01em}
+.brand .t span{display:block;font-size:13.5px;color:var(--ink-muted);margin-top:4px;line-height:1.35}
+.caption{border-top:1px solid var(--hairline);padding-top:16px;min-height:150px}
+.caption h2{font:600 27px/1.1 var(--font-display);margin-top:6px;text-wrap:balance}
+.caption p{font-size:16.5px;line-height:1.5;color:var(--ink-muted);margin-top:8px;text-wrap:pretty}
+.caption .tb{transition:opacity 250ms ease,transform 250ms var(--ease-out)}
+.caption.swap .tb{opacity:0;transform:translateY(6px)}
+.progrow{display:flex;align-items:center;gap:12px;margin-top:14px}
+.progrow .count{font-size:13.5px;font-weight:700;color:var(--ink-muted);min-width:56px;text-align:right}
+.prog{display:flex;gap:4px;flex:1}
+.prog i{flex:1;height:4px;border-radius:2px;background:var(--hairline);position:relative;overflow:hidden}
+.prog i::after{content:"";position:absolute;inset:0;background:var(--primary);transform:scaleX(var(--p,0));transform-origin:left;transition:transform 300ms var(--ease-out)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.pbtn{height:48px;padding:0 16px;border-radius:12px;display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:15.5px;transition:transform 160ms var(--ease-out),background-color 200ms ease}
+.pbtn:active{transform:scale(.97)}
+.pbtn.fill{background:var(--primary);color:#fff}
+.pbtn.out{border:1px solid var(--outline);color:var(--ink)}
+.label{font-size:13.5px;font-weight:700;color:var(--ink-muted);margin-bottom:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{height:40px;padding:0 14px 0 10px;border-radius:8px;border:1px solid var(--outline);display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:600;color:var(--ink);transition:transform 160ms var(--ease-out),background-color 200ms ease}
+.chip:active{transform:scale(.97)}
+.chip .ic{color:var(--primary-ink)}
+.chip.amber .ic{color:#9A6A12}
+.twin{display:flex;justify-content:space-around;align-items:center;padding:2px 0 0}
+.twin figure{display:flex;flex-direction:column;align-items:center;gap:4px}
+.twin .band{--u:2.2px;--strap:22px}
+.twin figcaption{font-size:13.5px;font-weight:700;color:var(--ink-muted)}
+.foot{font-size:12.5px;color:var(--ink-muted);line-height:1.45}
+.pbtn:disabled{opacity:.45;cursor:default;transform:none}
+.osm{display:flex;flex-direction:column;gap:10px}
+.osm-map{height:210px;border-radius:12px;border:1px solid var(--hairline);overflow:hidden;background:var(--sc);z-index:0}
+.osm-map .maplibregl-ctrl-attrib{font-size:10.5px}
+.osm-dot{width:16px;height:16px;border-radius:50%;background:#1B2230;border:3px solid #FFFFFF;box-shadow:0 1px 4px rgba(27,34,48,.35)}
+.osm-dest{width:16px;height:16px;border-radius:50%;background:#FFFFFF;border:3px solid #1B2230}
+.osm-ctl{display:flex;gap:8px}
+.osm-ctl select{flex:1;min-width:0;height:40px;border-radius:8px;border:1px solid var(--outline);background:var(--surface);color:var(--ink);font:inherit;font-size:14.5px;font-weight:600;padding:0 8px}
+.seg{display:flex;flex:none;border:1px solid var(--outline);border-radius:8px;overflow:hidden}
+.seg button{height:38px;padding:0 12px;font-size:14.5px;font-weight:600;color:var(--ink);transition:background-color 200ms ease}
+.seg button[aria-checked="true"]{background:var(--primary);color:#fff}
+.osm-status{font-size:14px;line-height:1.4;color:var(--ink)}
+.osm-status.err{color:var(--danger)}
+.osm-hint{font-size:12.5px;line-height:1.4;color:var(--ink-muted)}
+
+@media (hover:hover) and (pointer:fine){
+  .chip:hover,.pbtn.out:hover{background:rgba(74,98,214,.07)}
+  .pbtn.fill:hover{background:var(--primary-deep)}
+}
+
+/* formatos */
+@media (max-width:900px){
+  body{overflow:auto}
+  .stage{grid-template-columns:1fr;height:auto;justify-items:center;padding:20px 16px 40px}
+  .panel{max-height:none;width:min(100%,520px)}
+}
+body.full{overflow:hidden}
+body.full .stage{display:block;padding:0;height:100dvh}
+body.full .panel{display:none}
+body.full .device-wrap{width:100vw;height:100dvh}
+body.full .device{padding:0;border-radius:0;background:none;box-shadow:none}
+body.full .device::before,body.full .device::after,body.full .punch{display:none}
+body.full .screen{border-radius:0;--sys-top:max(env(safe-area-inset-top,0px),12px)}
+/* en un teléfono real ya hay barra de estado y barra de gestos: las del marco sobran */
+body.full .sysbar,body.full .gesture{display:none}
+
+@media (prefers-reduced-motion:reduce){
+  .band.buzz .module{animation:none;filter:brightness(1.6)}
+  .livedot::after{animation:none}
+  .band.lit.blink .led,.band.lit.blink .spill{animation:none}
+  .ev.fresh{animation:none}
+  .turn.swap .tb{filter:none;transform:none}
+  .turn .tb{transition:opacity 150ms ease}
+  .sheet{transition:transform 1ms,opacity 250ms ease}
+}
+</style>
+</head>
+<body>
+<h1 class="sr">Vira, maqueta interactiva de la app de las pulseras</h1>
+<div class="stage">
+  <div class="device-wrap" id="deviceWrap">
+    <div class="device" id="device">
+      <div class="screen" id="screen">
+        <div class="sysbar" aria-hidden="true">
+          <div class="l"><span class="num" id="clock">14:32</span><span class="notif" id="sysNotif"></span></div>
+          <div class="r" id="sysRight"></div>
+        </div>
+        <div class="punch"></div>
+
+        <!-- APP PRINCIPAL -->
+        <section class="view" id="vMain" aria-label="Vira">
+          <header class="appbar">
+            <span id="appLogo"></span><span class="name">Vira</span><span class="sp"></span>
+            <button class="iconbtn rp" id="btnHelp" aria-label="Ver la guía"><span data-icon="help"></span></button>
+          </header>
+          <div class="tabs">
+            <div class="tab" id="tabPulseras" role="tabpanel" aria-label="Pulseras">
+              <div id="orderSlot"></div>
+              <h2 class="h1">Tus pulseras</h2>
+              <p class="support">Toca una para probarla.</p>
+              <div class="pair" id="pair">
+                <div class="slot" data-side="L" id="slotL">
+                  <button class="bandbtn" aria-label="Probar la pulsera izquierda"><span class="band-host"></span></button>
+                  <span class="side">Izquierda</span>
+                  <span class="conn"><i></i><span class="ct">Conectada</span></span>
+                  <button class="batt num rp" aria-label="Ver la batería"><span class="bat"><i></i></span><span class="bv">80&nbsp;%</span></button>
+                </div>
+                <div class="slot" data-side="R" id="slotR">
+                  <button class="bandbtn" aria-label="Probar la pulsera derecha"><span class="band-host"></span></button>
+                  <span class="side">Derecha</span>
+                  <span class="conn"><i></i><span class="ct">Conectada</span></span>
+                  <button class="batt num rp" aria-label="Ver la batería"><span class="bat"><i></i></span><span class="bv">65&nbsp;%</span></button>
+                </div>
+              </div>
+              <div class="statusrow" id="statusRow"></div>
+              <div class="actions">
+                <button class="btn btn-filled rp" id="btnActivate"><span class="lbl"><span data-icon="power"></span><span class="t">Activar avisos</span></span></button>
+                <button class="btn btn-text rp" id="btnSecondary"><span class="lbl"><span data-icon="vibrate"></span><span class="t">Probar las dos</span></span></button>
+              </div>
+            </div>
+            <div class="tab" id="tabActividad" role="tabpanel" aria-label="Actividad" hidden>
+              <h2 class="h1">Actividad de hoy</h2>
+              <p class="support" id="actDate"></p>
+              <p class="summary" id="actSummary"></p>
+              <div class="timeline" id="timeline"></div>
+            </div>
+            <div class="tab" id="tabAjustes" role="tabpanel" aria-label="Ajustes" hidden></div>
+          </div>
+          <nav class="navbar" role="tablist" aria-label="Secciones">
+            <button class="navitem" role="tab" aria-selected="true" data-tab="Pulseras"><span class="pill rp"><span data-icon="bands"></span></span>Pulseras</button>
+            <button class="navitem" role="tab" aria-selected="false" data-tab="Actividad"><span class="pill rp"><span data-icon="history"></span></span>Actividad</button>
+            <button class="navitem" role="tab" aria-selected="false" data-tab="Ajustes"><span class="pill rp"><span data-icon="sliders"></span></span>Ajustes</button>
+          </nav>
+        </section>
+
+        <!-- EN RUTA -->
+        <section class="view route" id="vRoute" aria-label="En ruta" hidden>
+          <div class="morph"></div>
+          <div class="edge l" id="edgeL"></div><div class="edge r" id="edgeR"></div>
+          <header class="rhead">
+            <button class="iconbtn rp" id="btnRouteBack" aria-label="Volver a mis pulseras"><span data-icon="back"></span></button>
+            <span class="chiplive"><span class="livedot"></span>Avisos activos</span>
+            <span class="src">Rutas: © OpenStreetMap</span>
+          </header>
+          <div class="routeorder" id="routeOrder"></div>
+          <div class="turn" id="turn">
+            <div class="arrow tb" id="turnArrow"></div>
+            <div class="dist num tb" id="turnDist">600<small>m</small></div>
+            <div class="instr tb" id="turnInstr">Sigue recto</div>
+            <div class="street tb" id="turnStreet">por Av. Matta</div>
+          </div>
+          <div class="rfoot">
+            <div class="minis">
+              <div class="mini l"><span class="mh" data-side="L"></span><span class="lab">Izquierda<span class="mb num" data-side="L">80&nbsp;%</span></span></div>
+              <div class="mini r"><span class="mh" data-side="R"></span><span class="lab">Derecha<span class="mb num" data-side="R">65&nbsp;%</span></span></div>
+            </div>
+            <button class="btn btn-route rp" id="btnPause"><span class="lbl"><span data-icon="pause"></span>Pausar avisos</span></button>
+          </div>
+        </section>
+
+        <!-- INICIO -->
+        <section class="view splash" id="vSplash" aria-label="Vira" hidden><span id="splashLogo"></span><span class="word">Vira</span></section>
+
+        <!-- GUÍA -->
+        <section class="view onb" id="vOnb" aria-label="Guía" hidden>
+          <button class="btn btn-text rp skip" id="btnSkip">Omitir</button>
+          <div class="pager" id="pager">
+            <div class="track" id="track">
+              <div class="page" aria-roledescription="página">
+                <div class="ill" id="ill1"></div>
+                <h2>Una pulsera en cada brazo</h2>
+                <p>La que dice I va en el brazo izquierdo y la que dice D, en el derecho. La letra está en relieve para sentirla con guantes.</p>
+              </div>
+              <div class="page" aria-roledescription="página">
+                <div class="ill withtop" id="ill2"></div>
+                <h2>Vibra el lado del giro</h2>
+                <p>Antes de cada giro de tu ruta vibra solo la pulsera de ese lado: tres pulsos cortos, unos 250&nbsp;m antes.</p>
+              </div>
+              <div class="page" aria-roledescription="página">
+                <div class="ill withtop" id="ill3"></div>
+                <h2>Luz ámbar: tienes un pedido</h2>
+                <p>Cuando llega un pedido se encienden las luces de las dos pulseras. Revísalo cuando te detengas en un lugar seguro.</p>
+              </div>
+            </div>
+          </div>
+          <div class="onbfoot"><div class="dots" id="dots"><i></i><i></i><i></i><b></b></div><button class="btn btn-filled rp" id="btnNext"><span class="lbl">Siguiente</span></button></div>
+        </section>
+
+        <!-- PERMISOS -->
+        <section class="view flow perm" id="vPerm" aria-label="Permisos" hidden>
+          <header class="appbar"><button class="iconbtn rp" data-back="vOnb" aria-label="Volver"><span data-icon="back"></span></button><span class="ttl">Permisos</span></header>
+          <div class="body">
+            <h2 class="h1">Vira necesita cinco permisos</h2>
+            <p class="support">Te explicamos para qué sirve cada uno. Puedes cambiarlos después.</p>
+            <div class="list" id="permList"></div>
+            <p class="privacy"><span data-icon="lock" data-size="18"></span><span>Vira usa internet solo para pedir la ruta a OpenStreetMap. No guarda montos ni direcciones de entrega, y el registro de giros del día queda solo en tu teléfono.</span></p>
+          </div>
+          <div class="foot"><button class="btn btn-filled rp" id="btnPermNext" disabled><span class="lbl">Continuar</span></button></div>
+        </section>
+
+        <!-- EMPAREJAR -->
+        <section class="view flow pairv" id="vPair" aria-label="Emparejar" hidden>
+          <header class="appbar"><button class="iconbtn rp" data-back="vPerm" aria-label="Volver"><span data-icon="back"></span></button><span class="ttl">Emparejar</span></header>
+          <div class="body" id="pairBody">
+            <h2 class="h1" id="pairTitle">Empareja tus pulseras</h2>
+            <p class="support" id="pairSupport">Enciende una pulsera manteniendo su botón 3 segundos, hasta que vibre dos veces.</p>
+            <div class="pair" id="pairSlots">
+              <div class="slot" data-side="L"><span class="host" data-side="L"></span><span class="side">Izquierda</span><span class="sub">Sin emparejar</span></div>
+              <div class="slot" data-side="R"><span class="host" data-side="R"></span><span class="side">Derecha</span><span class="sub">Sin emparejar</span></div>
+            </div>
+            <div id="askHost"></div>
+          </div>
+          <div class="foot"><button class="btn btn-filled rp" id="btnPairMain"><span class="lbl"><span data-icon="bluetooth"></span><span class="t">Buscar pulseras</span></span></button></div>
+        </section>
+
+        <!-- AJUSTES DEL SISTEMA (acceso a notificaciones) -->
+        <section class="view syspage" id="vSys" aria-label="Ajustes de Android" hidden>
+          <div class="sp-top"><button class="iconbtn rp" id="btnSysBack" aria-label="Volver"><span data-icon="back"></span></button></div>
+          <h3>Acceso a notificaciones</h3>
+          <div class="grp">
+            <div class="r"><span class="ai"><span data-icon="map" data-size="20"></span></span><span class="t">Android Auto<small>No permitido</small></span><span class="switch" aria-hidden="true" aria-checked="false"></span></div>
+            <button class="r" id="sysVira" role="switch" aria-checked="false" aria-label="Acceso a notificaciones para Vira"><span class="ai vira" id="sysViraIc"></span><span class="t">Vira<small id="sysViraSub">No permitido</small></span><span class="switch" aria-hidden="true" aria-checked="false" id="sysViraSw"></span></button>
+            <div class="r"><span class="ai"><span data-icon="vibrate" data-size="20"></span></span><span class="t">Wear OS<small>No permitido</small></span><span class="switch" aria-hidden="true" aria-checked="false"></span></div>
+          </div>
+          <p class="hint">Las apps permitidas pueden leer las notificaciones que recibes, incluidos nombres y textos.</p>
+        </section>
+
+        <!-- capas del sistema y de la app -->
+        <div class="sysscrim" id="sysScrim"></div>
+        <div class="sysdlg" id="sysDlg" role="alertdialog" aria-modal="true"></div>
+        <div class="syssheet" id="sysSheet" role="dialog" aria-modal="true" aria-label="Elegir dispositivo"></div>
+        <div class="headsup" id="headsup" aria-live="polite"><span class="appic"><span data-icon="package" data-size="20"></span></span><div><div class="meta">App de reparto · ahora</div><b>Nueva oferta de pedido</b><p>Retiro a 1,2 km · Entrega a 3,4 km</p></div></div>
+        <div class="scrim" id="scrim"></div>
+        <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Batería"></div>
+        <div class="dialog" id="dialog" role="alertdialog" aria-modal="true"></div>
+        <div class="snack" id="snack" role="status" aria-live="polite"><span class="msg"></span><button class="act" hidden></button></div>
+        <div class="touch" id="touch"></div>
+        <div class="gesture"></div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="panel" aria-label="Panel de presentación">
+    <div class="brand"><span id="panelLogo"></span><div class="t"><b>Vira</b><span>Maqueta de la app de las pulseras · demostración conceptual con datos simulados</span></div></div>
+    <section class="caption" id="caption" aria-live="polite">
+      <h2 class="tb" id="capTitle">Toca la app como si fuera un teléfono</h2>
+      <p class="tb" id="capText">O usa las simulaciones para ver cómo reaccionan las pulseras.</p>
+      <div class="progrow"><div class="prog" id="prog"></div><span class="count num" id="capCount"></span></div>
+    </section>
+    <div class="row">
+      <button class="pbtn fill" id="btnTour"><span data-icon="play"></span><span class="t">Reproducir recorrido</span></button>
+      <button class="pbtn out" id="btnReset"><span data-icon="refresh"></span>Desde cero</button>
+    </div>
+    <div>
+      <div class="label">Lo que siente el repartidor</div>
+      <div class="twin" id="twin"></div>
+    </div>
+    <div>
+      <div class="label">Simular</div>
+      <div class="chips">
+        <button class="chip" data-sim="L"><span data-icon="turnL"></span>Giro a la izquierda</button>
+        <button class="chip" data-sim="R"><span data-icon="turnR"></span>Giro a la derecha</button>
+        <button class="chip amber" data-sim="order"><span data-icon="package"></span>Pedido nuevo</button>
+        <button class="chip" data-sim="low"><span data-icon="batteryLow"></span>Batería baja</button>
+        <button class="chip" data-sim="drop"><span data-icon="unlink"></span>Se desconecta la derecha</button>
+      </div>
+    </div>
+    <div>
+      <div class="label">Ruta real · OpenStreetMap</div>
+      <div class="osm">
+        <div class="osm-map" id="osmMap" role="region" aria-label="Mapa con la ruta calculada"></div>
+        <div class="osm-ctl">
+          <select id="osmTrip" aria-label="Trayecto"></select>
+          <div class="seg" role="radiogroup" aria-label="Vehículo">
+            <button role="radio" aria-checked="true" data-prof="bici">Bici</button>
+            <button role="radio" aria-checked="false" data-prof="moto">Moto</button>
+          </div>
+        </div>
+        <button class="pbtn fill" id="btnOsm" disabled></button>
+        <p class="osm-status" id="osmStatus" aria-live="polite">Cargando la ruta…</p>
+        <p class="osm-hint">Toca el mapa para cambiar el destino. El recorrido va 10 veces más rápido que en la calle.</p>
+      </div>
+    </div>
+    <p class="foot">Maqueta del Grupo 08, Innova UC. Los giros de «Simular», los pedidos y las baterías son inventados. Los giros de «Ruta real» los calcula OpenStreetMap; solo el avance del repartidor es simulado. Nombre de trabajo: Vira.</p>
+  </aside>
+</div>
+
+<script>
+/* ============ utilidades ============ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const RM=matchMedia('(prefers-reduced-motion: reduce)'), SHOT=new URLSearchParams(location.search).has('shot');
+const reduce={get matches(){return RM.matches||SHOT}};
+if(SHOT){const A=Element.prototype.animate;Element.prototype.animate=function(k,o){return A.call(this,k,typeof o==='number'?0:{...o,duration:0,delay:0})}}
+/* una animación termina aunque la pestaña esté oculta (el reloj de animación se detiene) */
+Object.defineProperty(Animation.prototype,'done',{get(){const t=this.effect?this.effect.getTiming():{};const ms=(+t.duration||0)+(+t.delay||0)+60;return Promise.race([this.finished.catch(()=>{}),sleep(ms)])}});
+const EASE_OUT='cubic-bezier(0.23,1,0.32,1)', EASE_IO='cubic-bezier(0.77,0,0.175,1)', EASE_DRAWER='cubic-bezier(0.32,0.72,0,1)';
+
+const ICONS={
+  help:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+  power:'<path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/>',
+  pause:'<rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/>',
+  vibrate:'<path d="m2 8 2 2-2 2 2 2-2 2"/><path d="m22 8-2 2 2 2-2 2 2 2"/><rect width="8" height="14" x="8" y="5" rx="1"/>',
+  bands:'<path d="M8.5 5a8 8 0 0 0 0 14"/><path d="M15.5 5a8 8 0 0 1 0 14"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/>',
+  history:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+  sliders:'<line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/>',
+  play:'<polygon points="6 3 20 12 6 21 6 3"/>',
+  refresh:'<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+  turnL:'<polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>',
+  turnR:'<polyline points="15 14 20 9 15 4"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/>',
+  package:'<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/>',
+  batteryLow:'<rect width="16" height="10" x="2" y="7" rx="2" ry="2"/><line x1="22" x2="22" y1="11" y2="13"/><line x1="6" x2="6" y1="11" y2="13"/>',
+  unlink:'<path d="m18.84 12.25 1.72-1.71h-.02a5.004 5.004 0 0 0-.12-7.07 5.006 5.006 0 0 0-6.95 0l-1.72 1.71"/><path d="m5.17 11.75-1.71 1.71a5.004 5.004 0 0 0 .12 7.07 5.006 5.006 0 0 0 6.95 0l1.71-1.71"/><line x1="8" x2="8" y1="2" y2="5"/><line x1="2" x2="5" y1="8" y2="8"/><line x1="16" x2="16" y1="19" y2="22"/><line x1="19" x2="22" y1="16" y2="16"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  checkCircle:'<path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/>',
+  alert:'<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
+  bluetooth:'<path d="m7 7 10 10-5 5V2l5 5L7 17"/>',
+  back:'<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+  route:'<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
+  map:'<path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/>',
+  lightbulb:'<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+  swap:'<path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/>',
+  trash:'<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+  book:'<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+  lock:'<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  chevron:'<path d="m9 18 6-6-6-6"/>',
+  battery:'<rect width="16" height="10" x="2" y="7" rx="2" ry="2"/><line x1="22" x2="22" y1="11" y2="13"/>',
+  bell:'<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>',
+  eye:'<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>',
+  watch:'<circle cx="12" cy="12" r="6"/><polyline points="12 10 12 12 13 13"/><path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05"/><path d="m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05"/>',
+};
+function icon(n,size=24,sw=2){return `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||''}</svg>`}
+function hydrateIcons(root=document){$$('[data-icon]',root).forEach(el=>{const sz=+(el.dataset.size||(el.closest('.chip,.pbtn')?20:24));el.outerHTML=icon(el.dataset.icon,sz)})}
+function logo(size){return `<svg class="logo" width="${size}" height="${size}" viewBox="0 0 100 100" aria-hidden="true"><path class="arc" d="M36 18 A38 38 0 0 0 36 82"/><path class="arc" d="M64 18 A38 38 0 0 1 64 82"/><circle class="dot" cx="50" cy="50" r="9"/></svg>`}
+const ARROWS={
+  R:'<svg viewBox="0 0 120 120"><path d="M42 110 V66 Q42 40 68 40 H102"/><path d="M84 20 L104 40 L84 60"/></svg>',
+  L:'<svg viewBox="0 0 120 120"><path d="M78 110 V66 Q78 40 52 40 H18"/><path d="M36 20 L16 40 L36 60"/></svg>',
+  S:'<svg viewBox="0 0 120 120"><path d="M60 110 V14"/><path d="M38 36 L60 14 L82 36"/></svg>',
+};
+const fmtTime=d=>d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',hour12:false});
+
+/* ============ estado ============ */
+const S={
+  scale:1, active:false, tab:'Pulseras', intensity:2, ledOrders:true, lowAt:20,
+  apps:{Uber:true,Rappi:true,PedidosYa:false,'DiDi Food':false},
+  bands:{L:{name:'Vira-3F2A',connected:true,battery:82,fw:'0.3.1'},R:{name:'Vira-8C71',connected:true,battery:64,fw:'0.3.1'}},
+  pendingOrder:null, log:[], street:0, routeOpen:false, theme:'light',
+};
+function applyTheme(){const h=new Date().getHours();screenEl.classList.toggle('night',S.theme==='dark'||(S.theme==='auto'&&(h>=20||h<7)))}
+const STREETS=['Av. Matta','San Diego','Av. Portugal','Carmen','Santa Isabel','Lira','Santa Rosa','Diez de Julio','Arturo Prat','Copiapó'];
+
+/* ============ escala del teléfono ============ */
+const screenEl=$('#screen'), deviceWrap=$('#deviceWrap');
+function fit(){
+  const W=innerWidth,H=innerHeight;
+  const full=W<520;
+  document.body.classList.toggle('full',full);
+  if(full){const s=W/412;S.scale=s;screenEl.style.setProperty('--screen-h',(H/s)+'px');deviceWrap.style.setProperty('--s',s);return}
+  screenEl.style.setProperty('--screen-h','892px');
+  let s;
+  if(W<=900){s=Math.min((W-32)/432,(H-40)/912,1)}
+  else{const panel=Math.min(380,Math.max(300,W*.28));s=Math.min((H-40)/912,(W-panel-64-Math.min(64,W*.04))/432,1.15)}
+  s=Math.max(.42,s);S.scale=s;deviceWrap.style.setProperty('--s',s);
+}
+addEventListener('resize',fit);
+/* la barra del navegador toma el color de lo que está arriba: el marco en el computador, la pantalla de la app en el teléfono */
+const themeMeta=$('#themeColor');
+function syncThemeColor(){
+  const cs=getComputedStyle(screenEl);
+  themeMeta.content=!document.body.classList.contains('full')?'#F3F0EB':cs.getPropertyValue(screenEl.classList.contains('dark')?'--night':'--canvas').trim();
+}
+new MutationObserver(syncThemeColor).observe(screenEl,{attributes:true,attributeFilter:['class']});
+new MutationObserver(syncThemeColor).observe(document.body,{attributes:true,attributeFilter:['class']});
+function rel(el){const sr=screenEl.getBoundingClientRect(),r=el.getBoundingClientRect(),s=S.scale;return{x:(r.left-sr.left)/s,y:(r.top-sr.top)/s,w:r.width/s,h:r.height/s,W:sr.width/s,H:sr.height/s}}
+
+/* ============ reloj y barra de estado ============ */
+function tick(){$('#clock').textContent=fmtTime(new Date())}
+setInterval(tick,10000);
+const SYS_ICONS=`<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20.5 1.4 8.3C7.5 3.4 16.5 3.4 22.6 8.3Z"/></svg>
+<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 22h20V2Z"/></svg>
+<span style="display:flex">${icon('bluetooth',15,2.4)}</span>
+<svg width="11" height="18" viewBox="0 0 11 18" aria-hidden="true"><rect x="3.2" y="0.5" width="4.6" height="2" rx=".6" fill="currentColor"/><rect x="1" y="2" width="9" height="15.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="2.6" y="6" width="5.8" height="10" rx=".8" fill="currentColor"/></svg>
+<span class="num" style="font-size:13px">78 %</span>`;
+
+/* ============ pulsera (componente) ============ */
+function bandHTML(side,cls=''){return `<div class="band ${cls}" data-side="${side}" aria-hidden="true">
+  <div class="strap t"></div><div class="spill"></div>
+  <div class="module"><span class="relief">${side==='L'?'I':'D'}</span><span class="led"></span><span class="knob"></span></div>
+  <div class="strap b"></div></div>`}
+const bandsOf=side=>$$(`.band[data-side="${side}"]:not(.static)`);
+
+const buzzToken={L:0,R:0};
+function rippleBand(b){
+  if(reduce.matches)return;
+  const r=document.createElement('span');r.className='ripple';b.appendChild(r);
+  r.animate([{transform:'scale(1)',opacity:.55},{transform:'scale(1.32)',opacity:0}],{duration:720,easing:EASE_OUT}).done.then(()=>r.remove());
+}
+async function buzz(side,{pulses=3,on=500,off=250}={}){
+  const my=++buzzToken[side];
+  if(!S.bands[side].connected)return;
+  if(navigator.vibrate&&document.body.classList.contains('full')&&navigator.userActivation?.hasBeenActive){try{navigator.vibrate([on,off,on,off,on])}catch(e){}}
+  for(let i=0;i<pulses;i++){
+    if(my!==buzzToken[side])return;
+    const list=bandsOf(side);
+    list.forEach(b=>{b.style.setProperty('--amp',[0.55,1,1.55][S.intensity-1]);b.classList.add('buzz');rippleBand(b)});
+    edgePulse(side);
+    await sleep(on);
+    list.forEach(b=>b.classList.remove('buzz'));
+    if(i<pulses-1)await sleep(off);
+  }
+}
+const EDGE_ARC={L:'<svg viewBox="0 0 80 160"><path d="M30 20 A70 70 0 0 0 30 140"/></svg>',R:'<svg viewBox="0 0 80 160"><path d="M50 20 A70 70 0 0 1 50 140"/></svg>'};
+function edgePulse(side){
+  if(!S.routeOpen)return;
+  const e=$('#edge'+side);
+  e.animate([{opacity:0},{opacity:1,offset:.25},{opacity:0}],{duration:620,easing:'ease'});
+  if(reduce.matches)return;
+  const holder=document.createElement('div');holder.innerHTML=EDGE_ARC[side];const svg=holder.firstElementChild;e.appendChild(svg);
+  const dx=side==='L'?54:-54;
+  svg.animate([{transform:'translateX(0)',opacity:.95},{transform:`translateX(${dx}px)`,opacity:0}],{duration:760,easing:EASE_OUT}).done.then(()=>svg.remove());
+}
+
+let ledTimer=0;
+function setLed(on){
+  clearTimeout(ledTimer);
+  $$('.band:not(.static)').forEach(b=>{b.classList.toggle('lit',on);b.classList.toggle('blink',on)});
+  if(on)ledTimer=setTimeout(()=>$$('.band:not(.static)').forEach(b=>b.classList.remove('blink')),6000);
+}
+
+/* ============ ripple Material ============ */
+document.addEventListener('pointerdown',e=>{
+  const host=e.target.closest('.rp');if(!host)return;
+  const r=host.getBoundingClientRect(),s=host.closest('#screen')?S.scale:1;
+  const x=(e.clientX-r.left)/s,y=(e.clientY-r.top)/s,w=r.width/s,h=r.height/s;
+  const d=Math.hypot(Math.max(x,w-x),Math.max(y,h-y))*2;
+  const wv=document.createElement('span');wv.className='wave';
+  wv.style.cssText=`width:${d}px;height:${d}px;left:${x-d/2}px;top:${y-d/2}px`;
+  host.appendChild(wv);
+  wv.animate([{transform:'scale(.2)',opacity:.16},{transform:'scale(1)',opacity:.12}],{duration:420,easing:EASE_OUT,fill:'forwards'});
+  const end=()=>{wv.animate([{opacity:.12},{opacity:0}],{duration:260,easing:'ease',fill:'forwards'}).done.then(()=>wv.remove());removeEventListener('pointerup',end);removeEventListener('pointercancel',end)};
+  addEventListener('pointerup',end);addEventListener('pointercancel',end);
+});
+
+/* ============ snackbar ============ */
+let snackT=0;
+function snack(msg,action,fn,ms=4400){
+  const el=$('#snack');clearTimeout(snackT);
+  el.querySelector('.msg').textContent=msg;
+  const a=el.querySelector('.act');
+  if(action){a.hidden=false;a.textContent=action;a.onclick=()=>{el.classList.remove('on');fn&&fn()}}else a.hidden=true;
+  el.classList.add('on');snackT=setTimeout(()=>el.classList.remove('on'),ms);
+}
+
+/* ============ Inicio ============ */
+const pct=b=>Math.round(b.battery/5)*5+' %';
+function renderSlots(){
+  ['L','R'].forEach(side=>{
+    const b=S.bands[side],slot=$('#slot'+side);
+    const state=!b.connected?'off':(b.battery<=S.lowAt?'low':'ok');
+    slot.dataset.state=state;
+    slot.querySelector('.ct').textContent=b.connected?'Conectada':'Reconectando…';
+    slot.querySelector('.bv').textContent=b.connected?pct(b):'—';
+    slot.querySelector('.bat i').style.transform=`scaleX(${b.connected?b.battery/100:0})`;
+    bandsOf(side).forEach(el=>el.classList.toggle('off',!b.connected));
+    $$(`.mb[data-side="${side}"]`).forEach(m=>{m.textContent=b.connected?pct(b):'Sin conexión';m.style.color=state==='low'?'#FF8A80':''});
+  });
+  renderStatus();
+}
+function renderStatus(){
+  const row=$('#statusRow'),L=S.bands.L,R=S.bands.R;
+  let html,warn=false;
+  if(!L.connected||!R.connected){warn=true;html=`${icon('alert',22)}<span>Se cortó la conexión con la pulsera ${!R.connected?'derecha':'izquierda'}. Acércala al teléfono.</span>`}
+  else if(S.active){const apps=Object.keys(S.apps).filter(k=>S.apps[k]);html=`<span class="livedot"></span><span>Avisando los giros de tu ruta${apps.length?' y pedidos de '+apps.join(' y '):''}.</span>`}
+  else{html=`${icon('checkCircle',22)}<span>Las dos pulseras están listas.</span>`}
+  row.innerHTML=html;row.classList.toggle('warn',warn);
+}
+async function swapLabel(btn,html){
+  const lbl=btn.querySelector('.lbl');lbl.classList.add('swap');await sleep(110);lbl.innerHTML=html;requestAnimationFrame(()=>lbl.classList.remove('swap'));
+}
+async function setActive(on){
+  S.active=on;
+  $('#btnActivate').classList.toggle('on',on);
+  swapLabel($('#btnActivate'),on?`${icon('pause')}<span class="t">Pausar avisos</span>`:`${icon('power')}<span class="t">Activar avisos</span>`);
+  swapLabel($('#btnSecondary'),on?`${icon('route')}<span class="t">Ver pantalla En ruta</span>`:`${icon('vibrate')}<span class="t">Probar las dos</span>`);
+  $('#sysNotif').classList.toggle('on',on);
+  renderStatus();
+  if(!on&&S.pendingOrder===null)setLed(false);
+}
+
+/* ============ pestañas (fade through) ============ */
+async function goTab(name,instant){
+  if(name===S.tab)return;
+  const from=$('#tab'+S.tab),to=$('#tab'+name);
+  $$('.navitem').forEach(n=>n.setAttribute('aria-selected',n.dataset.tab===name));
+  S.tab=name;
+  if(name==='Actividad')renderActivity();
+  if(!instant&&!reduce.matches)await from.animate([{opacity:1},{opacity:0}],{duration:90,easing:'ease',fill:'forwards'}).done;
+  from.hidden=true;from.getAnimations().forEach(a=>a.cancel());
+  to.hidden=false;to.scrollTop=0;
+  if(!instant)to.animate(reduce.matches?[{opacity:0},{opacity:1}]:[{opacity:0,transform:'scale(.96)'},{opacity:1,transform:'none'}],{duration:210,easing:EASE_OUT});
+}
+
+/* ============ En ruta: transformación de contenedor ============ */
+async function openRoute(){
+  if(S.routeOpen)return;S.routeOpen=true;
+  if(S.tab!=='Pulseras')await goTab('Pulseras',true);
+  const v=$('#vRoute'),b=rel($('#btnActivate'));
+  const from=`inset(${b.y}px ${b.W-b.x-b.w}px ${b.H-b.y-b.h}px ${b.x}px round 12px)`;
+  v.hidden=false;
+  const parts=[$('#vRoute .rhead'),$('#routeOrder'),$('#turn'),$('#vRoute .rfoot')];
+  if(reduce.matches){v.animate([{opacity:0},{opacity:1}],{duration:250});screenEl.classList.add('dark');return}
+  parts.forEach(p=>p.style.opacity=0);
+  v.animate([{clipPath:from},{clipPath:'inset(0px 0px 0px 0px round 0px)'}],{duration:520,easing:EASE_DRAWER});
+  v.querySelector('.morph').animate([{opacity:1},{opacity:1,offset:.2},{opacity:0}],{duration:520,easing:'ease'});
+  setTimeout(()=>screenEl.classList.add('dark'),180);
+  await sleep(240);
+  parts.forEach((p,i)=>{p.style.opacity='';p.animate([{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'none'}],{duration:500,delay:i*80,easing:EASE_OUT,fill:'backwards'})});
+}
+async function closeRoute(){
+  if(!S.routeOpen)return;S.routeOpen=false;
+  const v=$('#vRoute'),b=rel($('#btnActivate'));
+  const to=`inset(${b.y}px ${b.W-b.x-b.w}px ${b.H-b.y-b.h}px ${b.x}px round 12px)`;
+  screenEl.classList.remove('dark');
+  if(reduce.matches){await v.animate([{opacity:1},{opacity:0}],{duration:200}).done;v.hidden=true;return}
+  v.querySelector('.morph').animate([{opacity:0},{opacity:1}],{duration:380,easing:'ease',fill:'forwards'});
+  await v.animate([{clipPath:'inset(0px 0px 0px 0px round 0px)'},{clipPath:to}],{duration:380,easing:EASE_IO}).done;
+  v.hidden=true;v.getAnimations({subtree:true}).forEach(a=>a.cancel());
+}
+
+/* ============ instrucciones de ruta ============ */
+let cdRaf=0;
+async function setInstruction(dir,dist,street){
+  const t=$('#turn');
+  t.classList.add('swap');await sleep(reduce.matches?0:200);
+  $('#turnArrow').innerHTML=ARROWS[dir];
+  $('#turnInstr').textContent=dir==='R'?'Gira a la derecha':dir==='L'?'Gira a la izquierda':'Sigue recto';
+  $('#turnStreet').textContent=(dir==='S'?'por ':'hacia ')+street;
+  setDist(dist);
+  requestAnimationFrame(()=>t.classList.remove('swap'));
+  cancelAnimationFrame(cdRaf);
+  if(dir==='S')return;
+  const t0=performance.now(),dur=6500;
+  const step=now=>{const k=Math.min(1,(now-t0)/dur);const d=Math.max(0,Math.round(dist*(1-k)/10)*10);setDist(d);
+    if(k<1)cdRaf=requestAnimationFrame(step);else setInstruction('S',600,street)};
+  cdRaf=requestAnimationFrame(step);
+}
+function setDist(d){$('#turnDist').innerHTML=`${d}<small>m</small>`}
+function turn(side){
+  if(!S.active)return snack('Los avisos están en pausa. Actívalos para recibir giros.','Activar',activate);
+  osmStop();
+  const street=STREETS[S.street++%STREETS.length];
+  logEvent({k:side,what:side==='L'?'Giro a la izquierda':'Giro a la derecha',where:'hacia '+street});
+  setInstruction(side,250,street);
+  buzz(side);
+}
+
+/* ============ pedido ============ */
+async function order(){
+  if(!S.active)return snack('Los avisos están en pausa. Actívalos para recibir pedidos.','Activar',activate);
+  const h=$('#headsup');h.classList.add('on');setTimeout(()=>h.classList.remove('on'),3400);
+  await sleep(700);
+  const ev=logEvent({k:'O',what:'Pedido nuevo',where:'Revísalo cuando te detengas.'});
+  S.pendingOrder=ev.id;
+  if(S.ledOrders)setLed(true);
+  const band=`<div class="orderband" role="alert">${icon('package',24)}<div><b>Tienes un pedido nuevo.</b>Revísalo cuando te detengas.</div><button class="btn rp" data-seen>Visto</button></div>`;
+  ['#orderSlot','#routeOrder'].forEach(sel=>{const slot=$(sel);slot.innerHTML=band;slot.firstElementChild.animate([{opacity:0,transform:'translateY(-12px)'},{opacity:1,transform:'none'}],{duration:400,easing:EASE_OUT})});
+}
+function clearOrder(){
+  const id=S.pendingOrder;S.pendingOrder=null;setLed(false);
+  const ev=S.log.find(e=>e.id===id);if(ev){ev.seen=true;ev.where='Revisado a las '+fmtTime(new Date())}
+  ['#orderSlot','#routeOrder'].forEach(sel=>{const el=$(sel).firstElementChild;if(!el)return;
+    el.animate([{opacity:1},{opacity:0,transform:'translateY(-8px)'}],{duration:200,easing:'ease',fill:'forwards'}).done.then(()=>el.remove())});
+  if(S.tab==='Actividad')renderActivity();
+}
+document.addEventListener('click',e=>{if(e.target.closest('[data-seen]'))clearOrder()});
+
+/* ============ actividad ============ */
+let evId=0;
+function logEvent(o){const ev={id:++evId,time:new Date(),seen:false,...o,fresh:true};S.log.unshift(ev);if(S.tab==='Actividad')renderActivity();return ev}
+function seedLog(){
+  const now=Date.now(),m=60000;
+  const seed=[[94,'L','Giro a la izquierda','hacia Carmen'],[86,'R','Giro a la derecha','hacia Santa Isabel'],[79,'R','Giro a la derecha','hacia Av. Portugal'],[71,'O','Pedido nuevo',''],[63,'L','Giro a la izquierda','hacia San Diego'],[58,'R','Giro a la derecha','hacia Av. Matta']];
+  S.log=seed.map(([ago,k,what,where])=>{const t=new Date(now-ago*m);return{id:++evId,time:t,k,what,where:k==='O'?'Revisado a las '+fmtTime(new Date(t.getTime()+3*m)):where,seen:true}}).reverse();
+}
+function renderActivity(){
+  const d=new Date();
+  $('#actDate').textContent=d.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'}).replace(/^./,c=>c.toUpperCase())+' · datos simulados';
+  const turns=S.log.filter(e=>e.k!=='O').length,orders=S.log.filter(e=>e.k==='O').length;
+  $('#actSummary').textContent=S.log.length?`Hoy Vira avisó ${turns} ${turns===1?'giro':'giros'} y ${orders} ${orders===1?'pedido':'pedidos'}.`:'';
+  const tl=$('#timeline');
+  if(!S.log.length){tl.innerHTML=`<p class="empty">Todavía no hay avisos hoy.<br>Activa los avisos antes de salir a ruta.</p>`;return}
+  tl.innerHTML=S.log.map(e=>{
+    if(e.k==='O')return `<div class="ev O ${e.seen?'seen':''} ${e.fresh?'fresh':''}"><div class="c">${icon('package',24)}<div><div class="time num">${fmtTime(e.time)}</div><div class="what">${e.what}</div><div class="where">${e.where}</div></div>${e.seen?'':'<button class="btn rp" data-seen>Visto</button>'}</div></div>`;
+    return `<div class="ev ${e.k} ${e.fresh?'fresh':''}"><div class="c"><div class="time num">${e.k==='R'?`<span class="sidek">D</span>${fmtTime(e.time)}`:`${fmtTime(e.time)}<span class="sidek">I</span>`}</div><div class="what">${e.what}</div><div class="where">${e.where}</div></div></div>`;
+  }).join('');
+  S.log.forEach(e=>e.fresh=false);
+}
+
+/* ============ hoja de batería ============ */
+function openSheet(html,label){
+  const sh=$('#sheet');sh.innerHTML=`<div class="handle"></div>${html}`;sh.setAttribute('aria-label',label);
+  $('#scrim').classList.add('on');sh.classList.add('on');sh.style.transform='';
+}
+function closeSheet(){$('#scrim').classList.remove('on');const sh=$('#sheet');sh.classList.remove('on');sh.style.transform='';closeDialog()}
+function batterySheet(){
+  const rows=['L','R'].map(side=>{const b=S.bands[side];const low=b.battery<=S.lowAt;
+    return `<div class="brow ${low?'low':''}">${bandHTML(side)}<div class="tx"><b>${side==='L'?'Izquierda':'Derecha'}</b><span>${b.connected?(low?'Batería baja: cárgala al terminar el turno':'Conectada'):'Sin conexión'}</span></div><span class="pct num">${b.connected?pct(b):'—'}</span></div>`}).join('');
+  openSheet(`<h3>Batería</h3>${rows}<p class="note">La medición es aproximada, con un margen cercano al 10&nbsp;%. Carga las dos pulseras al terminar el turno.</p>`,'Batería');
+  ['L','R'].forEach(s=>{if(!S.bands[s].connected)$(`#sheet .band[data-side="${s}"]`).classList.add('off')});
+  if(S.pendingOrder!==null&&S.ledOrders)$$('#sheet .band').forEach(b=>b.classList.add('lit'));
+}
+(function sheetDrag(){
+  const sh=$('#sheet');let y0=0,t0=0,dy=0,drag=false;
+  sh.addEventListener('pointerdown',e=>{if(sh.scrollTop>0||e.target.closest('input,button'))return;drag=true;y0=e.clientY;t0=performance.now();dy=0;sh.setPointerCapture(e.pointerId);sh.style.transition='none'});
+  sh.addEventListener('pointermove',e=>{if(!drag)return;dy=(e.clientY-y0)/S.scale;const v=dy<0?-Math.sqrt(-dy)*2:dy;sh.style.transform=`translateY(${v}px)`});
+  const up=()=>{if(!drag)return;drag=false;sh.style.transition='';const vel=dy/(performance.now()-t0);
+    if(dy>120||vel>0.11)closeSheet();else sh.style.transform=''};
+  sh.addEventListener('pointerup',up);sh.addEventListener('pointercancel',up);
+})();
+$('#scrim').addEventListener('click',closeSheet);
+
+/* ============ diálogo ============ */
+function openDialog(title,body,acts){
+  const d=$('#dialog');d.innerHTML=`<h3>${title}</h3><p>${body}</p><div class="acts">${acts.map((a,i)=>`<button class="btn btn-text rp" data-i="${i}">${a.t}</button>`).join('')}</div>`;
+  $$('button',d).forEach(b=>b.onclick=()=>{closeDialog();acts[+b.dataset.i].fn&&acts[+b.dataset.i].fn()});
+  $('#scrim').classList.add('on');d.classList.add('on');
+}
+function closeDialog(){const d=$('#dialog');if(!d.classList.contains('on'))return;d.classList.remove('on');if(!$('#sheet').classList.contains('on'))$('#scrim').classList.remove('on')}
+
+/* ============ ajustes ============ */
+function renderSettings(){
+  const sw=(id,on,label)=>`<button class="switch" role="switch" aria-checked="${on}" aria-label="${label}" data-sw="${id}"></button>`;
+  const bandRow=side=>{const b=S.bands[side];return `<div class="li">${icon('bluetooth')}<div class="tx"><b>${side==='L'?'Izquierda':'Derecha'} · ${b.name}</b><span>Firmware ${b.fw} · ${b.connected?'conectada':'sin conexión'}</span></div></div>`};
+  $('#tabAjustes').innerHTML=`
+    <h2 class="h1">Ajustes</h2>
+    <p class="support">Configura una vez y olvídate.</p>
+    <div class="sect"><h3>Vibración</h3><div class="list">
+      <div class="seg-wrap"><div class="tx"><b>Intensidad</b></div>
+        <div class="seg" role="group" aria-label="Intensidad">${['Suave','Media','Fuerte'].map((t,i)=>`<button class="rp" aria-pressed="${S.intensity===i+1}" data-int="${i+1}">${icon('check',18)}${t}</button>`).join('')}</div></div>
+      <button class="li rp" id="setTest">${icon('vibrate')}<div class="tx"><b>Probar vibración</b><span>Vibra la izquierda y luego la derecha.</span></div></button>
+    </div></div>
+    <div class="sect"><h3>Pedidos</h3><div class="list">
+      <div class="li">${icon('lightbulb')}<div class="tx"><b>Encender las luces con pedidos nuevos</b><span>El LED ámbar parpadea en las dos pulseras.</span></div>${sw('led',S.ledOrders,'Encender las luces con pedidos nuevos')}</div>
+      ${Object.keys(S.apps).map(a=>`<div class="li">${icon('package')}<div class="tx"><b>${a}</b><span>${S.apps[a]?'Avisa sus pedidos':'No avisa'}</span></div>${sw('app:'+a,S.apps[a],'Avisar pedidos de '+a)}</div>`).join('')}
+    </div></div>
+    <div class="sect"><h3>Giros</h3><div class="list">
+      <div class="li">${icon('map')}<div class="tx"><b>Rutas de OpenStreetMap</b><span>Vira calcula la ruta hasta la dirección del pedido. Mapas © colaboradores de OpenStreetMap.</span></div></div>
+    </div></div>
+    <div class="sect"><h3>Batería</h3><div class="list">
+      <div class="seg-wrap"><div class="tx"><b>Avisarme cuando baje del <span class="num" id="lowVal">${S.lowAt}&nbsp;%</span></b></div>
+        <input class="range" id="lowRange" type="range" min="10" max="40" step="5" value="${S.lowAt}" aria-label="Avisar con batería baja" style="--v:${(S.lowAt-10)/30*100}%"></div>
+    </div></div>
+    <div class="sect"><h3>Apariencia</h3><div class="list">
+      <div class="seg-wrap"><div class="tx"><b>Tema</b><span style="display:block;font-size:14px;color:var(--ink-muted);margin-top:2px">Según la hora: oscuro de 20:00 a 7:00, para la ruta nocturna.</span></div>
+        <div class="seg" role="group" aria-label="Tema">${[['light','Claro'],['dark','Oscuro'],['auto','Según la hora']].map(([k,t])=>`<button class="rp" aria-pressed="${S.theme===k}" data-theme="${k}">${icon('check',18)}${t}</button>`).join('')}</div></div>
+    </div></div>
+    <div class="sect"><h3>Pulseras</h3><div class="list">
+      ${bandRow('L')}${bandRow('R')}
+      <button class="li rp danger" id="setForget">${icon('trash')}<div class="tx"><b>Olvidar las pulseras</b><span>Tendrás que emparejarlas de nuevo.</span></div></button>
+    </div></div>
+    <div class="sect"><h3>Ayuda</h3><div class="list">
+      <button class="li rp" id="setGuide">${icon('book')}<div class="tx"><b>Ver la guía de nuevo</b></div>${icon('chevron')}</button>
+      <div class="li">${icon('lock')}<div class="tx"><b>Privacidad</b><span>Vira usa internet solo para pedir la ruta a OpenStreetMap. No guarda montos ni direcciones de entrega, y el registro de giros del día queda solo en tu teléfono.</span></div></div>
+    </div></div>
+    <p class="ver">Vira 0.1 · maqueta del Grupo 08<br>Datos simulados</p>`;
+}
+document.addEventListener('click',e=>{
+  const s=e.target.closest('[data-sw]');
+  if(s){const on=s.getAttribute('aria-checked')!=='true';s.setAttribute('aria-checked',on);const id=s.dataset.sw;
+    if(id==='led'){S.ledOrders=on;if(!on)setLed(false);else if(S.pendingOrder!==null)setLed(true)}
+    else if(id.startsWith('app:')){const a=id.slice(4);S.apps[a]=on;s.parentElement.querySelector('.tx span').textContent=on?'Avisa sus pedidos':'No avisa';renderStatus()}
+    return}
+  const th=e.target.closest('[data-theme]');
+  if(th){S.theme=th.dataset.theme;$$('[data-theme]').forEach(b=>b.setAttribute('aria-pressed',b===th));applyTheme();return}
+  const it=e.target.closest('[data-int]');
+  if(it){S.intensity=+it.dataset.int;$$('[data-int]').forEach(b=>b.setAttribute('aria-pressed',b===it));buzz('L',{pulses:1,on:420})}
+});
+document.addEventListener('input',e=>{if(e.target.id==='lowRange'){S.lowAt=+e.target.value;e.target.style.setProperty('--v',(S.lowAt-10)/30*100+'%');$('#lowVal').textContent=S.lowAt+' %';renderSlots()}});
+document.addEventListener('click',async e=>{
+  const id=e.target.closest('button')?.id;
+  if(id==='setTest'){await buzz('L');await sleep(200);buzz('R')}
+  if(id==='setSwap'){const t=S.bands.L;S.bands.L=S.bands.R;S.bands.R=t;renderSettings();renderSlots();snack('Listo. Ahora la '+S.bands.L.name+' es la izquierda.')}
+  if(id==='setForget')openDialog('¿Olvidar las pulseras?','Vira dejará de conectarse con ellas. Para volver a usarlas tendrás que emparejarlas de nuevo.',[{t:'Cancelar'},{t:'Olvidar',fn:()=>snack('En la maqueta, las pulseras se mantienen emparejadas.')}]);
+});
+
+/* ============ vistas (eje compartido) ============ */
+S.view='vMain';
+async function goView(id,dir=1){
+  if(id===S.view)return;
+  const from=$('#'+S.view),to=$('#'+id);
+  S.view=id;to.hidden=false;
+  if(id==='vOnb')onbLoops(true);
+  if(id==='vPerm')renderPerms();
+  if(reduce.matches){await to.animate([{opacity:0},{opacity:1}],{duration:200}).done;from.hidden=true;if(from.id==='vOnb')onbLoops(false);return}
+  const out=from.animate([{opacity:1,transform:'none'},{opacity:0,transform:`translateX(${-36*dir}px)`}],{duration:200,easing:'ease',fill:'forwards'});
+  await to.animate([{opacity:0,transform:`translateX(${36*dir}px)`},{opacity:1,transform:'none'}],{duration:320,delay:70,easing:EASE_OUT,fill:'backwards'}).done;
+  from.hidden=true;out.cancel();
+  if(from.id==='vOnb')onbLoops(false);
+}
+function showOnly(id){$$('#screen > .view').forEach(v=>v.hidden=v.id!==id);S.view=id}
+
+/* ============ inicio (splash) ============ */
+async function playSplash(){
+  $('#splashLogo').innerHTML=logo(112);
+  const arcs=$$('#vSplash .arc'),dot=$('#vSplash .dot'),word=$('#vSplash .word');
+  dot.style.transformBox='fill-box';dot.style.transformOrigin='center';
+  if(reduce.matches){arcs.forEach(a=>a.style.strokeDashoffset=0);word.style.opacity=1;await sleep(900);return}
+  arcs.forEach(a=>a.animate([{strokeDashoffset:80},{strokeDashoffset:0}],{duration:760,easing:EASE_OUT,fill:'forwards'}));
+  dot.animate([{opacity:0,transform:'scale(.6)'},{opacity:1,transform:'none'}],{duration:420,delay:520,easing:EASE_OUT,fill:'backwards'});
+  word.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],{duration:500,delay:700,easing:EASE_OUT,fill:'forwards'});
+  await sleep(1750);
+}
+
+/* ============ guía ============ */
+const onb={i:0,loop:0};
+function buildIllustrations(){
+  const tag=(side,t)=>`<div style="display:flex;flex-direction:column;align-items:center;gap:6px">${bandHTML(side,'static')}<span style="font-size:14px;font-weight:700;color:var(--ink-muted)">${t}</span></div>`;
+  $('#ill1').innerHTML=tag('L','Brazo izquierdo')+tag('R','Brazo derecho');
+  $('#ill2').innerHTML=`<div class="bigarrow">${ARROWS.R}</div>${bandHTML('L','static')}${bandHTML('R','static')}`;
+  $('#ill3').innerHTML=`<div class="orderband mini-order">${icon('package',20)}<div><b>Tienes un pedido nuevo.</b>Revísalo cuando te detengas.</div></div>${bandHTML('L','static lit blink')}${bandHTML('R','static lit blink')}`;
+}
+function setPage(i,instant){
+  onb.i=Math.max(0,Math.min(2,i));
+  const tr=$('#track');if(instant)tr.classList.add('drag');
+  tr.style.transform=`translateX(${-onb.i*100}%)`;
+  if(instant){tr.offsetWidth;tr.classList.remove('drag')}
+  $('#dots b').style.transform=`translateX(${onb.i*20}px)`;
+  $('#btnNext .lbl').textContent=onb.i<2?'Siguiente':(S.setupDone?'Listo':'Configurar');
+  $('#btnSkip').style.visibility=onb.i<2?'visible':'hidden';
+}
+function onbLoops(on){
+  clearInterval(onb.loop);if(!on)return;
+  const run=async()=>{if(onb.i!==1||S.view!=='vOnb')return;const b=$('#ill2 .band[data-side="R"]');
+    for(let k=0;k<3;k++){b.classList.add('buzz');rippleBand(b);await sleep(500);b.classList.remove('buzz');await sleep(250)}};
+  onb.loop=setInterval(run,3400);setTimeout(run,600);
+}
+(function pagerDrag(){
+  const p=$('#pager'),tr=$('#track');let x0=0,t0=0,dx=0,drag=false,W=412;
+  const rub=(o,d=412,c=.55)=>(o*d*c)/(d+c*Math.abs(o));
+  p.addEventListener('pointerdown',e=>{drag=true;x0=e.clientX;t0=performance.now();dx=0;W=rel(p).w;p.setPointerCapture(e.pointerId);tr.classList.add('drag')});
+  p.addEventListener('pointermove',e=>{if(!drag)return;dx=(e.clientX-x0)/S.scale;
+    const edge=(onb.i===0&&dx>0)||(onb.i===2&&dx<0);tr.style.transform=`translateX(${-onb.i*W+(edge?rub(dx,W):dx)}px)`});
+  const up=()=>{if(!drag)return;drag=false;tr.classList.remove('drag');
+    const v=dx/Math.max(1,performance.now()-t0),proj=dx+v*499*0.3;
+    let n=onb.i;if(proj<-W*.35)n++;else if(proj>W*.35)n--;
+    setPage(Math.max(onb.i-1,Math.min(onb.i+1,n)))};
+  p.addEventListener('pointerup',up);p.addEventListener('pointercancel',up);
+})();
+function finishOnb(){if(S.setupDone)goView('vMain',-1);else goView('vPerm')}
+
+/* ============ permisos ============ */
+const PERMS=[
+  {id:'nearby',ic:'bluetooth',t:'Dispositivos cercanos',d:'Para encontrar y conectar tus pulseras.'},
+  {id:'loc',ic:'map',t:'Ubicación',d:'Para calcular la ruta con OpenStreetMap y avisar cada giro a tiempo.'},
+  {id:'notif',ic:'bell',t:'Notificaciones',d:'Para mostrar el aviso fijo «Pulseras activas» mientras trabajas.'},
+  {id:'access',ic:'eye',t:'Acceso a notificaciones',d:'Para avisarte los pedidos nuevos de tus apps de reparto.'},
+  {id:'bg',ic:'battery',t:'Funcionar en segundo plano',d:'Para que los avisos sigan con la pantalla apagada.'},
+];
+S.perms={};
+function renderPerms(justGranted){
+  $('#permList').innerHTML=PERMS.map(p=>`<div class="li">${icon(p.ic)}<div class="tx"><b>${p.t}</b><span>${p.d}</span></div>${S.perms[p.id]?`<span class="ok" data-ok="${p.id}">${icon('check',18,2.6)}Listo</span>`:`<button class="btn btn-tonal rp grant" data-perm="${p.id}">Permitir</button>`}</div>`).join('');
+  $('#btnPermNext').disabled=!PERMS.every(p=>S.perms[p.id]);
+  if(justGranted){const ok=$(`[data-ok="${justGranted}"]`);ok&&ok.animate([{opacity:0,transform:'scale(.9)'},{opacity:1,transform:'none'}],{duration:300,easing:EASE_OUT})}
+}
+function sysDialog({ic,icHTML,title,text,btns}){
+  return new Promise(res=>{
+    const d=$('#sysDlg');
+    d.innerHTML=`${icHTML?`<div class="sic">${icHTML}</div>`:ic?`<div class="sic">${icon(ic,26)}</div>`:''}<h4>${title}</h4>${text?`<p>${text}</p>`:''}<div class="stack">${btns.map((b,i)=>`<button class="rp" data-b="${i}">${b}</button>`).join('')}</div>`;
+    $('#sysScrim').classList.add('on');d.classList.add('on');
+    $$('button',d).forEach(b=>b.onclick=()=>{d.classList.remove('on');$('#sysScrim').classList.remove('on');res(+b.dataset.b)});
+  });
+}
+async function grant(id){
+  let ok=false;
+  if(id==='nearby')ok=0===await sysDialog({ic:'bluetooth',title:'¿Permitir que <b>Vira</b> encuentre dispositivos cercanos, se conecte a ellos y determine su posición relativa?',btns:['Permitir','No permitir']});
+  if(id==='loc')ok=0===await sysDialog({ic:'map',title:'¿Permitir que <b>Vira</b> acceda a la ubicación de este dispositivo?',btns:['Mientras la app está en uso','Solo esta vez','No permitir']});
+  if(id==='notif')ok=0===await sysDialog({ic:'bell',title:'¿Permitir que <b>Vira</b> te envíe notificaciones?',btns:['Permitir','No permitir']});
+  if(id==='bg')ok=0===await sysDialog({icHTML:logo(30),title:'¿Permitir que <b>Vira</b> se ejecute siempre en segundo plano?',text:'Si permites que Vira se ejecute siempre en segundo plano, es posible que la batería del teléfono dure menos. Puedes cambiarlo después en Ajustes.',btns:['Permitir','Rechazar']});
+  if(id==='access'){goView('vSys');return}
+  if(ok){S.perms[id]=true;renderPerms(id)}
+}
+async function sysToggleVira(){
+  if(S.perms.access)return;
+  const ok=0===await sysDialog({title:'¿Permitir que <b>Vira</b> acceda a las notificaciones?',text:'Vira podrá leer todas las notificaciones, incluida información personal como nombres de contactos y el texto de los mensajes que recibes. También podrá descartar notificaciones o usar sus botones.',btns:['Permitir','No permitir']});
+  if(!ok)return;
+  S.perms.access=true;$('#sysVira').setAttribute('aria-checked','true');$('#sysViraSw').setAttribute('aria-checked','true');$('#sysViraSub').textContent='Permitido';
+}
+
+/* ============ emparejar ============ */
+S.paired={L:false,R:false};S.setupDone=true;
+const DEV={'Vira-3F2A':'L','Vira-8C71':'R'};
+function renderPairSlots(){
+  $$('#pairSlots .slot').forEach(sl=>{const side=sl.dataset.side;
+    sl.querySelector('.host').innerHTML=bandHTML(side,S.paired[side]?'static':'empty static');
+    sl.querySelector('.sub').textContent=S.paired[side]?S.bands[side].name+' · lista':'Sin emparejar'});
+  const n=+S.paired.L + +S.paired.R;
+  $('#pairTitle').textContent=n===2?'Listas':'Empareja tus pulseras';
+  $('#pairSupport').textContent=n===2?'La izquierda vibra con los giros a la izquierda y la derecha, con los giros a la derecha.':n===1?'Ahora enciende la otra pulsera de la misma forma.':'Enciende una pulsera manteniendo su botón 3 segundos, hasta que vibre dos veces.';
+  $('#btnPairMain .lbl').innerHTML=n===2?`<span class="t">Ir a mis pulseras</span>`:`${icon('bluetooth')}<span class="t">${n?'Buscar la otra pulsera':'Buscar pulseras'}</span>`;
+  $('#btnPairMain').dataset.mode=n===2?'done':'search';
+}
+function cdm(){
+  return new Promise(async res=>{
+    const sh=$('#sysSheet');
+    const avail=Object.keys(DEV).filter(n=>!S.paired[DEV[n]]);
+    sh.innerHTML=`<h4>Elige un dispositivo para que <b>Vira</b> lo administre</h4><p class="subt">Vira podrá conectarse con él y usar Bluetooth en segundo plano.</p><div class="bar"></div><div class="devs"></div><button class="cancel rp">Cancelar</button>`;
+    const close=()=>{sh.classList.remove('on');$('#sysScrim').classList.remove('on');$('#pairSlots').classList.remove('searching')};
+    sh.querySelector('.cancel').onclick=()=>{close();res(null)};
+    $('#sysScrim').classList.add('on');sh.classList.add('on');$('#pairSlots').classList.add('searching');
+    await sleep(1000);
+    const devs=sh.querySelector('.devs');
+    devs.innerHTML=avail.map(n=>`<button class="dev rp" data-n="${n}">${icon('watch')}<span>${n}<small>Pulsera Vira</small></span></button>`).join('');
+    sh.querySelector('.bar').classList.add('done');
+    $$('.dev',devs).forEach((b,i)=>{b.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:300,delay:i*70,easing:EASE_OUT,fill:'backwards'});b.onclick=()=>{close();res(b.dataset.n)}});
+  });
+}
+let floatBuzz=0;
+async function pairMain(){
+  const btn=$('#btnPairMain');
+  if(btn.dataset.mode==='done')return finishSetup();
+  if(btn.dataset.mode==='confirm')return confirmPair();
+  const n=await cdm();if(!n)return;
+  const side=DEV[n],other=side==='L'?'R':'L';S.pairing=side;
+  /* la pulsera aparece en su propio lugar: izquierda a la izquierda */
+  const slot=$(`#pairSlots .slot[data-side="${side}"]`),host=slot.querySelector('.host');
+  host.innerHTML=bandHTML(side,'static');
+  slot.querySelector('.sub').textContent=n+' · vibrando';
+  const b=host.querySelector('.band');
+  b.animate([{opacity:0,transform:'scale(.96)'},{opacity:1,transform:'none'}],{duration:400,easing:EASE_OUT});
+  if(!S.paired[other])$(`#pairSlots .slot[data-side="${other}"]`).animate([{opacity:1},{opacity:.35}],{duration:250,fill:'forwards'});
+  const sideTxt=side==='L'?'izquierda, la que dice I':'derecha, la que dice D';
+  $('#askHost').innerHTML=`<div class="ask"><p>Tu pulsera está vibrando.</p><p class="support" style="margin-top:4px;font-weight:400">Es la ${sideTxt} en relieve. Póntela en el brazo ${side==='L'?'izquierdo':'derecho'}.</p></div>`;
+  $('#askHost').firstElementChild.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],{duration:400,delay:120,easing:EASE_OUT,fill:'backwards'});
+  btn.dataset.mode='confirm';swapLabel(btn,`${icon('check')}<span class="t">Listo, ya la tengo puesta</span>`);
+  const my=++floatBuzz;
+  (async()=>{while(my===floatBuzz){for(let k=0;k<2&&my===floatBuzz;k++){b.classList.add('buzz');rippleBand(b);await sleep(380);b.classList.remove('buzz');await sleep(200)}await sleep(900)}})();
+}
+async function confirmPair(){
+  const side=S.pairing;floatBuzz++;
+  $('#askHost').innerHTML='';
+  S.paired[side]=true;
+  $$('#pairSlots .slot').forEach(s=>s.getAnimations().forEach(x=>x.cancel()));
+  renderPairSlots();
+  rippleBand($(`#pairSlots .host[data-side="${side}"] .band`));
+  snack(side==='L'?'La pulsera izquierda quedó lista.':'La pulsera derecha quedó lista.');
+}
+async function finishSetup(){
+  S.setupDone=true;setPage(0,true);
+  await goView('vMain');
+  if(!reduce.matches)$$('#tabPulseras > *').forEach((el,i)=>el.animate([{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'none'}],{duration:500,delay:i*80,easing:EASE_OUT,fill:'backwards'}));
+}
+
+/* ============ desde cero ============ */
+async function resetAll(){
+  osmStop();
+  S.active=false;S.routeOpen=false;screenEl.classList.remove('dark');
+  $('#vRoute').hidden=true;$('#vRoute').getAnimations({subtree:true}).forEach(a=>a.cancel());
+  $('#btnActivate').classList.remove('on');$('#btnActivate .lbl').innerHTML=`${icon('power')}<span class="t">Activar avisos</span>`;
+  $('#btnSecondary .lbl').innerHTML=`${icon('vibrate')}<span class="t">Probar las dos</span>`;
+  $('#sysNotif').classList.remove('on');
+  S.pendingOrder=null;setLed(false);$('#orderSlot').innerHTML='';$('#routeOrder').innerHTML='';
+  closeSheet();$('#sysDlg').classList.remove('on');$('#sysSheet').classList.remove('on');$('#sysScrim').classList.remove('on');$('#snack').classList.remove('on');
+  S.perms={};S.paired={L:false,R:false};S.setupDone=false;S.pairing=null;floatBuzz++;$$('#vPair .floatband').forEach(f=>f.remove());$('#askHost').innerHTML='';
+  $('#sysVira').setAttribute('aria-checked','false');$('#sysViraSw').setAttribute('aria-checked','false');$('#sysViraSub').textContent='No permitido';
+  Object.assign(S.bands.L,{battery:82,connected:true});Object.assign(S.bands.R,{battery:64,connected:true});
+  S.log=[];S.intensity=2;S.theme='light';applyTheme();renderSettings();renderSlots();renderPerms();renderPairSlots();
+  if(S.tab!=='Pulseras')await goTab('Pulseras',true);
+  setPage(0,true);setInstruction('S',600,'Av. Matta');
+  showOnly('vSplash');
+  await playSplash();
+  await goView('vOnb');
+}
+
+/* ============ recorrido automático ============ */
+const TOUR=[
+  {s:'Primera vez',t:'Vira se presenta en tres pasos',p:'La guía explica qué pulsera va en cada brazo, cómo se siente un giro y cómo se ve un pedido.',
+   run:async w=>{await resetAll();await w(900);await swipe($('#pager'));await w(1700);await swipe($('#pager'));await w(1900);await tap($('#btnNext'));await w(500)}},
+  {s:'Permisos',t:'Pide solo lo necesario y explica para qué',p:'Cinco permisos de Android: Bluetooth, ubicación para seguir la ruta, notificaciones, leer los avisos de las apps de reparto y seguir funcionando con la pantalla apagada.',
+   run:async w=>{await w(600);
+     await tap($('[data-perm="nearby"]'));await w(700);await tap($('#sysDlg [data-b="0"]'));await w(500);
+     await tap($('[data-perm="loc"]'));await w(700);await tap($('#sysDlg [data-b="0"]'));await w(500);
+     await tap($('[data-perm="notif"]'));await w(700);await tap($('#sysDlg [data-b="0"]'));await w(500);
+     await tap($('[data-perm="access"]'));await w(900);await tap($('#sysVira'));await w(900);await tap($('#sysDlg [data-b="0"]'));await w(900);await tap($('#btnSysBack'));await w(700);
+     await tap($('[data-perm="bg"]'));await w(700);await tap($('#sysDlg [data-b="0"]'));await w(700);await tap($('#btnPermNext'));await w(500)}},
+  {s:'Emparejar',t:'Cada pulsera se conecta y se asigna a su brazo',p:'El repartidor la elige en la lista de Android, la siente vibrar y se la pone en el brazo que corresponde.',
+   run:async w=>{await w(700);await tap($('#btnPairMain'));await w(1600);await tap($('#sysSheet .dev'));await w(2200);await tap($('#btnPairMain'));await w(1400);
+     await tap($('#btnPairMain'));await w(1600);await tap($('#sysSheet .dev'));await w(2000);await tap($('#btnPairMain'));await w(1500);await tap($('#btnPairMain'));await w(600)}},
+  {s:'Tus pulseras',t:'Las dos pulseras, a tamaño real',p:'Cada una muestra su lado, su conexión y su batería. Al tocarla vibra en la pantalla y en el brazo.',
+   run:async w=>{await w(1400);await tap($('#slotL .bandbtn'));await w(2600)}},
+  {s:'Activar',t:'Un botón activa los avisos',p:'Vira calcula la ruta con OpenStreetMap y sigue al repartidor por GPS. La pantalla En ruta muestra el próximo giro, por si el repartidor la mira detenido.',
+   run:async w=>{await w(600);await tap($('#btnActivate'));await w(2400)}},
+  {s:'Giro a la derecha',t:'Vibra solo la pulsera derecha',p:'Unos 250 m antes del giro, tres pulsos cortos en el brazo derecho. El borde derecho de la pantalla también pulsa.',
+   run:async w=>{await w(400);turn('R');await w(4200)}},
+  {s:'Giro a la izquierda',t:'Y a la izquierda, solo la izquierda',p:'La pulsera izquierda no se confunde con la derecha porque está en el otro brazo.',
+   run:async w=>{await w(400);turn('L');await w(4200)}},
+  {s:'Pedido nuevo',t:'La luz ámbar avisa un pedido',p:'Llega la notificación de la app de reparto y se encienden los LED de las dos pulseras. El aviso espera a que el repartidor se detenga.',
+   run:async w=>{await w(300);await order();await w(4600)}},
+  {s:'Al detenerse',t:'El pedido queda anotado hasta revisarlo',p:'En Actividad, cada giro aparece del lado en que vibró y el pedido sigue en ámbar hasta marcarlo como visto.',
+   run:async w=>{await tap($('#btnPause'));await w(900);await tap($('[data-tab="Actividad"]'));await w(2400);const seen=$('#timeline [data-seen]');if(seen){await tap(seen);await w(1400)}}},
+  {s:'Batería',t:'Avisa antes de quedarse sin batería',p:'Cuando una pulsera baja del 20 %, Vira avisa. La medición es aproximada.',
+   run:async w=>{await tap($('[data-tab="Pulseras"]'));await w(700);SIM.low();await w(1600);await tap($('#slotR .batt'));await w(3200);closeSheet();await w(700)}},
+  {s:'Ajustes',t:'Ajustes mínimos y tema para la noche',p:'Intensidad de la vibración, luces de pedidos, qué apps de reparto avisan y un tema oscuro para la ruta nocturna. Se configura una vez.',
+   run:async w=>{await tap($('[data-tab="Ajustes"]'));await w(1000);await tap($('[data-int="3"]'));await w(1500);await tap($('[data-theme="dark"]'));await w(2400);await tap($('[data-theme="light"]'));await w(900);$('#tabAjustes').scrollTo({top:0,behavior:'smooth'});await w(700)}},
+  {s:'Fin del recorrido',t:'Izquierda es izquierda',p:'Maqueta conceptual con datos simulados. Falta medir si las pulseras se sienten y se entienden en ruta.',
+   run:async w=>{await tap($('[data-tab="Pulseras"]'));await w(800)}},
+];
+let tourId=0;
+function setCaption(step,title,text,i){
+  const c=$('#caption');c.classList.add('swap');
+  $('#capCount').textContent=i==null?'':`${i+1} de ${TOUR.length}`;
+  setTimeout(()=>{$('#capTitle').textContent=title;$('#capText').textContent=text;c.classList.remove('swap')},reduce.matches?0:200);
+  $$('#prog i').forEach((b,k)=>b.style.setProperty('--p',i==null?0:(k<=i?1:0)));
+}
+async function tour(){
+  const my=++tourId,alive=()=>my===tourId;
+  const w=ms=>sleep(ms).then(()=>{if(!alive())throw new Error('stop')});
+  osmStop();setTourBtn(true);
+  try{
+    for(let i=0;i<TOUR.length;i++){if(!alive())return;const st=TOUR[i];setCaption(`Paso ${i+1} de ${TOUR.length} · ${st.s}`,st.t,st.p,i);await st.run(w)}
+    setTourBtn(false);$('#touch').classList.remove('on');
+  }catch(e){if(e.message!=='stop')console.error(e)}
+}
+function stopTour(){tourId++;setTourBtn(false);$('#touch').classList.remove('on');setCaption('Maqueta interactiva','Toca la app como si fuera un teléfono','O usa las simulaciones para ver cómo reaccionan las pulseras.',null)}
+function setTourBtn(on){$('#btnTour').innerHTML=on?`${icon('pause',20)}<span class="t">Detener recorrido</span>`:`${icon('play',20)}<span class="t">Reproducir recorrido</span>`;$('#btnTour').dataset.on=on?'1':''}
+let touchPos={x:206,y:760};
+async function moveTouch(x,y,ms=520){
+  const t=$('#touch');t.classList.add('on');
+  t.animate([{transform:`translate(${touchPos.x}px,${touchPos.y}px)`},{transform:`translate(${x}px,${y}px)`}],{duration:ms,easing:EASE_IO,fill:'forwards'});
+  touchPos={x,y};await sleep(ms);
+}
+async function tap(el){
+  if(!el)return;
+  el.scrollIntoView&&el.closest('.tab,.body')&&el.scrollIntoView({block:'nearest',behavior:'smooth'});
+  await sleep(60);
+  const r=rel(el),x=r.x+r.w/2,y=r.y+r.h/2;
+  await moveTouch(x,y);
+  const t=$('#touch');t.animate([{scale:1},{scale:.78},{scale:1}],{duration:260,easing:EASE_OUT});
+  const sr=screenEl.getBoundingClientRect();
+  const cx=sr.left+x*S.scale,cy=sr.top+y*S.scale;
+  el.dispatchEvent(new PointerEvent('pointerdown',{clientX:cx,clientY:cy,bubbles:true}));
+  await sleep(120);
+  dispatchEvent(new PointerEvent('pointerup',{bubbles:true}));
+  el.click();
+  await sleep(200);
+}
+async function swipe(el){
+  const r=rel(el),y=r.y+r.h*.42;
+  await moveTouch(r.x+r.w*.8,y,420);
+  setPage(onb.i+1);
+  await moveTouch(r.x+r.w*.2,y,380);
+}
+
+/* ============ acciones principales ============ */
+async function activate(){if(!S.active){await setActive(true)}openRoute()}
+async function pause(){await closeRoute();setActive(false)}
+
+/* ============ simulaciones ============ */
+const SIM={
+  L:()=>turn('L'), R:()=>turn('R'), order,
+  low(){S.bands.R.battery=18;renderSlots();snack('A la pulsera derecha le queda 18 %. Cárgala al terminar el turno.','Ver',batterySheet)},
+  async drop(){if(!S.bands.R.connected)return;S.bands.R.connected=false;renderSlots();snack('Se cortó la conexión con la pulsera derecha. Reconectando…');
+    await sleep(4200);S.bands.R.connected=true;renderSlots();snack('La pulsera derecha se conectó de nuevo.')},
+};
+
+/* ============ ruta real con OpenStreetMap ============ */
+/* La ruta la calcula OSRM sobre OpenStreetMap (servidor de prueba de FOSSGIS). Solo el avance del repartidor es simulado. */
+const OSM_TRIPS={
+  lastarria:{name:'Barrio Lastarria → Barrio Italia',o:[-70.6414,-33.4387],d:[-70.6215,-33.4473]},
+  yungay:{name:'Plaza de Armas → Barrio Yungay',o:[-70.6504,-33.4378],d:[-70.6683,-33.4382]},
+  nunoa:{name:'Plaza Ñuñoa → Estadio Nacional',o:[-70.5975,-33.4565],d:[-70.6106,-33.4646]},
+};
+const OSM_PROF={bici:{srv:'routed-bike',kmh:18,warn:60,label:'bici'},moto:{srv:'routed-car',kmh:30,warn:120,label:'moto'}};
+const OSM_SPEEDUP=10;
+/* rutas guardadas el 29-oct-2026 para que la demo funcione sin internet: [tipo, modificador, calle, lon, lat] por paso */
+const OSM_CACHE={"lastarria_bici":{"d":3140,"g":[[-70.64112,-33.43872],[-70.64108,-33.43823],[-70.64032,-33.43824],[-70.64019,-33.43824],[-70.63944,-33.43825],[-70.63938,-33.43825],[-70.63935,-33.43825],[-70.63932,-33.43823],[-70.63929,-33.43822],[-70.63922,-33.43814],[-70.63918,-33.4381],[-70.63915,-33.43805],[-70.63896,-33.43776],[-70.63877,-33.43786],[-70.63868,-33.4379],[-70.63864,-33.43793],[-70.63859,-33.43797],[-70.63825,-33.43834],[-70.63817,-33.43842],[-70.63812,-33.43847],[-70.63801,-33.43838],[-70.6378,-33.43822],[-70.63763,-33.4381],[-70.63734,-33.43794],[-70.63708,-33.43779],[-70.63695,-33.43772],[-70.63666,-33.43759],[-70.63655,-33.43754],[-70.63641,-33.43749],[-70.63608,-33.43739],[-70.63578,-33.43731],[-70.63544,-33.43721],[-70.63533,-33.43718],[-70.63527,-33.43717],[-70.63525,-33.43722],[-70.63522,-33.43728],[-70.63514,-33.43727],[-70.63502,-33.43726],[-70.63488,-33.43727],[-70.63475,-33.43728],[-70.63467,-33.43728],[-70.63449,-33.43729],[-70.63437,-33.43729],[-70.63426,-33.43728],[-70.63415,-33.43727],[-70.63398,-33.43724],[-70.63382,-33.4372],[-70.63376,-33.43729],[-70.63374,-33.43733],[-70.63371,-33.43736],[-70.63368,-33.4374],[-70.63364,-33.43746],[-70.63363,-33.43749],[-70.63354,-33.43766],[-70.63338,-33.43796],[-70.63322,-33.43827],[-70.63314,-33.43845],[-70.63305,-33.43869],[-70.63299,-33.43891],[-70.63294,-33.43913],[-70.63285,-33.43955],[-70.63282,-33.43969],[-70.63274,-33.44002],[-70.63266,-33.44037],[-70.63249,-33.44113],[-70.63246,-33.44128],[-70.63245,-33.44132],[-70.63243,-33.4414],[-70.63241,-33.44149],[-70.63234,-33.4418],[-70.63226,-33.44213],[-70.63213,-33.44265],[-70.63212,-33.44269],[-70.6321,-33.44277],[-70.63202,-33.44311],[-70.63179,-33.44408],[-70.63177,-33.44412],[-70.63174,-33.44416],[-70.6317,-33.44421],[-70.63164,-33.44426],[-70.63159,-33.44429],[-70.63154,-33.44432],[-70.63151,-33.44433],[-70.63142,-33.44436],[-70.63135,-33.44438],[-70.63131,-33.44441],[-70.63128,-33.44444],[-70.63126,-33.44445],[-70.63124,-33.44449],[-70.63123,-33.44454],[-70.6312,-33.44468],[-70.63112,-33.44499],[-70.63111,-33.44503],[-70.63109,-33.44509],[-70.63108,-33.44515],[-70.63092,-33.44571],[-70.63058,-33.44696],[-70.63057,-33.44699],[-70.63056,-33.44703],[-70.63052,-33.44715],[-70.63051,-33.44722],[-70.63043,-33.44754],[-70.6303,-33.44802],[-70.63013,-33.44871],[-70.63002,-33.44913],[-70.62991,-33.44952],[-70.62977,-33.44949],[-70.6297,-33.44948],[-70.62966,-33.44947],[-70.62955,-33.44945],[-70.62896,-33.44934],[-70.62812,-33.44917],[-70.62809,-33.44917],[-70.628,-33.44915],[-70.62789,-33.44913],[-70.62686,-33.44893],[-70.62682,-33.44892],[-70.62677,-33.44891],[-70.62671,-33.4489],[-70.62624,-33.44879],[-70.62548,-33.44859],[-70.6254,-33.44858],[-70.62535,-33.44857],[-70.62458,-33.44842],[-70.6245,-33.4484],[-70.62441,-33.44839],[-70.62378,-33.44826],[-70.62372,-33.44824],[-70.62367,-33.44823],[-70.62366,-33.44823],[-70.62331,-33.44816],[-70.62326,-33.44815],[-70.62319,-33.44814],[-70.62319,-33.44814],[-70.62236,-33.44797],[-70.62226,-33.44795],[-70.62227,-33.44791],[-70.62243,-33.44736],[-70.62236,-33.44735],[-70.62235,-33.44735],[-70.62175,-33.44723],[-70.62173,-33.44722]],"s":[["depart","left","José Victorino Lastarria",-70.64112,-33.43872],["turn","right","Villavicencio",-70.64108,-33.43823],["turn","right","Namur",-70.63896,-33.43776],["turn","left","Ciclovía Alameda",-70.63812,-33.43847],["turn","right","",-70.63527,-33.43717],["turn","left","Avenida Providencia",-70.63522,-33.43728],["turn","right","Ramón Carnicer",-70.63382,-33.4372],["new name","straight","Avenida General Bustamante",-70.63151,-33.44433],["turn","left","Malaquías Concha",-70.62991,-33.44952],["new name","straight","Caupolicán",-70.6254,-33.44858],["turn","left","Avenida Salvador",-70.62226,-33.44795],["turn","right","Fresia",-70.62243,-33.44736],["arrive","straight","Fresia",-70.62173,-33.44722]]},"lastarria_moto":{"d":2998,"g":[[-70.64112,-33.43872],[-70.64108,-33.43823],[-70.64032,-33.43824],[-70.64019,-33.43824],[-70.63944,-33.43825],[-70.63938,-33.43825],[-70.63935,-33.43825],[-70.63932,-33.43823],[-70.63929,-33.43822],[-70.63922,-33.43814],[-70.63918,-33.4381],[-70.63915,-33.43805],[-70.63896,-33.43776],[-70.63877,-33.43786],[-70.63868,-33.4379],[-70.63864,-33.43793],[-70.63859,-33.43797],[-70.63825,-33.43834],[-70.63817,-33.43842],[-70.63812,-33.43847],[-70.63806,-33.43853],[-70.63783,-33.43837],[-70.63762,-33.43823],[-70.63739,-33.43808],[-70.63727,-33.43801],[-70.63717,-33.43795],[-70.63709,-33.43791],[-70.63698,-33.43785],[-70.6369,-33.43781],[-70.6368,-33.43775],[-70.63672,-33.43772],[-70.63665,-33.43769],[-70.63661,-33.43768],[-70.63648,-33.43763],[-70.63635,-33.43759],[-70.63617,-33.43754],[-70.63545,-33.43734],[-70.63539,-33.43732],[-70.63528,-33.43729],[-70.63522,-33.43728],[-70.63514,-33.43727],[-70.63502,-33.43726],[-70.63488,-33.43727],[-70.63475,-33.43728],[-70.63467,-33.43728],[-70.63449,-33.43729],[-70.63437,-33.43729],[-70.63426,-33.43728],[-70.63415,-33.43727],[-70.63398,-33.43724],[-70.63382,-33.4372],[-70.63376,-33.43729],[-70.63374,-33.43733],[-70.63371,-33.43736],[-70.63368,-33.4374],[-70.63364,-33.43746],[-70.63363,-33.43749],[-70.63354,-33.43766],[-70.63338,-33.43796],[-70.63322,-33.43827],[-70.63314,-33.43845],[-70.63305,-33.43869],[-70.63299,-33.43891],[-70.63294,-33.43913],[-70.63285,-33.43955],[-70.63282,-33.43969],[-70.63274,-33.44002],[-70.63266,-33.44037],[-70.63249,-33.44113],[-70.63246,-33.44128],[-70.63245,-33.44132],[-70.63243,-33.4414],[-70.63234,-33.44141],[-70.63224,-33.4414],[-70.63216,-33.44139],[-70.63202,-33.44136],[-70.6319,-33.44134],[-70.63174,-33.4413],[-70.63162,-33.44127],[-70.6315,-33.44124],[-70.63145,-33.44122],[-70.63143,-33.44121],[-70.63133,-33.44116],[-70.63126,-33.44115],[-70.63028,-33.44096],[-70.63014,-33.44094],[-70.63008,-33.44092],[-70.62996,-33.4409],[-70.62985,-33.44088],[-70.62883,-33.44066],[-70.62774,-33.44044],[-70.62738,-33.44036],[-70.62733,-33.44035],[-70.62725,-33.44034],[-70.62685,-33.44025],[-70.62587,-33.44005],[-70.62483,-33.43983],[-70.62479,-33.43982],[-70.62478,-33.43982],[-70.62467,-33.43979],[-70.62465,-33.43986],[-70.62464,-33.43989],[-70.62454,-33.44024],[-70.62452,-33.44031],[-70.62443,-33.44063],[-70.62441,-33.4407],[-70.62436,-33.44088],[-70.62435,-33.4409],[-70.62433,-33.44097],[-70.62431,-33.44105],[-70.6243,-33.44107],[-70.62421,-33.44139],[-70.62408,-33.44185],[-70.62395,-33.44229],[-70.6238,-33.44277],[-70.62364,-33.44332],[-70.62358,-33.44348],[-70.62356,-33.44356],[-70.62353,-33.44364],[-70.62351,-33.44371],[-70.62346,-33.44391],[-70.62341,-33.44406],[-70.62326,-33.44456],[-70.62326,-33.44458],[-70.62324,-33.44465],[-70.62323,-33.4447],[-70.62322,-33.44473],[-70.62305,-33.44529],[-70.62303,-33.44536],[-70.62296,-33.4456],[-70.62294,-33.44565],[-70.62292,-33.44573],[-70.6229,-33.44581],[-70.62289,-33.44584],[-70.62287,-33.44591],[-70.62281,-33.44611],[-70.62275,-33.4463],[-70.62259,-33.44683],[-70.62243,-33.44736],[-70.62236,-33.44735],[-70.62235,-33.44735],[-70.62175,-33.44723],[-70.62173,-33.44722]],"s":[["depart","left","José Victorino Lastarria",-70.64112,-33.43872],["turn","right","Villavicencio",-70.64108,-33.43823],["turn","right","Namur",-70.63896,-33.43776],["turn","left","Avenida Libertador Bernardo O'Higgins",-70.63817,-33.43842],["new name","straight","Avenida Providencia",-70.63514,-33.43727],["turn","right","Ramón Carnicer",-70.63382,-33.4372],["turn","left","Avenida Rancagua",-70.63243,-33.4414],["turn","right","Avenida Salvador",-70.62467,-33.43979],["turn","left","Fresia",-70.62243,-33.44736],["arrive","straight","Fresia",-70.62173,-33.44722]]},"yungay_bici":{"d":1850,"g":[[-70.65038,-33.43779],[-70.6504,-33.43777],[-70.65042,-33.43775],[-70.65045,-33.43773],[-70.65048,-33.43772],[-70.65052,-33.43772],[-70.65056,-33.43745],[-70.65057,-33.43733],[-70.65128,-33.4374],[-70.65129,-33.43735],[-70.65136,-33.43735],[-70.65234,-33.43747],[-70.65256,-33.43749],[-70.65265,-33.4375],[-70.65277,-33.43752],[-70.6528,-33.43752],[-70.65312,-33.43756],[-70.65343,-33.43759],[-70.65353,-33.4376],[-70.65388,-33.43764],[-70.65402,-33.43766],[-70.65478,-33.43774],[-70.65544,-33.4378],[-70.65552,-33.43781],[-70.65675,-33.43794],[-70.65678,-33.43794],[-70.65688,-33.43795],[-70.65696,-33.43796],[-70.65814,-33.43809],[-70.65818,-33.4381],[-70.65826,-33.4381],[-70.65836,-33.43812],[-70.65847,-33.43813],[-70.65892,-33.43818],[-70.65946,-33.43824],[-70.65951,-33.43824],[-70.65957,-33.43825],[-70.65963,-33.43826],[-70.66018,-33.43831],[-70.66021,-33.43831],[-70.66026,-33.43832],[-70.6603,-33.43832],[-70.66054,-33.43834],[-70.66095,-33.43839],[-70.66102,-33.43839],[-70.66234,-33.43853],[-70.6624,-33.43853],[-70.66342,-33.43864],[-70.66388,-33.43868],[-70.66453,-33.43875],[-70.66465,-33.43876],[-70.66522,-33.43882],[-70.66595,-33.4389],[-70.66602,-33.43779],[-70.66602,-33.43776],[-70.66656,-33.43781],[-70.66708,-33.43786],[-70.66752,-33.4379],[-70.66766,-33.43792],[-70.66833,-33.43798]],"s":[["depart","","",-70.65038,-33.43779],["turn","right","",-70.65052,-33.43772],["end of road","left","",-70.65057,-33.43733],["turn","right","Plaza de Armas",-70.65128,-33.4374],["turn","left","Catedral",-70.65129,-33.43735],["turn","right","General Baquedano",-70.66595,-33.4389],["turn","left","Santo Domingo",-70.66602,-33.43776],["arrive","left","Santo Domingo",-70.66833,-33.43798]]},"yungay_moto":{"d":1784,"g":[[-70.65049,-33.43725],[-70.65122,-33.43734],[-70.65129,-33.43735],[-70.65136,-33.43735],[-70.65234,-33.43747],[-70.65256,-33.43749],[-70.65265,-33.4375],[-70.65277,-33.43752],[-70.6528,-33.43752],[-70.65312,-33.43756],[-70.65343,-33.43759],[-70.65353,-33.4376],[-70.65388,-33.43764],[-70.65402,-33.43766],[-70.65478,-33.43774],[-70.65544,-33.4378],[-70.65552,-33.43781],[-70.65675,-33.43794],[-70.65678,-33.43794],[-70.65688,-33.43795],[-70.65696,-33.43796],[-70.65814,-33.43809],[-70.65818,-33.4381],[-70.65826,-33.4381],[-70.65836,-33.43812],[-70.65847,-33.43813],[-70.65892,-33.43818],[-70.65946,-33.43824],[-70.65951,-33.43824],[-70.65957,-33.43825],[-70.65963,-33.43826],[-70.66018,-33.43831],[-70.66021,-33.43831],[-70.66026,-33.43832],[-70.6603,-33.43832],[-70.66054,-33.43834],[-70.66095,-33.43839],[-70.66102,-33.43839],[-70.66234,-33.43853],[-70.6624,-33.43853],[-70.66253,-33.43749],[-70.66254,-33.43741],[-70.66429,-33.43758],[-70.66442,-33.43759],[-70.66453,-33.4376],[-70.66602,-33.43776],[-70.66656,-33.43781],[-70.66708,-33.43786],[-70.66752,-33.4379],[-70.66766,-33.43792],[-70.66833,-33.43798]],"s":[["depart","left","Plaza de Armas",-70.65049,-33.43725],["new name","straight","Catedral",-70.65129,-33.43735],["turn","right","Almirante Barroso",-70.6624,-33.43853],["turn","left","Santo Domingo",-70.66254,-33.43741],["arrive","left","Santo Domingo",-70.66833,-33.43798]]},"nunoa_bici":{"d":2510,"g":[[-70.59751,-33.45659],[-70.59772,-33.45658],[-70.59776,-33.45658],[-70.59784,-33.45656],[-70.59793,-33.45654],[-70.59794,-33.45664],[-70.59794,-33.45671],[-70.598,-33.45784],[-70.598,-33.45786],[-70.598,-33.45792],[-70.59801,-33.45799],[-70.59801,-33.45806],[-70.59801,-33.4582],[-70.59805,-33.459],[-70.59805,-33.45902],[-70.59806,-33.4591],[-70.59806,-33.45918],[-70.59806,-33.45921],[-70.59807,-33.45949],[-70.59814,-33.46062],[-70.59821,-33.46181],[-70.59829,-33.4618],[-70.59997,-33.46171],[-70.60004,-33.46171],[-70.60013,-33.46171],[-70.60022,-33.4617],[-70.60027,-33.4617],[-70.60082,-33.46168],[-70.60132,-33.46165],[-70.60185,-33.46163],[-70.6022,-33.46161],[-70.6025,-33.4616],[-70.60286,-33.46158],[-70.60318,-33.46156],[-70.60343,-33.46154],[-70.60348,-33.46154],[-70.60357,-33.46154],[-70.60366,-33.46153],[-70.60371,-33.46153],[-70.60597,-33.46138],[-70.60604,-33.46138],[-70.60612,-33.46138],[-70.60617,-33.46137],[-70.60643,-33.46135],[-70.60693,-33.46131],[-70.60821,-33.46119],[-70.60822,-33.46127],[-70.60832,-33.46195],[-70.60833,-33.46203],[-70.60993,-33.46193],[-70.60997,-33.46193],[-70.60998,-33.46198],[-70.60998,-33.46203],[-70.60999,-33.46207],[-70.61,-33.46213],[-70.61,-33.46217],[-70.61004,-33.46227],[-70.61007,-33.46245],[-70.61009,-33.46256],[-70.6102,-33.46311],[-70.61044,-33.46308],[-70.6106,-33.46307],[-70.61074,-33.46308],[-70.61097,-33.46312],[-70.61117,-33.4632],[-70.61135,-33.4633],[-70.61144,-33.46338],[-70.61159,-33.46353],[-70.61166,-33.46364],[-70.61172,-33.46375],[-70.61177,-33.46388],[-70.61169,-33.46389],[-70.61167,-33.46384],[-70.61164,-33.46376],[-70.6116,-33.46368],[-70.61153,-33.46358],[-70.61148,-33.46352],[-70.61139,-33.46344],[-70.61124,-33.46333],[-70.61108,-33.46325],[-70.61097,-33.46322],[-70.61082,-33.46318],[-70.61066,-33.46315],[-70.61056,-33.46315],[-70.61046,-33.46316],[-70.61036,-33.46317],[-70.61026,-33.46318],[-70.61014,-33.46322],[-70.61005,-33.46326],[-70.60994,-33.46332],[-70.60985,-33.46338],[-70.6097,-33.46351],[-70.6096,-33.46363],[-70.60953,-33.46374],[-70.6095,-33.46383],[-70.60945,-33.46402],[-70.60944,-33.46419],[-70.60947,-33.46458],[-70.60949,-33.46472]],"s":[["depart","right","",-70.59751,-33.45659],["turn","left","Avenida José Pedro Alessandri",-70.59793,-33.45654],["turn","right","Profesor Juan Gómez Millas",-70.59821,-33.46181],["new name","straight","Los Pescadores del Cardenal Raul Silva Henríquez",-70.60604,-33.46138],["turn","left","Presidente Madero",-70.60821,-33.46119],["turn","right","Avenida Grecia",-70.60833,-33.46203],["turn","left","",-70.60997,-33.46193],["end of road","right","",-70.6102,-33.46311],["turn","left","",-70.61177,-33.46388],["turn","left","",-70.61169,-33.46389],["arrive","right","",-70.60949,-33.46472]]},"nunoa_moto":{"d":2339,"g":[[-70.59751,-33.45667],[-70.59736,-33.45668],[-70.59658,-33.45671],[-70.59632,-33.45672],[-70.59608,-33.45674],[-70.59598,-33.45674],[-70.59589,-33.45675],[-70.59589,-33.45679],[-70.59589,-33.45682],[-70.59595,-33.45793],[-70.59601,-33.45907],[-70.59601,-33.4591],[-70.59601,-33.45918],[-70.59782,-33.45911],[-70.59785,-33.45911],[-70.59793,-33.4591],[-70.59806,-33.4591],[-70.59815,-33.4591],[-70.59824,-33.45909],[-70.5985,-33.45909],[-70.59907,-33.45907],[-70.59984,-33.45905],[-70.59989,-33.45905],[-70.59998,-33.45904],[-70.60009,-33.45903],[-70.60014,-33.45902],[-70.6002,-33.459],[-70.60123,-33.45872],[-70.6013,-33.45871],[-70.60137,-33.45869],[-70.60144,-33.45868],[-70.6015,-33.45867],[-70.603,-33.45853],[-70.60304,-33.45852],[-70.60311,-33.45852],[-70.60318,-33.45851],[-70.60486,-33.45833],[-70.60545,-33.45827],[-70.60548,-33.45827],[-70.60555,-33.45826],[-70.60563,-33.45825],[-70.60564,-33.45833],[-70.60573,-33.45888],[-70.60578,-33.45919],[-70.60587,-33.45977],[-70.60598,-33.46047],[-70.60599,-33.4605],[-70.606,-33.46057],[-70.60601,-33.46065],[-70.60612,-33.46138],[-70.60615,-33.46156],[-70.60622,-33.46206],[-70.60623,-33.46209],[-70.60624,-33.46217],[-70.60625,-33.46223],[-70.60626,-33.46231],[-70.60627,-33.46237],[-70.60628,-33.46245],[-70.60633,-33.4628],[-70.60631,-33.4629],[-70.60633,-33.46299],[-70.6066,-33.46471],[-70.60663,-33.46486],[-70.60663,-33.46489],[-70.60677,-33.46489],[-70.60715,-33.46485],[-70.60744,-33.46482],[-70.60766,-33.4648],[-70.60771,-33.4648],[-70.60783,-33.46478],[-70.60785,-33.46478],[-70.60819,-33.46475],[-70.60902,-33.46465],[-70.60905,-33.46465],[-70.60929,-33.46462],[-70.60931,-33.46462],[-70.60938,-33.46461],[-70.60939,-33.46467],[-70.6094,-33.46474]],"s":[["depart","left","Dublé Almeyda",-70.59751,-33.45667],["turn","right","Juan Enrique Concha",-70.59589,-33.45675],["turn","right","Alcalde Eduardo Castillo Velasco",-70.59601,-33.45918],["turn","left","Avenida Pedro de Valdivia",-70.60555,-33.45826],["turn","right","",-70.60663,-33.46489],["end of road","left","",-70.60938,-33.46461],["arrive","right","",-70.6094,-33.46474]]}};
+const OSM={trip:'lastarria',prof:'bici',dest:null,route:null,running:false,load:0,map:null,ready:false,dot:null,end:null,hit:new Set()};
+let osmRaf=0;
+
+const hav=(a,b)=>{const k=Math.PI/180,dLa=(b[1]-a[1])*k,dLo=(b[0]-a[0])*k;const x=Math.sin(dLa/2)**2+Math.cos(a[1]*k)*Math.cos(b[1]*k)*Math.sin(dLo/2)**2;return 2*6371000*Math.asin(Math.sqrt(x))};
+const km=m=>m>=1000?(m/1000).toLocaleString('es-CL',{maximumFractionDigits:1})+' km':Math.round(m)+' m';
+function sideOf(type,mod){
+  if(['depart','arrive','new name','notification'].includes(type))return null;
+  if(mod==='uturn')return 'U';
+  return /left/.test(mod)?'L':/right/.test(mod)?'R':null;
+}
+async function fetchOsrm(o,d,srv){
+  const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),8000);
+  try{
+    const r=await fetch(`https://routing.openstreetmap.de/${srv}/route/v1/driving/${o.join(',')};${d.join(',')}?overview=full&geometries=geojson&steps=true`,{signal:ctl.signal});
+    const j=await r.json();if(j.code!=='Ok')throw new Error(j.code);
+    const rt=j.routes[0];
+    return{d:rt.distance,g:rt.geometry.coordinates,s:rt.legs[0].steps.map(s=>[s.maneuver.type,s.maneuver.modifier||'',s.name||'',...s.maneuver.location])};
+  }finally{clearTimeout(tm)}
+}
+/* distancia acumulada por punto de la línea y ubicación de cada giro a lo largo de la ruta */
+function prepRoute(r){
+  const g=r.g,cum=[0];for(let i=1;i<g.length;i++)cum.push(cum[i-1]+hav(g[i-1],g[i]));
+  let j=0;
+  const steps=r.s.map(([type,mod,name,lon,lat])=>{
+    let best=j,bd=Infinity;
+    for(let i=j;i<g.length;i++){const d=hav(g[i],[lon,lat]);if(d<bd){bd=d;best=i}else if(d>bd+300)break}
+    j=best;return{type,mod,name,at:cum[best],side:sideOf(type,mod),ll:[lat,lon]};
+  });
+  return{g,cum,len:cum[cum.length-1],steps,pi:0};
+}
+function posAt(R,x){
+  let i=R.cum[R.pi]>x?0:R.pi;
+  while(i<R.cum.length-2&&R.cum[i+1]<x)i++;
+  R.pi=i;const a=R.g[i],b=R.g[i+1]||a,f=Math.min(1,Math.max(0,(x-R.cum[i])/((R.cum[i+1]-R.cum[i])||1)));
+  return[a[1]+(b[1]-a[1])*f,a[0]+(b[0]-a[0])*f];
+}
+function osmStatus(msg,err){const p=$('#osmStatus');p.textContent=msg;p.classList.toggle('err',!!err)}
+function setOsmBtn(){$('#btnOsm').innerHTML=OSM.running?`${icon('pause',20)}<span class="t">Detener la ruta</span>`:`${icon('route',20)}<span class="t">Recorrer la ruta</span>`}
+
+/* Mapa base: OpenFreeMap (datos de OpenStreetMap, sin clave ni límite de uso). Los servidores de mapas de
+   openstreetmap.org bloquean las páginas abiertas con doble clic, porque no envían de qué sitio vienen. */
+/* El mapa base de Santiago viene en vendor/mapa_santiago.js (teselas, tipografías y sprite), así funciona sin internet
+   y con doble clic. PMTiles no sirve aquí: pide el archivo por partes (Range) y file:// no lo permite. El protocolo vira://
+   entrega lo guardado y, fuera de esa zona, lo pide a OpenFreeMap si hay conexión. */
+const loadScript=src=>new Promise((ok,fail)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=fail;document.head.appendChild(s)});
+const loadCss=href=>{const l=document.createElement('link');l.rel='stylesheet';l.href=href;document.head.appendChild(l)};
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const gunzip=async u8=>new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+function registerVira(){
+  maplibregl.addProtocol('vira',async(params,ctl)=>{
+    const M=window.VIRA_MAPA,[kind,...rest]=params.url.slice(7).split('/'),key=decodeURIComponent(rest.join('/'));
+    if(kind==='sprite'&&M.sprite[key])return{data:key.endsWith('.json')?M.sprite[key]:b64(M.sprite[key]).buffer};
+    const saved=kind==='t'?M.tiles[key]:kind==='fonts'?M.fonts[key]:null;
+    if(saved)return{data:await gunzip(b64(saved))};
+    const [stack,range]=key.split('/');
+    const url=kind==='t'?M.remoto.tiles.replace('{z}/{x}/{y}',key)
+      :kind==='fonts'?M.remoto.glyphs.replace('{fontstack}',encodeURIComponent(stack)).replace('{range}',range)
+      :M.remoto.sprite.replace(/ofm$/,'')+key;
+    try{
+      const r=await fetch(url,{signal:ctl.signal});if(!r.ok)throw new Error(r.status);
+      return{data:params.type==='json'?await r.json():await r.arrayBuffer()};
+    }catch(e){if(kind==='t')return{data:new ArrayBuffer(0)};throw e}
+  });
+}
+async function osmInitMap(){
+  try{loadCss('vendor/maplibre-gl.css');await loadScript('vendor/maplibre-gl.js')}
+  catch(e){return osmStatus('Falta la carpeta vendor junto a index.html: sin ella no se ve el mapa, pero la ruta funciona.',true)}
+  let style='https://tiles.openfreemap.org/styles/positron';
+  try{await loadScript('vendor/mapa_santiago.js');registerVira();style=VIRA_MAPA.style}catch(e){}
+  try{
+    OSM.map=new maplibregl.Map({container:'osmMap',style,
+      center:[-70.635,-33.445],zoom:12.5,attributionControl:false,dragRotate:false,pitchWithRotate:false});
+  }catch(e){return osmStatus('Este navegador no puede mostrar el mapa; la ruta igual funciona.')}
+  OSM.map.addControl(new maplibregl.AttributionControl({compact:false,customAttribution:'Rutas: OSRM'}));
+  OSM.map.touchZoomRotate.disableRotation();
+  OSM.map.on('load',()=>{
+    const m=OSM.map,empty={type:'FeatureCollection',features:[]};
+    m.addSource('ruta',{type:'geojson',data:empty});
+    m.addSource('hecho',{type:'geojson',data:empty});
+    m.addSource('giros',{type:'geojson',data:empty});
+    /* la ruta va bajo los nombres de calles para que se sigan leyendo; los giros, encima de todo */
+    const labels=m.getStyle().layers.find(l=>l.type==='symbol')?.id;
+    const w=k=>['interpolate',['linear'],['zoom'],12,k*.7,16,k*1.6];
+    const round={'line-join':'round','line-cap':'round'};
+    m.addLayer({id:'ruta-borde',type:'line',source:'ruta',layout:round,paint:{'line-color':'#FFFFFF','line-width':w(9)}},labels);
+    m.addLayer({id:'ruta',type:'line',source:'ruta',layout:round,paint:{'line-color':'#4A62D6','line-width':w(5)}},labels);
+    m.addLayer({id:'hecho',type:'line',source:'hecho',layout:round,paint:{'line-color':'#AFC0FF','line-width':w(5)}},labels);
+    m.addLayer({id:'giros',type:'circle',source:'giros',paint:{'circle-radius':['interpolate',['linear'],['zoom'],12,4,16,7],'circle-stroke-width':2,'circle-stroke-color':'#2F45B0',
+      'circle-color':['case',['get','hit'],'#2F45B0','#FFFFFF']}});
+    OSM.ready=true;if(OSM.route)drawRoute();
+  });
+  OSM.map.on('click',e=>{if(OSM.running)return;OSM.dest=[e.lngLat.lng,e.lngLat.lat];loadRoute()});
+}
+function setTurnMarks(){
+  if(!OSM.ready)return;
+  OSM.map.getSource('giros').setData({type:'FeatureCollection',features:OSM.route.steps.map((s,k)=>s.side&&{type:'Feature',
+    properties:{hit:OSM.hit.has(k)},geometry:{type:'Point',coordinates:[s.ll[1],s.ll[0]]}}).filter(Boolean)});
+}
+/* tramo ya recorrido, más claro: se actualiza 5 veces por segundo, no en cada cuadro */
+function setDone(R,x,p){
+  if(!OSM.ready)return;
+  const c=x>0?[...R.g.slice(0,R.pi+1),[p[1],p[0]]]:[];
+  OSM.map.getSource('hecho').setData(c.length>1?{type:'Feature',properties:{},geometry:{type:'LineString',coordinates:c}}:{type:'FeatureCollection',features:[]});
+}
+function drawRoute(){
+  if(!OSM.ready)return;
+  const R=OSM.route,m=OSM.map,g=R.g;
+  m.getSource('ruta').setData({type:'Feature',properties:{},geometry:{type:'LineString',coordinates:g}});
+  setTurnMarks();setDone(R,0);
+  const el=c=>{const d=document.createElement('div');d.className=c;return d};
+  OSM.end?OSM.end.setLngLat(g[g.length-1]):OSM.end=new maplibregl.Marker({element:el('osm-dest')}).setLngLat(g[g.length-1]).addTo(m);
+  OSM.dot?OSM.dot.setLngLat(g[0]):OSM.dot=new maplibregl.Marker({element:el('osm-dot')}).setLngLat(g[0]).addTo(m);
+  const b=g.reduce((b,c)=>b.extend(c),new maplibregl.LngLatBounds(g[0],g[0]));
+  m.fitBounds(b,{padding:22,duration:0});
+}
+async function loadRoute(){
+  osmStop();
+  const t=OSM_TRIPS[OSM.trip],d=OSM.dest||t.d,my=++OSM.load;
+  $('#btnOsm').disabled=true;osmStatus('Pidiendo la ruta a OpenStreetMap…');
+  let data,saved=false;
+  try{data=await fetchOsrm(t.o,d,OSM_PROF[OSM.prof].srv)}
+  catch(e){
+    data=!OSM.dest&&OSM_CACHE[OSM.trip+'_'+OSM.prof];saved=true;
+    if(!data){if(my===OSM.load)osmStatus('No se pudo conectar con el servidor de rutas. Revisa la conexión a internet.',true);return}
+  }
+  if(my!==OSM.load)return;
+  OSM.route=prepRoute(data);OSM.hit.clear();drawRoute();
+  const n=OSM.route.steps.filter(s=>s.side).length;
+  osmStatus(`${km(OSM.route.len)} en ${OSM_PROF[OSM.prof].label} · ${n} ${n===1?'giro':'giros'} que avisar${saved?' · ruta guardada (sin conexión)':''}`);
+  /* el mapa es un canvas: el lector de pantalla recibe la ruta como texto */
+  $('#osmMap').setAttribute('aria-label',`Mapa de la ruta ${OSM.dest?'hasta el destino elegido en el mapa':OSM_TRIPS[OSM.trip].name}: ${$('#osmStatus').textContent}`);
+  $('#btnOsm').disabled=false;
+}
+
+async function showStep(st){
+  cancelAnimationFrame(cdRaf);
+  const t=$('#turn'),arrive=st.type==='arrive';
+  t.classList.add('swap');await sleep(reduce.matches?0:200);
+  $('#turnArrow').innerHTML=ARROWS[arrive||st.side==='U'?'S':st.side];
+  $('#turnInstr').textContent=arrive?'Llegas al destino':st.side==='L'?'Gira a la izquierda':st.side==='R'?'Gira a la derecha':'Da la vuelta';
+  $('#turnStreet').textContent=arrive?(st.name?'en '+st.name:''):'hacia '+(st.name||'la siguiente calle');
+  requestAnimationFrame(()=>t.classList.remove('swap'));
+}
+function osmWarn(st,k){
+  if(st.side==='U'){buzz('L');buzz('R')}
+  else{buzz(st.side);logEvent({k:st.side,what:st.side==='L'?'Giro a la izquierda':'Giro a la derecha',where:'hacia '+(st.name||'calle sin nombre')})}
+  OSM.hit.add(k);setTurnMarks();
+}
+async function osmRun(){
+  if(OSM.running)return osmStop();
+  if(!OSM.route)return;
+  if($('#btnTour').dataset.on)stopTour();
+  cancelAnimationFrame(cdRaf);
+  OSM.running=true;setOsmBtn();
+  await activate();renderStatus();
+  const R=OSM.route,P=OSM_PROF[OSM.prof],v=P.kmh/3.6*OSM_SPEEDUP,warned=new Set();
+  OSM.hit.clear();setTurnMarks();setDone(R,0);OSM.doneAt=0;
+  R.pi=0;let x=0,k=0,cur=-1,last=performance.now();
+  const frame=now=>{
+    if(!OSM.running)return;
+    if(!S.active)return osmStop();
+    x=Math.min(R.len,x+v*(now-last)/1000);last=now;
+    while(k<R.steps.length&&(R.steps[k].at<x-.5||!(R.steps[k].side||R.steps[k].type==='arrive')))k++;
+    const st=R.steps[k],dist=st?Math.max(0,st.at-x):0;
+    if(st&&k!==cur){cur=k;showStep(st)}
+    setDist(Math.round(dist/10)*10);
+    if(st&&st.side&&!warned.has(k)&&dist<=P.warn){warned.add(k);osmWarn(st,k)}
+    if(OSM.dot){const p=posAt(R,x);OSM.dot.setLngLat([p[1],p[0]]);if(now-OSM.doneAt>200){OSM.doneAt=now;setDone(R,x,p)}}
+    if(x>=R.len){
+      OSM.running=false;setOsmBtn();
+      buzz('L',{pulses:1,on:900});buzz('R',{pulses:1,on:900});
+      osmStatus(`Llegaste. Se avisaron ${warned.size} giros en ${km(R.len)}.`);
+      snack('Llegaste al destino. Los giros los calculó OpenStreetMap.');
+      return;
+    }
+    osmRaf=requestAnimationFrame(frame);
+  };
+  osmRaf=requestAnimationFrame(frame);
+}
+function osmStop(){
+  cancelAnimationFrame(osmRaf);
+  if(!OSM.running)return;
+  OSM.running=false;setOsmBtn();renderStatus();
+}
+function osmInit(){
+  $('#osmTrip').innerHTML=Object.entries(OSM_TRIPS).map(([k,t])=>`<option value="${k}">${t.name}</option>`).join('');
+  $('#osmTrip').onchange=e=>{OSM.trip=e.target.value;OSM.dest=null;loadRoute()};
+  $$('.seg [data-prof]').forEach(b=>b.onclick=()=>{if(OSM.prof===b.dataset.prof)return;OSM.prof=b.dataset.prof;
+    $$('.seg [data-prof]').forEach(x=>x.setAttribute('aria-checked',x===b));loadRoute()});
+  $('#btnOsm').onclick=osmRun;setOsmBtn();
+  loadRoute();
+  /* el mapa (librería de 0,8 MB y paquete de Santiago de 4,3 MB) se carga cuando el navegador queda libre, para no frenar la apertura */
+  (window.requestIdleCallback||(f=>setTimeout(f,300)))(osmInitMap,{timeout:2500});
+}
+
+/* ============ arranque ============ */
+function boot(){
+  $('#appLogo').innerHTML=logo(32);$('#panelLogo').innerHTML=logo(48);
+  $('#sysRight').innerHTML=SYS_ICONS;
+  $('#sysNotif').innerHTML=`<svg width="15" height="15" viewBox="0 0 100 100" aria-hidden="true"><path d="M36 18 A38 38 0 0 0 36 82" fill="none" stroke="currentColor" stroke-width="12"/><path d="M64 18 A38 38 0 0 1 64 82" fill="none" stroke="currentColor" stroke-width="12"/><circle cx="50" cy="50" r="10" fill="currentColor"/></svg>`;
+  $$('#pair .slot').forEach(s=>s.querySelector('.band-host').outerHTML=bandHTML(s.dataset.side));
+  $$('.mh').forEach(h=>h.outerHTML=bandHTML(h.dataset.side));
+  $('#twin').innerHTML=`<figure>${bandHTML('L')}<figcaption>Brazo izquierdo</figcaption></figure><figure>${bandHTML('R')}<figcaption>Brazo derecho</figcaption></figure>`;
+  hydrateIcons();
+  $('#turnArrow').innerHTML=ARROWS.S;
+  seedLog();renderSettings();
+  tick();fit();renderSlots();
+  $$('.bandbtn').forEach(t=>t.onclick=()=>buzz(t.closest('.slot').dataset.side));
+  $$('.slot .batt').forEach(b=>b.onclick=batterySheet);
+  $('#btnSecondary').onclick=async()=>{if(S.active)return openRoute();await buzz('L');await sleep(200);buzz('R')};
+  $('#btnActivate').onclick=()=>S.active?setActive(false):activate();
+  $('#btnPause').onclick=pause;
+  $('#btnRouteBack').onclick=closeRoute;
+  $$('.navitem').forEach(n=>n.onclick=()=>goTab(n.dataset.tab));
+  $$('[data-sim]').forEach(c=>c.onclick=()=>SIM[c.dataset.sim]());
+  addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#sheet').classList.contains('on')||$('#dialog').classList.contains('on'))closeSheet();else if(S.routeOpen)closeRoute()}});
+  // guía, permisos y emparejar
+  buildIllustrations();renderPerms();renderPairSlots();setPage(0,true);
+  $('#sysViraIc').innerHTML=logo(26);
+  $('#prog').innerHTML=TOUR.map(()=>'<i></i>').join('');
+  $('#btnNext').onclick=()=>onb.i<2?setPage(onb.i+1):finishOnb();
+  $('#btnSkip').onclick=finishOnb;
+  $('#btnHelp').onclick=()=>{setPage(0,true);goView('vOnb')};
+  $('#permList').addEventListener('click',e=>{const b=e.target.closest('[data-perm]');if(b)grant(b.dataset.perm)});
+  $('#btnPermNext').onclick=()=>goView('vPair');
+  $('#btnPairMain').onclick=pairMain;
+  $('#btnSysBack').onclick=()=>goView('vPerm',-1);
+  $('#sysVira').onclick=sysToggleVira;
+  $$('[data-back]').forEach(b=>b.onclick=()=>goView(b.dataset.back,-1));
+  $('#btnTour').onclick=()=>$('#btnTour').dataset.on?stopTour():tour();
+  $('#btnReset').onclick=()=>{stopTour();resetAll()};
+  osmInit();
+  applyShot();
+}
+async function applyShot(){
+  const qs=new URLSearchParams(location.search);if(qs.has('tour')){tour();return}
+  const q=qs.get('shot');
+  if(!q){if(!reduce.matches)$$('#tabPulseras > *').forEach((el,i)=>el.animate([{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'none'}],{duration:500,delay:i*80,easing:EASE_OUT,fill:'backwards'}));return}
+  document.documentElement.classList.add('shot');
+  if(q==='route'||q==='order'){await activate();await sleep(900);turn('R');if(q==='order'){await sleep(400);await order()}}
+  if(q==='activity'){S.log.unshift({id:++evId,time:new Date(),k:'O',what:'Pedido nuevo',where:'Revísalo cuando te detengas.',seen:false});goTab('Actividad',true)}
+  if(q==='settings')goTab('Ajustes',true);
+  if(q==='night'){S.theme='dark';applyTheme()}
+  if(q==='nightsettings'){S.theme='dark';applyTheme();renderSettings();goTab('Ajustes',true)}
+  if(q==='sheet'){S.bands.R.battery=18;renderSlots();batterySheet()}
+  if(q.startsWith('onb')){setPage(+q.slice(3)-1,true);showOnly('vOnb');onbLoops(true)}
+  if(q==='perm'){S.perms={nearby:true,notif:true};showOnly('vPerm');renderPerms();grant('bg')}
+  if(q==='pair'){S.paired={L:true,R:false};showOnly('vPair');renderPairSlots();pairMain();await sleep(1400);$('#sysSheet .dev')?.click()}
+  if(q==='cdm'){S.paired={L:false,R:false};showOnly('vPair');renderPairSlots();pairMain()}
+  if(q==='sys'){showOnly('vSys')}
+  if(q==='splash'){resetAll()}
+}
+boot();
+</script>
+</body>
+</html>
