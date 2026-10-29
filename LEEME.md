@@ -47,9 +47,15 @@ Para regenerar el paquete (otra zona o datos más nuevos): `node vendor/build_ma
 
 Sin internet, los tres trayectos predefinidos usan una ruta guardada el 29 de octubre; lo único que necesita internet es calcular una ruta nueva tocando el mapa.
 
-## Abrirla en un iPhone (o en cualquier teléfono por wifi)
+## Publicada en internet
 
-En el iPhone no sirve abrir `index.html` desde la app Archivos (la vista previa no carga `vendor/`). Hay que servirla desde el computador:
+**https://vicente-ca.github.io/vira-maqueta/** (GitHub Pages, repositorio público [vicente-ca/vira-maqueta](https://github.com/vicente-ca/vira-maqueta)). Es la forma más simple de abrirla en cualquier teléfono, incluido el iPhone.
+
+Para publicar cambios: en esta carpeta, `git add -A`, `git commit -m "…"` y `git push`. GitHub Pages se actualiza solo en uno o dos minutos.
+
+## Abrirla en un iPhone sin internet público (por wifi)
+
+En el iPhone no sirve abrir `index.html` desde la app Archivos (la vista previa no carga `vendor/`). Si no quieres usar la versión publicada, hay que servirla desde el computador:
 
 1. En la carpeta `Innova`, ejecuta `npx --yes http-server "E2/Diseno_y_marca/App_Vira" -p 8767 -c-1` (o la configuración `app-vira-node` de `.claude/launch.json`).
 2. El comando muestra «Available on: http://10.x.x.x:8767». Abre esa dirección en Safari del iPhone, conectado **al mismo wifi** que el computador.
