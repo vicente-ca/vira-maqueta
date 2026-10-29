@@ -47,6 +47,14 @@ Para regenerar el paquete (otra zona o datos más nuevos): `node vendor/build_ma
 
 Sin internet, los tres trayectos predefinidos usan una ruta guardada el 29 de octubre; lo único que necesita internet es calcular una ruta nueva tocando el mapa.
 
+## Panel para la plataforma (agregado el 29-oct-2026)
+
+Lo que vería Uber Eats, Rappi o PedidosYa: se abre con el botón **«Ver el panel de la plataforma»** del panel de la derecha, o directo con la dirección `?vista=plataforma` (sirve también en el celular en vertical: https://vicente-ca.github.io/vira-maqueta/?vista=plataforma).
+
+- Muestra las métricas del informe `reports/Métricas de valor para plataformas.md`: exposición a pantalla en movimiento (la principal, comparando con pulsera vs. sin pulsera), uso de la pulsera, avisos a tiempo, giros correctos y satisfacción; un gráfico semanal y una tabla por zona.
+- **Los números son simulados** (piloto ficticio de 8 semanas con 92 repartidores) y el panel lo dice. Solo la franja «En esta demostración» usa datos reales de la ruta de OpenStreetMap recorrida.
+- Aplica las reglas de privacidad propuestas: datos agregados, zonas con menos de 20 repartidores por grupo ocultas, y el indicador de accidentes por millón de entregas aparece como «no se informa aquí» porque requiere los datos de la plataforma.
+
 ## Publicada en internet
 
 **https://vicente-ca.github.io/vira-maqueta/** (GitHub Pages, repositorio público [vicente-ca/vira-maqueta](https://github.com/vicente-ca/vira-maqueta)). Es la forma más simple de abrirla en cualquier teléfono, incluido el iPhone.
