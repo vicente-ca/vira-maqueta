@@ -1,0 +1,362 @@
+/* Tema Vira para html-ppt: tokens de la marca (DESIGN.md de la E2) + piezas propias de esta presentación. */
+:root{
+  --bg:#F3F0EB; --bg-soft:#ECE8E1; --surface:#FFFFFF; --surface-2:#ECE8E1;
+  --border:#D9D4CC; --border-strong:#8C857D;
+  --text-1:#1B2230; --text-2:#57534E; --text-3:#8C857D;
+  --accent:#4A62D6; --accent-ink:#FFFFFF; --accent-2:#2F45B0; --accent-3:#F0B44C;
+  --good:#4A62D6; --warn:#F0B44C; --bad:#B5523B;
+  --grad:linear-gradient(135deg,#4A62D6,#2F45B0);
+  --radius:22px; --radius-sm:14px;
+  --shadow:none; --shadow-lg:0 24px 60px rgba(27,34,48,.14);
+  --font-sans:'Atkinson Hyperlegible Next','Atkinson Hyperlegible','Segoe UI',system-ui,sans-serif;
+  --font-display:'Barlow Semi Condensed','Bahnschrift','Arial Narrow',sans-serif;
+  --letter-tight:-.005em; --letter-normal:0;
+  --ink:#1B2230; --paper:#F3F0EB; --soft:#AFC0FF; --amber:#F0B44C; --terra:#B5523B;
+  --nmuted:#A9ADB6; --ncard:#242C3B; --line:#D9D4CC;
+  --ease-out:cubic-bezier(.23,1,.32,1);
+}
+
+/* ---------- lámina base ---------- */
+.v .slide{justify-content:flex-start;padding:76px 120px 70px;font-size:25px;line-height:1.45;color:var(--text-1);background:var(--paper)}
+.v .slide.dark{background:var(--ink);color:#fff}
+.tag{font-family:var(--font-sans);font-weight:700;font-size:22px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-2)}
+.dark .tag{color:var(--nmuted)}
+.ttl{font-family:var(--font-display);font-weight:600;font-size:68px;line-height:1.04;margin:14px 0 0;color:var(--text-1);max-width:1680px;letter-spacing:-.005em}
+.dark .ttl{color:#fff}
+.src{position:absolute;left:120px;right:120px;bottom:34px;font-size:17px;line-height:1.4;color:var(--text-2)}
+.dark .src{color:var(--nmuted)}
+.d{font-family:var(--font-display);font-weight:600;letter-spacing:-.005em}
+.muted{color:var(--text-2)} .dark .muted{color:var(--nmuted)}
+.soft{color:var(--soft)} .acc{color:var(--accent)}
+.k{font-family:var(--font-sans);font-weight:700;font-size:20px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-2)}
+.hl .k{color:var(--soft)} .dark .k{color:var(--nmuted)}
+.pend{display:inline-block;background:var(--amber);color:var(--ink);font-weight:700;font-size:20px;line-height:1.3;padding:8px 18px;border-radius:24px}
+.body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px;min-height:0;padding:24px 0 54px}
+
+/* ---------- tarjetas ---------- */
+.c{background:var(--surface);border-radius:var(--radius);padding:36px 40px;position:relative}
+.c.hl{background:var(--accent);color:#fff}
+.c.inkc{background:var(--ink);color:#fff}
+.c h3{font-family:var(--font-display);font-weight:600;font-size:44px;line-height:1.08;margin:12px 0 18px}
+.c p{margin:0}
+.dots{list-style:none;margin:0;padding:0}
+.dots li{position:relative;padding-left:28px;margin-top:18px}
+.dots li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;border-radius:50%;background:var(--accent)}
+.hl .dots li::before{background:var(--soft)} .inkc .dots li::before{background:var(--amber)}
+
+/* ---------- logo Vira (portada y cierre): los arcos vibran como las pulseras ---------- */
+.logo-big{overflow:visible}
+.logo-big .arc{fill:none;stroke:var(--accent);stroke-width:9;stroke-linecap:round;stroke-dasharray:140;stroke-dashoffset:0}
+.logo-big .dot{fill:var(--amber);transform-box:fill-box;transform-origin:center}
+.slide.is-active .logo-big .arc{animation:arc-draw 1s var(--ease-out) both}
+.slide.is-active .logo-big .arc.l{animation:arc-draw 1s var(--ease-out) both, buzz-l 3.6s ease-in-out 1.3s infinite}
+.slide.is-active .logo-big .arc.r{animation:arc-draw 1s var(--ease-out) .12s both, buzz-r 3.6s ease-in-out 3.1s infinite}
+.slide.is-active .logo-big .dot{animation:dot-in .7s cubic-bezier(.22,1.3,.36,1) .55s both, dot-pulse 3.6s ease-in-out 1.3s infinite}
+@keyframes arc-draw{from{stroke-dashoffset:140}to{stroke-dashoffset:0}}
+@keyframes buzz-l{0%,14%,100%{transform:none;stroke:var(--accent)}2%,6%,10%{transform:translateX(-1.6px);stroke:var(--soft)}4%,8%,12%{transform:translateX(1.6px);stroke:var(--soft)}}
+@keyframes buzz-r{0%,14%,100%{transform:none;stroke:var(--accent)}2%,6%,10%{transform:translateX(1.6px);stroke:var(--soft)}4%,8%,12%{transform:translateX(-1.6px);stroke:var(--soft)}}
+@keyframes dot-in{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes dot-pulse{0%,100%{transform:scale(1)}7%{transform:scale(1.12)}}
+
+/* ---------- animaciones propias (se activan con data-anim al entrar a la lámina) ---------- */
+@keyframes kf-grow{from{transform:scaleY(0)}to{transform:none}}
+@keyframes kf-growx{from{transform:scaleX(0)}to{transform:none}}
+.anim-grow{animation:kf-grow .9s var(--ease-out) both;transform-origin:bottom}
+.anim-growx{animation:kf-growx 1s var(--ease-out) both;transform-origin:left}
+@keyframes kf-ring{0%{box-shadow:0 0 0 0 rgba(74,98,214,.55)}70%{box-shadow:0 0 0 22px rgba(74,98,214,0)}100%{box-shadow:0 0 0 0 rgba(74,98,214,0)}}
+.anim-ring{animation:kf-ring 1.8s ease-out both}
+
+/* ---------- 1 portada ---------- */
+.cover{justify-content:center!important}
+.cover .logo-big{position:absolute;right:110px;top:50%;width:640px;height:640px;transform:translateY(-50%)}
+.cover h1{font-family:var(--font-display);font-weight:600;font-size:240px;line-height:.9;margin:0;color:#fff}
+.cover .lema{font-size:48px;line-height:1.25;margin:34px 0 0;max-width:900px}
+.cover .sub{font-size:28px;color:var(--nmuted);margin-top:40px;max-width:900px}
+
+/* ---------- 1 portada: producto y propuesta de valor ---------- */
+.cover2{flex:1;display:flex;align-items:center;max-width:930px;position:relative;z-index:1}
+.cover-img{position:absolute;top:0;right:0;bottom:0;width:840px;height:100%;object-fit:cover;object-position:50% 70%}
+.cover2 .brand{display:flex;align-items:center;gap:30px}
+.cover2 .brand .logo-big{width:150px;height:150px}
+.cover2 h1{font-family:var(--font-display);font-weight:600;font-size:190px;line-height:.9;margin:0;color:#fff}
+.cover2 .prod{font-family:var(--font-display);font-weight:600;font-size:54px;line-height:1.1;margin:44px 0 0}
+.cover2 .vp{display:grid;grid-template-columns:1fr 1fr;gap:44px;margin-top:54px;padding-top:34px;border-top:2px solid var(--ncard)}
+.cover2 .vp p{margin:0} .cover2 .vpt{font-size:32px;line-height:1.25;margin-top:10px!important}
+.cover2 .who{font-size:19px;color:var(--nmuted);margin:60px 0 0}
+.cover2 .phone{display:block;height:720px;width:auto;margin:0 auto;border-radius:38px;filter:drop-shadow(0 30px 60px rgba(0,0,0,.45))}
+.cover2 .ph-cap{text-align:center;font-size:19px;color:var(--nmuted);margin:18px 0 0}
+
+/* portada: texto a la izquierda, foto de las pulseras a la derecha */
+.cover3{flex:1;display:grid;grid-template-columns:720px 1fr;gap:70px;align-items:center;padding-bottom:30px}
+.cover3 .brand{display:flex;align-items:center;gap:26px}
+.cover3 .brand .logo-big{width:118px;height:118px}
+.cover3 h1{font-family:var(--font-display);font-weight:600;font-size:150px;line-height:.9;margin:0;color:#fff}
+.cover3 .prod{font-family:var(--font-display);font-weight:600;font-size:60px;line-height:1.05;margin:48px 0 0;color:#fff}
+.cover3 .sub{font-size:32px;line-height:1.3;margin:16px 0 0;color:var(--soft)}
+.cover3 .vp{margin-top:52px;padding-top:6px;border-top:2px solid var(--ncard)}
+.cover3 .vp > div{padding:22px 0;border-bottom:2px solid var(--ncard)}
+.cover3 .vp p{margin:0}
+.cover3 .vpt{font-size:33px;line-height:1.2;margin-top:8px!important;color:#fff;text-wrap:balance}
+.cover3 .cv-img{width:100%;aspect-ratio:1530/1140;object-fit:cover;border-radius:28px;box-shadow:0 30px 70px rgba(0,0,0,.4)}
+.cv-who{position:absolute;left:120px;right:120px;bottom:44px;margin:0;font-size:20px;color:var(--nmuted)}
+
+/* versión limpia: piezas con menos texto */
+.cover3 .sub{font-size:36px;line-height:1.35;margin:34px 0 0}
+.mrow2{display:grid;grid-template-columns:44px 1fr auto;align-items:center;padding:26px 0;border-bottom:2px solid var(--line)}
+.mrow2 .sw{width:28px;height:28px;border-radius:50%}
+.mrow2 .lab{font-size:30px}
+.mrow2 .num{font-family:var(--font-display);font-weight:600;font-size:58px}
+.chan2{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.chan2 .c{padding:40px 44px}
+.chan2 h3{font-size:54px!important;margin:10px 0 12px!important}
+.chan2 p:last-child{font-size:28px}
+.route.big4 .c{padding:40px 36px 44px}
+.route.big4 .n{font-size:34px}
+.route.big4 h4{font-size:46px;margin-top:14px}
+.route-note{font-size:32px;margin:10px 0 0;color:var(--text-2)}
+.inc2 > .c{padding:50px 56px}
+.inc2 > .c h3{font-size:130px!important;line-height:1;margin:16px 0 12px!important}
+.inc2 > .c p:last-child{font-size:30px}
+.cita q,.cita .para{text-wrap:balance}
+.costs{align-content:center;align-items:center}
+.proj .plot{height:520px}
+svg.chain .tt{font-size:28px} svg.chain .tx{font-size:24px}
+.proj .stat{padding:34px 36px;margin-top:22px}
+.g3c.voz .c{padding:40px 44px}
+.g3c.voz .big{font-size:110px;margin:10px 0 14px;white-space:nowrap}
+.g3c.voz .c:not(.inkc) .big{color:var(--accent)}
+.g3c.voz p:last-child{font-size:27px;line-height:1.35}
+.proj .stat .big{font-size:78px}
+
+/* ---------- citas de entrevistas ---------- */
+.cita{border-left:6px solid var(--accent);padding:4px 0 4px 26px}
+.cita q,.cita .para{display:block;font-family:var(--font-display);font-weight:600;font-size:34px;line-height:1.15;margin:0}
+.cita q{quotes:"«" "»"}
+.cita .para{font-size:30px}
+.cita .who{margin:8px 0 0;font-size:20px;color:var(--text-2)}
+.citas2{display:grid;grid-template-columns:1fr 1fr;gap:50px}
+.citas1 .cita{margin-top:26px} .citas1 .cita:first-child{margin-top:14px}
+
+/* ---------- 2 problema ---------- */
+.prob2{display:grid;grid-template-columns:860px 1fr;gap:90px;align-items:center}
+.hero-n{font-family:var(--font-display);font-weight:600;font-size:250px;line-height:.85;color:var(--accent);font-variant-numeric:tabular-nums}
+.hero-n small{font-size:130px}
+.hero-ex{font-size:30px;line-height:1.3;margin:22px 0 40px;max-width:760px}
+
+/* ---------- 3 clientes ---------- */
+.stages{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.stages h3{margin:10px 0 6px!important}
+.stages .big{font-size:96px;margin:6px 0 4px}
+.stages .hl p:last-child{color:#fff}
+
+/* ---------- 4 mercado ---------- */
+.rings .sam2{left:90px;width:420px;height:420px;border:4px dashed var(--accent-2);color:var(--accent-2);padding-top:40px;font-size:34px}
+.rings .som2{left:167px;width:265px;height:265px;background:var(--accent);color:#fff;align-items:center;font-size:36px}
+.mnote{margin:30px 0 0;font-size:26px}
+.rings .som2{left:176px;width:248px;height:248px} /* área proporcional: 7.800 de 45.700 */
+.gr div{display:grid;grid-template-columns:180px 1fr;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line)}
+.gr span{font-weight:700;color:var(--text-2)}
+.gr b{font-family:var(--font-display);font-weight:600;font-size:34px}
+
+/* ---------- 5 canales ---------- */
+.chan{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.chan .c{padding:30px 40px 22px}
+.chan .row{display:grid;grid-template-columns:150px 1fr;gap:18px;padding:12px 0;border-top:1px solid var(--line);font-size:25px}
+.chan .row:nth-child(2){margin-top:12px}
+.chan .row span:first-child{font-weight:700;color:var(--text-2)}
+.chan .hl .row{border-color:rgba(255,255,255,.28)} .chan .hl .row span:first-child{color:var(--soft)}
+.trac{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.trac .t{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center}
+.trac .big{font-size:88px;color:var(--accent)}
+.trac p{margin:0;font-size:23px;line-height:1.3} .trac b{font-size:27px}
+
+/* ---------- 7 recursos ---------- */
+.g3c.tight .c{padding:40px 44px}
+.g3c.tight .c h3{margin:0 0 8px;font-size:52px}
+.g3c.tight .dots li{margin-top:20px;font-size:31px;line-height:1.3}
+.g3c.tight .dots li::before{top:.5em;width:13px;height:13px}
+
+/* ---------- 9 ingresos ---------- */
+.inc2{display:grid;grid-template-columns:640px 1fr;gap:80px;align-items:center}
+.inc2 .c h3{font-size:56px;margin:8px 0 10px}
+
+/* ---------- 2 historia (versión anterior) ---------- */
+.story .grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:80px;align-items:start;margin-top:56px}
+.story .relato{font-family:var(--font-display);font-weight:600;font-size:64px;line-height:1.1}
+.story .remate{font-size:36px;color:var(--soft);margin-top:36px}
+.story .cifra{font-family:var(--font-display);font-weight:600;font-size:300px;line-height:.86;color:#fff;font-variant-numeric:tabular-nums}
+.story .cifra small{font-size:160px}
+.story .cifra-ex{font-size:28px;color:var(--nmuted);margin-top:28px;max-width:560px}
+.story .pregunta{font-family:var(--font-display);font-weight:600;font-size:76px;line-height:1.05;margin-top:auto;padding-top:44px;border-top:2px solid var(--ncard)}
+
+/* contador 0 → 17 solo con CSS (sin JavaScript: no frena las demás animaciones ni la exportación) */
+@property --num{syntax:'<integer>';inherits:false;initial-value:17}
+.count17{--num:17;counter-reset:n var(--num)}
+.count17::before{content:counter(n)}
+.anim-count{animation:kf-count 1.4s var(--ease-out) both}
+@keyframes kf-count{from{--num:0}to{--num:17}}
+
+/* ---------- 3 problema ---------- */
+.prob{display:grid;grid-template-columns:760px 1fr;gap:100px;align-items:center}
+.big{font-family:var(--font-display);font-weight:600;line-height:.95}
+.e-cards .c{display:grid;grid-template-columns:100px 1fr;align-items:center;padding:30px 36px;margin-top:22px}
+.e-cards .c:first-child{margin-top:0}
+.e-cards .n{font-family:var(--font-display);font-weight:600;font-size:56px;color:var(--accent)}
+.e-cards .hl .n{color:#fff}
+.e-cards h4{font-family:var(--font-display);font-weight:600;font-size:40px;margin:0 0 4px;line-height:1.1}
+.e-cards p{margin:0;color:var(--text-2)} .e-cards .hl p{color:#fff}
+
+/* ---------- 4 clientes ---------- */
+.g3c{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.seg{display:grid;grid-template-columns:1fr 2px 1fr;gap:48px;align-items:center}
+.seg .sep{background:var(--line);height:100%}
+.seg h4{font-family:var(--font-display);font-weight:600;font-size:40px;line-height:1.12;margin:12px 0 0}
+
+/* ---------- 5 mercado ---------- */
+.mkt{display:grid;grid-template-columns:640px 1fr;gap:70px;align-items:center}
+.rings{position:relative;width:600px;height:600px}
+/* círculos con área proporcional a 40.000 / 14.000 / 4.500 repartidores */
+.rings .r{position:absolute;bottom:0;border-radius:50%;display:flex;justify-content:center;font-family:var(--font-display);font-weight:600;transform-origin:center bottom}
+.rings .tam{left:0;width:600px;height:600px;background:#E4DFD7;padding-top:70px;font-size:40px}
+.rings .sam{left:122px;width:355px;height:355px;background:var(--soft);color:var(--accent-2);padding-top:44px;font-size:34px}
+.rings .som{left:200px;width:201px;height:201px;background:var(--accent);color:#fff;align-items:center;font-size:34px}
+.mrow{display:grid;grid-template-columns:44px 1fr 230px 230px;align-items:center;padding:24px 0;border-bottom:2px solid var(--line)}
+.mrow .sw{width:28px;height:28px;border-radius:50%}
+.mrow .lab{font-size:24px}
+.mrow .lab b{display:block;font-family:var(--font-display);font-weight:600;font-size:36px}
+.mrow .num{font-family:var(--font-display);font-weight:600;font-size:48px}
+.mhead{display:grid;grid-template-columns:44px 1fr 230px 230px}
+
+/* ---------- 6 propuesta de valor ---------- */
+.pv{display:grid;grid-template-columns:1fr 430px;gap:90px;align-items:center}
+.pv .val{display:grid;grid-template-columns:90px 1fr;margin-top:34px}
+.pv .val:first-child{margin-top:0}
+.pv .val .n{font-family:var(--font-display);font-weight:600;font-size:46px;color:var(--soft)}
+.pv .val h4{font-family:var(--font-display);font-weight:600;font-size:42px;margin:0 0 6px;line-height:1.1}
+.pv .val p{margin:0;color:var(--nmuted)}
+.pv .phone{height:640px;border-radius:38px;width:auto;justify-self:center;filter:drop-shadow(0 30px 60px rgba(0,0,0,.45))}
+.pv .rep{margin-top:40px;padding-top:28px;border-top:2px solid var(--ncard);font-weight:700;font-size:28px}
+
+/* ---------- 7 canales ---------- */
+.journey{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:24px}
+.journey .track{position:absolute;left:44px;right:44px;top:22px;height:3px;background:var(--line)}
+.journey .track i{display:block;height:100%;background:var(--accent)}
+.journey .step{position:relative}
+.journey .b{width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid var(--accent);display:grid;place-items:center;font-family:var(--font-display);font-weight:600;font-size:24px;color:var(--accent)}
+.journey .step.hl .b{background:var(--accent);color:#fff}
+.journey h4{font-family:var(--font-display);font-weight:600;font-size:40px;margin:26px 0 8px}
+.journey p{margin:0;font-size:23px}
+.rel{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+
+/* ---------- 8 cadena de valor ---------- */
+.chain-img{width:100%;border-radius:18px}
+.chain{display:block;height:auto;font-family:var(--font-sans)}
+.chain .bx{fill:#fff;stroke:var(--line);stroke-width:3}
+.chain .bx.cl{stroke:var(--accent-2);stroke-width:4}
+.chain .lb{font-size:17px;font-weight:700;letter-spacing:2px;fill:var(--text-2)}
+.chain .tt{font-size:33px;font-weight:700;fill:var(--text-1)}
+.chain .tx{font-size:22px;fill:var(--text-1)} .chain .tx.w{fill:#fff}
+.chain .ft{font-size:19px;fill:var(--text-2)}
+.chain .ar line{stroke:#57534E;stroke-width:3;marker-end:url(#ch-a)}
+.chain .ds{fill:none;stroke:#57534E;stroke-width:2.5;stroke-dasharray:4 6}
+.chain .pg{font-size:21px;fill:var(--text-2)}
+.chain .fb{fill:none;stroke:var(--accent-2);stroke-width:3;stroke-dasharray:12 8}
+.chain .fbt{font-size:21px;font-weight:700;fill:var(--accent-2)}
+.chain .fbs{font-size:20px;fill:var(--accent-2)}
+
+/* ---------- 9 recursos ---------- */
+.band{background:var(--ink);color:#fff;border-radius:var(--radius);padding:28px 40px}
+
+/* ---------- 10 costos ---------- */
+.costs{display:grid;grid-template-columns:1fr 600px;gap:80px;align-items:start}
+.bar-row{display:grid;grid-template-columns:330px 1fr;align-items:center;margin-top:10px}
+.bar-row .lab{font-size:24px}
+.bar-row .track{display:flex;align-items:center;gap:16px}
+.bar-row .bar{height:34px;background:var(--accent);border-radius:4px}
+.bar-row .val{font-family:var(--font-display);font-weight:600;font-size:30px;white-space:nowrap}
+.tot{display:grid;grid-template-columns:330px 1fr;align-items:baseline;margin-top:14px}
+.tot .d{font-size:42px}
+.kc{background:#fff;border-radius:var(--radius);padding:28px 36px}
+.kc .big{font-size:64px;margin:4px 0 8px}
+
+/* ---------- 11 ingresos ---------- */
+.inc{display:grid;grid-template-columns:820px 1fr;gap:80px}
+.inc .c h3{font-size:64px;margin:12px 0 16px}
+.model{display:grid;grid-template-columns:46px 1fr;padding:26px 0;border-bottom:2px solid var(--line)}
+.model .sw{width:26px;height:26px;border-radius:50%;background:var(--line);margin-top:10px}
+.model.ok .sw{background:var(--accent)}
+.model h4{font-family:var(--font-display);font-weight:600;font-size:38px;margin:0 0 4px;line-height:1.1}
+.model p{margin:0;color:var(--text-2)} .model.ok p{color:var(--text-1)}
+
+/* ---------- 12 proyecciones ---------- */
+.proj{display:grid;grid-template-columns:1fr 580px;gap:40px}
+.chart{background:#fff;border-radius:var(--radius);padding:30px 40px 26px;display:flex;flex-direction:column}
+.legend{display:flex;gap:30px;font-weight:700;font-size:22px}
+.legend span{display:flex;align-items:center;gap:10px}
+.legend i{width:26px;height:8px;border-radius:2px}
+.plot{position:relative;margin:20px 0 0 70px;display:grid;grid-template-columns:repeat(3,1fr);align-items:end;border-bottom:2px solid var(--border-strong);height:400px}
+.plot .gl{position:absolute;left:0;right:0;height:1px;background:var(--bg-soft)}
+.plot .gl b{position:absolute;left:-70px;top:-12px;font-weight:400;font-size:18px;color:var(--text-2)}
+.yr{display:flex;justify-content:center;gap:8px;align-items:flex-end;height:100%;position:relative}
+.yr .col{width:96px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.yr .col .v{font-family:var(--font-display);font-weight:600;font-size:26px;margin-bottom:8px;white-space:nowrap}
+.yr .col .b{width:100%;border-radius:4px 4px 0 0}
+.xl{display:grid;grid-template-columns:repeat(3,1fr);margin-left:70px;padding-top:14px}
+.xl div{text-align:center;font-size:20px;color:var(--text-2)} .xl b{display:block;color:var(--text-1);font-size:22px}
+.plot.y5,.xl.y5{grid-template-columns:repeat(5,1fr)}
+.plot.y5 .yr{gap:6px} .plot.y5 .col{width:76px} .plot.y5 .col .v{font-size:21px}
+.stat{background:#fff;border-radius:var(--radius);padding:18px 28px;margin-top:12px}
+.stat p{margin:0;font-size:21px;line-height:1.35}
+.stat:first-child{margin-top:0}
+.stat .big{font-size:48px;margin:0 0 2px}
+.stat.hl{background:var(--accent);color:#fff}
+
+/* ---------- 13 escalabilidad ---------- */
+.route{display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
+.route .c{padding:28px 32px}
+.route .n{font-family:var(--font-display);font-weight:600;font-size:30px;color:var(--accent)}
+.route .hl .n{color:var(--soft)}
+.route h4{font-family:var(--font-display);font-weight:600;font-size:34px;line-height:1.12;margin:8px 0 0}
+
+/* ---------- 14 cierre ---------- */
+.close{display:grid;grid-template-columns:1fr 420px;gap:80px;flex:1}
+.nx{display:grid;grid-template-columns:80px 1fr;margin-top:40px}
+.nx .n{font-family:var(--font-display);font-weight:600;font-size:56px;color:var(--soft);line-height:1}
+.nx h4{font-family:var(--font-display);font-weight:600;font-size:42px;margin:0 0 6px;line-height:1.1}
+.nx p{margin:0;color:var(--nmuted)}
+.close .remate{font-size:38px;line-height:1.3;margin-top:56px;max-width:1100px}
+.close .right{display:flex;flex-direction:column;align-items:center;justify-content:space-between}
+.close .logo-big{width:400px;height:400px}
+.qr{background:#fff;border-radius:24px;padding:22px;width:300px}
+.qr img{width:100%}
+.qr-cap{text-align:center;margin-top:16px;font-size:22px}
+.qr-cap b{display:block;font-size:24px}
+
+/* ---------- anexos: tablas ---------- */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border-radius:var(--radius);overflow:hidden;font-size:22px}
+.tbl th{background:var(--bg-soft);color:var(--text-2);text-align:left;font-size:18px;letter-spacing:.06em;text-transform:uppercase;padding:18px 24px}
+.tbl td{padding:20px 24px;border-top:1px solid var(--bg-soft);vertical-align:top}
+.tbl td:first-child{font-family:var(--font-display);font-weight:600;font-size:28px;white-space:nowrap}
+.tbl tr.hl td{background:var(--accent);color:#fff}
+.annex2{display:grid;grid-template-columns:960px 1fr;gap:56px;align-items:start}
+.annex2 img{width:100%;border-radius:18px}
+.met{display:grid;grid-template-columns:44px 1fr;margin-bottom:22px}
+.met .n{font-family:var(--font-display);font-weight:600;font-size:30px;color:var(--accent)}
+.met h4{font-family:var(--font-display);font-weight:600;font-size:30px;margin:0;line-height:1.15}
+.met p{margin:2px 0 0;font-size:21px;color:var(--text-2)}
+
+/* logo pequeño (runtime) */
+.v .deck-logo{--logo-inset-y:58px;--logo-inset-x:110px}
+
+/* ---------- PDF: una lámina por página, animaciones en su estado final ---------- */
+@page{size:1920px 1080px;margin:0}
+@media print{
+  html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .slide{width:1920px!important;height:1080px!important;max-height:1080px!important}
+  [class*="anim-"],[class*="anim-"]>*,[data-anim],.logo-big .arc,.logo-big .dot{animation:none!important;opacity:1!important;filter:none!important}
+  [data-anim]{transform:none!important}
+  .logo-big .arc{stroke-dashoffset:0!important}
+}
+@media (prefers-reduced-motion: reduce){
+  .logo-big .arc,.logo-big .dot,[data-anim]{animation:none!important}
+}
