@@ -126,6 +126,12 @@ svg.chain .tt{font-size:28px} svg.chain .tx{font-size:24px}
 .g3c.voz .big{font-size:110px;margin:10px 0 14px;white-space:nowrap}
 .g3c.voz .c:not(.inkc) .big{color:var(--accent)}
 .g3c.voz p:last-child{font-size:27px;line-height:1.35}
+.g3c.mk3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g3c.mk3 .c{padding:40px 44px}
+.g3c.mk3 .big{font-size:86px;margin:10px 0 14px;white-space:nowrap}
+.g3c.mk3 .c:not(.hl) .big{color:var(--accent)}
+.g3c.mk3 p:last-child{font-size:27px;line-height:1.35}
+.g3c.mk3 .hl p:last-child{color:#fff}
 .proj .stat .big{font-size:78px}
 
 /* ---------- citas de entrevistas ---------- */
