@@ -1,11 +1,29 @@
-# Vira · maqueta de la app
+# Vira · App de pulseras
 
-Maqueta interactiva de la app de las pulseras, en un solo archivo: `index.html`. Es una demostración conceptual con datos simulados: no se conecta a pulseras reales. Desde la E3, los giros salen de rutas de OpenStreetMap y ya no de Google Maps.
+## Prueba funcional en el teléfono
+
+**Control manual.** En **Tus pulseras → Control manual de pulseras**, conecta una o las dos ESP32 por Bluetooth. Prueba y confirma cada lado conectado. Después, **Vibrar izquierda** o **Vibrar derecha** envía tres pulsos únicamente a esa muñeca. El primer toque abre la sesión y cada orden queda en el registro. Puedes probar el otro brazo mientras termina el primer pulso. Para ensayar la interfaz sin placas, selecciona **Simuladas**. Este ejercicio funciona sin ruta y sin GPS.
+
+Desde **Tus pulseras → Abrir prueba de ruta** se entra a `prueba.html`. Copiar la carpeta completa. Para probar sin hardware, elegir **Simuladas**, seleccionar uno de los tres trayectos y pulsar **Iniciar ruta**. El recorrido usa las seis variantes ya guardadas, funciona sin red y avanza a velocidad acelerada. Pausar conserva la posición. Al cambiar de aplicación también queda en pausa.
+
+**Pulseras físicas.** Servir la carpeta por HTTPS y abrirla en Chrome para Android. Cada placa ESP32-C3 necesita el programa `firmware/PulseraVira/PulseraVira.ino`. En Arduino IDE seleccionar la placa ESP32C3 Dev Module y la biblioteca NimBLE-Arduino **2.3.7**. Para cada placa, configurar `VIRA_SIDE` como 'L' o 'R' según la muñeca, y verificar que `motorPin` corresponde a la entrada de control del módulo con MOSFET (valor inicial GPIO4). Con PlatformIO, ejecutar `pio run -d firmware` para compilar las variantes izquierda y derecha sin editar el código. El programa anuncia Vira-L o Vira-R. Cada señal son tres pulsos de 500 ms separados por 200 ms.
+
+En **Físicas · Bluetooth**, conectar cada pulsera, pulsar **Probar** y confirmar en qué muñeca se sintió. Si hay una desconexión, la sesión queda en pausa. Para reanudar, conectar de nuevo y repetir la prueba de ese lado. Si falla una escritura, el registro conserva el intento fallido y la ruta continúa con el giro siguiente al reanudar. Una escritura aceptada por la pulsera se cuenta como **enviada**. La percepción del pulso se mide en el ejercicio de tacto.
+
+**Prueba de tacto.** Con el vehículo detenido, elegir **Reconocer 10 giros por tacto**. Un operador emite cada señal y anota izquierda, derecha o ninguno según la respuesta. Se sortean cinco señales por lado. El orden se oculta durante el ejercicio. Al final aparecen aciertos y respuestas. La meta del equipo es 9 de 10 por participante.
+
+**Registro.** Cada sesión se guarda en este navegador y origen, con modo, hora, lado y resultado. Al recargar se puede consultar el último registro y comenzar otra sesión. Un cierre durante un envío deja su resultado sin confirmar. En navegación privada o si el navegador elimina los datos, los registros pueden perderse.
+
+**Verificación de software.** Con Node, Playwright y Edge instalados, ejecutar `node tests/prueba.cjs` desde esta carpeta. La prueba automatizada usa un navegador en tamaño móvil y pulseras simuladas. Para usar el Chromium de Playwright, definir `VIRA_BROWSER=chromium`.
+
+## Maqueta de presentación
+
+El archivo `index.html` conserva la presentación interactiva con datos simulados, el panel de flota y los accesos de captura. Los datos y la preparación de las rutas están en `rutas.js`, compartido con la prueba funcional.
 
 ## Cómo abrirla
 
 - **En el computador:** abre `index.html` con Chrome o Edge (doble clic). La primera vez necesita internet para cargar las tipografías; sin internet usa Bahnschrift y Segoe UI, que se parecen.
-- **En un teléfono:** copia el archivo al teléfono y ábrelo con Chrome. En pantallas angostas la app ocupa toda la pantalla, sin el marco, para probarla con repartidores. En Android, las vibraciones también hacen vibrar el teléfono.
+- **En un teléfono:** copia la carpeta completa al teléfono y ábrelo con Chrome. En pantallas angostas la app ocupa toda la pantalla, sin el marco, para probarla con repartidores. En Android, las vibraciones también hacen vibrar el teléfono.
 
 ## Qué tiene
 
@@ -41,7 +59,7 @@ Qué es real y qué no: **los giros y las calles son reales** (los calcula OpenS
 
 El fondo del mapa es el estilo «positron» de **OpenFreeMap** (datos de OpenStreetMap, gratis y sin clave). **El sector de Santiago de los tres trayectos viene guardado en `vendor/mapa_santiago.js`** (teselas, tipografías e íconos, 4,3 MB), así que el mapa se ve **sin internet** y abriendo con doble clic. Fuera de esa zona, el mapa se completa desde OpenFreeMap si hay conexión. La librería del mapa también está en `vendor/` (MapLibre GL JS 4.7.1).
 
-**Hay que copiar la carpeta completa** (`index.html` + `vendor/`), no solo el HTML.
+**Hay que copiar la carpeta completa** (incluidos `rutas.js`, `prueba.html`, `prueba.js` y `vendor/`), no solo el HTML.
 
 Para regenerar el paquete (otra zona o datos más nuevos): `node vendor/build_mapa_santiago.mjs vendor/mapa_santiago.js` (necesita Node e internet). El área y los zooms se cambian al inicio del script. No se usa PMTiles porque pide el archivo por partes y eso no funciona al abrir con doble clic (`file://`).
 

@@ -1,0 +1,380 @@
+'use strict';
+
+const el = id => document.getElementById(id);
+const sides = { L: 'Izquierda', R: 'Derecha', U: 'Vuelta' };
+const serviceId = '42aa0001-7331-4d61-b432-9b418a6297d1';
+const commandId = '42aa0002-7331-4d61-b432-9b418a6297d1';
+const storagePrefix = 'vira.prueba.v1.';
+const links = { L: null, R: null };
+const connecting = new Set();
+const sessions = new Map();
+let current = null;
+let route = null;
+let timer = 0;
+let previousTick = 0;
+let busy = false;
+let coolingUntil = 0;
+const manualNext = {L:0, R:0};
+let message = '';
+
+const physical = () => el('mode').value === 'ble';
+const connected = side => Boolean(links[side]?.device.gatt.connected);
+const active = () => current && ['En curso', 'En pausa'].includes(current.state);
+const usable = side => connected(side) && links[side].tested;
+const ready = () => !physical() || (el('kind').value === 'manual'
+  ? Object.keys(links).some(usable) : Object.keys(links).every(usable));
+const supportsBle = () => window.isSecureContext && Boolean(navigator.bluetooth);
+const timeLabel = t => new Date(t).toLocaleTimeString('es-CL');
+const completed = e => e.result === 'Enviada' || e.result === 'Simulada';
+function title(s) {
+  if (s.kind === 'manual') return 'Control manual';
+  if (s.kind === 'trial') return 'Prueba de tacto';
+  return OSM_TRIPS[s.trip].name + ' · ' + s.profile;
+}
+
+function save(session) {
+  try { localStorage.setItem(storagePrefix + session.id, JSON.stringify(session)); }
+  catch { message = 'El navegador no pudo guardar la sesión. El registro está disponible mientras esta página siga abierta.'; }
+}
+
+function restore() {
+  try {
+    for (const key of Object.keys(localStorage)) {
+      if (!key.startsWith(storagePrefix)) continue;
+      let s;
+      try { s = JSON.parse(localStorage.getItem(key)); } catch { continue; }
+      if (!s || key !== storagePrefix + s.id || !Array.isArray(s.events) || !OSM_TRIPS[s.trip]) continue;
+      sessions.set(s.id, s);
+    }
+  } catch { message = 'El almacenamiento local no está disponible.'; }
+}
+
+function renderHistory() {
+  const s = sessions.get(el('history').value);
+  const list = el('events');
+  list.replaceChildren();
+  el('summary').textContent = s ? s.state + ' · ' + tally(s) : 'Aún no hay sesiones.';
+  if (!s) return;
+  for (const e of [...s.events].reverse()) {
+    const item = document.createElement('li');
+    const side = sides[e.side] || '';
+    const answer = e.answer ? ' · respuesta: ' + (sides[e.answer] || 'Ninguno') : '';
+    item.textContent = timeLabel(e.time) + ' · ' + (e.result === 'Pendiente' && !activeFor(s) ? 'Sin confirmar' : e.result) +
+      (side ? ' · ' + side : '') + (e.detail ? ' · ' + e.detail : '') + answer;
+    list.append(item);
+  }
+}
+
+function activeFor(s) { return current === s && active(); }
+
+function tally(s) {
+  const signals = s.events.filter(e => e.type === 'signal');
+  const ok = signals.filter(completed).length;
+  const failed = signals.filter(e => e.result === 'Fallida').length;
+  const unclear = signals.filter(e => ['Sin confirmar', 'Pendiente'].includes(e.result)).length;
+  let text = ok + (s.mode === 'ble' ? ' enviadas por Bluetooth' : ' simuladas') + ' · ' + failed + ' fallidas';
+  if (unclear) text += ' · ' + unclear + ' sin confirmar';
+  if (s.kind === 'trial') {
+    const answered = signals.filter(e => e.answer);
+    text += ' · ' + answered.filter(e => e.answer === e.side).length + ' aciertos de ' + answered.length + ' respuestas';
+  }
+  return text;
+}
+
+function addHistoryOption(s) {
+  const date = new Date(s.started).toLocaleString('es-CL');
+  const mode = s.mode === 'ble' ? 'Bluetooth' : 'simulación';
+  el('history').prepend(new Option(date + ' · ' + title(s) + ' · ' + mode, s.id));
+}
+
+function render() {
+  const locked = Boolean(active());
+  const trial = el('kind').value === 'trial';
+  const manual = el('kind').value === 'manual';
+  for (const id of ['mode','kind','trip','profile']) el(id).disabled = locked || busy || connecting.size > 0;
+  el('hardware').hidden = !physical();
+  el('routeOptions').hidden = manual || trial;
+  el('manualControls').hidden = !manual;
+  el('trialHelp').hidden = !trial;
+  for (const side of Object.keys(links)) {
+    el('manual' + side).disabled = busy || connecting.size > 0 || current?.state === 'En pausa' ||
+      (physical() && (!usable(side) || performance.now() < manualNext[side]));
+    el('connect' + side).disabled = connected(side) || busy || connecting.size > 0 || !supportsBle();
+    el('test' + side).disabled = !connected(side) || busy || (current?.state === 'En curso' && (!manual || usable(side)));
+    el('confirm' + side).hidden = !links[side]?.awaitingTouch || busy;
+    el('state' + side).textContent = connecting.has(side) ? 'Conectando…' : connected(side) ? (links[side].tested ? 'Probada' : 'Por probar') : 'Sin conexión';
+  }
+  el('message').textContent = physical() && !supportsBle() ? 'Para conectar pulseras abre esta página por HTTPS en Chrome para Android, o elige la simulación.' : message;
+  el('start').hidden = current?.state === 'En curso' || (manual && current?.state !== 'En pausa');
+  el('start').disabled = busy || !ready() || (trial && !physical());
+  el('start').textContent = locked ? 'Reanudar' : trial ? 'Iniciar prueba de tacto' : 'Iniciar ruta';
+  el('pause').hidden = current?.state !== 'En curso';
+  el('finish').hidden = !locked;
+  el('finish').disabled = busy;
+  el('state').textContent = current ? current.state + ' · ' + title(current) : 'Lista para empezar.';
+  el('counts').textContent = current ? tally(current) : '';
+  el('trialControls').hidden = !locked || !trial || current.state !== 'En curso';
+  const waiting = current?.events.find(e => e.type === 'signal' && completed(e) && !e.answer);
+  el('answers').hidden = !waiting || busy;
+  el('signal').hidden = Boolean(waiting);
+  el('signal').disabled = busy || !ready();
+  // El operador registra primero la respuesta. Mostrar el lado antes arruinaría la prueba.
+  el('records').hidden = locked && trial;
+  renderHistory();
+}
+
+function event(type, result, side = '', detail = '') {
+  const entry = {time: Date.now(), type, result, side, detail};
+  current.events.push(entry);
+  save(current);
+  return entry;
+}
+
+function pause(reason) {
+  if (current?.state !== 'En curso') return;
+  clearTimeout(timer);
+  current.state = 'En pausa';
+  event('state', 'Pausa', '', reason);
+  el('instruction').textContent = reason;
+  render();
+}
+
+async function connect(side) {
+  if (connecting.size || connected(side)) return;
+  connecting.add(side);
+  message = '';
+  render();
+  let device;
+  try {
+    device = await navigator.bluetooth.requestDevice({filters:[{name:'Vira-' + side}],optionalServices:[serviceId]});
+    const server = await device.gatt.connect();
+    const service = await server.getPrimaryService(serviceId);
+    const command = await service.getCharacteristic(commandId);
+    if (!command.properties.write || !command.writeValueWithResponse) throw Error('Característica sin escritura confirmada.');
+    if (!device.gatt.connected) throw Error('Se perdió la conexión.');
+    links[side] = {device, command, tested:false};
+    device.addEventListener('gattserverdisconnected', () => {
+      if (links[side]?.device !== device) return;
+      links[side] = null;
+      message = 'Pulsera ' + sides[side].toLowerCase() + ' desconectada. Conéctala y vuelve a probarla.';
+      if (active() && current.mode === 'ble') {
+        event('link','Desconexión',side);
+        pause(message);
+      }
+      render();
+    }, {once:true});
+  } catch (err) {
+    device?.gatt.disconnect();
+    message = err.name === 'NotFoundError' ? 'No se seleccionó una pulsera.' : 'No se pudo conectar. Revisa el lado y el firmware de la pulsera.';
+  } finally { connecting.delete(side); render(); }
+}
+
+async function send(side) {
+  const link = links[side];
+  if (!link?.device.gatt.connected) throw Error('Pulsera sin conexión');
+  let timeout;
+  const deadline = new Promise((_, reject) => {
+    timeout = setTimeout(() => {
+      reject(new DOMException('Sin respuesta de la pulsera', 'TimeoutError'));
+      link.device.gatt.disconnect();
+    }, 6000);
+  });
+  try {
+    await Promise.race([link.command.writeValueWithResponse(new TextEncoder().encode(side)), deadline]);
+  } finally { clearTimeout(timeout); }
+}
+
+async function testSide(side) {
+  if (busy || !connected(side)) return;
+  const link = links[side];
+  busy = true;
+  link.tested = false;
+  link.awaitingTouch = false;
+  try {
+    render();
+    await send(side);
+    if (connected(side) && links[side] === link) {
+      link.awaitingTouch = true;
+      message = 'Confirma solo si sentiste el pulso en la muñeca ' + sides[side].toLowerCase() + '.';
+      await new Promise(resolve => setTimeout(resolve, 1900));
+    }
+  } catch { link.tested = false; message = 'Falló la prueba de la pulsera ' + sides[side].toLowerCase() + '.'; }
+  finally { busy = false; render(); }
+}
+
+async function emit(side, detail) {
+  const entry = event('signal','Pendiente',side,detail);
+  busy = true;
+  render();
+  try {
+    if (current.mode === 'ble') {
+      // Una vuelta requiere que ambos dispositivos acepten su orden.
+      const targets = side === 'U' ? ['L','R'] : [side];
+      const results = await Promise.allSettled(targets.map(send));
+      const received = targets.filter((_,i) => results[i].status === 'fulfilled');
+      if (received.length !== targets.length) {
+        if (received.length) entry.detail += ' · escritura aceptada solo en ' + sides[received[0]];
+        for (const target of targets.filter(t => !received.includes(t))) {
+          if (links[target]) links[target].tested = false;
+        }
+        throw results.find(result => result.status === 'rejected' && result.reason?.name === 'TimeoutError')?.reason ||
+          Error('Escritura fallida');
+      }
+      entry.result = 'Enviada';
+      coolingUntil = performance.now() + 1900;
+    } else {
+      entry.result = 'Simulada';
+    }
+  } catch (err) {
+    entry.result = err.name === 'TimeoutError' ? 'Sin confirmar' : 'Fallida';
+    pause('No se confirmó la orden. Prueba las pulseras antes de reanudar.');
+  } finally {
+    busy = false;
+    save(current);
+    render();
+  }
+  return entry;
+}
+
+function finish(state) {
+  clearTimeout(timer);
+  current.state = state;
+  event('state', state);
+  el('instruction').textContent = state === 'Completada' ? (current.kind === 'trial' ? 'Diez respuestas registradas.' : 'Llegaste al destino.') : 'Prueba finalizada.';
+  render();
+}
+
+async function advance() {
+  if (current?.state !== 'En curso' || current.kind !== 'route') return;
+  const now = performance.now();
+  const elapsed = Math.min(500, now - previousTick);
+  previousTick = now;
+  route.position += elapsed / 1000 * OSM_PROF[current.profile].kmh / 3.6 * OSM_SPEEDUP;
+  const step = route.steps[route.next];
+  if (step) {
+    const distance = Math.max(0, Math.round(step.at - route.position));
+    const name = step.name || 'la siguiente calle';
+    el('instruction').textContent = sides[step.side] + ' en ' + distance + ' m · ' + name;
+    if (distance <= OSM_PROF[current.profile].warn && now >= coolingUntil) {
+      route.next++;
+      await emit(step.side, name);
+    }
+  } else if (route.position >= route.len) {
+    finish('Completada');
+    return;
+  } else { el('instruction').textContent = 'Continúa hasta el destino.'; }
+  if (current.state === 'En curso') timer = setTimeout(advance, 150);
+}
+
+function start() {
+  if (busy || !ready() || current?.state === 'En curso') return;
+  if (current?.state === 'En pausa') {
+    current.state = 'En curso';
+    event('state','Reanudada');
+  } else {
+    const kind = el('kind').value;
+    if (kind === 'trial' && !physical()) return;
+    const trip = el('trip').value, profile = el('profile').value;
+    const id = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,9);
+    current = {id,started:Date.now(),mode:el('mode').value,kind,trip,profile,state:'En curso',events:[]};
+    sessions.set(id,current);
+    if (kind === 'route') {
+      const parsed = prepRoute(OSM_CACHE[trip + '_' + profile]);
+      route = {steps:parsed.steps.filter(s => s.side),len:parsed.len,position:0,next:0};
+    } else if (kind === 'trial') {
+      current.sequence = Array.from('LLLLLRRRRR');
+      for (let i = 9; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [current.sequence[i],current.sequence[j]] = [current.sequence[j],current.sequence[i]];
+      }
+    }
+    addHistoryOption(current);
+    el('history').value = id;
+    event('state','Iniciada');
+  }
+  message = '';
+  previousTick = performance.now();
+  render();
+  if (current.kind === 'route') advance();
+  else el('instruction').textContent = current.kind === 'manual' ? 'Elige el lado.' : 'El participante mantiene la vista fuera de la pantalla.';
+}
+
+async function manualSignal(side) {
+  if (el('kind').value !== 'manual' || el('manual' + side).disabled) return;
+  if (!active()) start();
+  if (current?.kind !== 'manual' || current.state !== 'En curso') return;
+  const entry = await emit(side, 'Botón manual');
+  if (entry.result === 'Enviada') {
+    manualNext[side] = performance.now() + 1900;
+    setTimeout(render, 1900);
+  }
+  if (current.state === 'En curso') el('instruction').textContent = sides[side] + ' · ' + entry.result.toLowerCase();
+  render();
+}
+
+async function trialSignal() {
+  if (busy || current?.state !== 'En curso' || !ready()) return;
+  if (current.events.some(e => completed(e) && !e.answer)) return;
+  if (performance.now() < coolingUntil) { message = 'Espera a que termine el pulso anterior.'; render(); return; }
+  message = '';
+  const index = current.events.filter(e => e.answer).length;
+  await emit(current.sequence[index], 'Ensayo ' + (index + 1));
+}
+
+for (const [key,t] of Object.entries(OSM_TRIPS)) el('trip').add(new Option(t.name,key));
+restore();
+for (const s of [...sessions.values()].sort((a,b) => a.started-b.started)) {
+  if (['En curso','En pausa'].includes(s.state)) {
+    // Otra pestaña puede seguir usando esta sesión. Mostrar su último registro sin reescribirlo.
+    s.state = 'Último registro · sin cierre';
+    for (const e of s.events) if (e.result === 'Pendiente') e.result = 'Sin confirmar';
+  }
+  addHistoryOption(s);
+}
+el('history').selectedIndex = 0;
+el('history').onchange = renderHistory;
+for (const side of Object.keys(links)) {
+  el('manual'+side).onclick = () => manualSignal(side);
+  el('connect'+side).onclick = () => connect(side);
+  el('test'+side).onclick = () => testSide(side);
+  el('confirm'+side).onclick = () => {
+    if (!connected(side) || !links[side].awaitingTouch) return;
+    links[side].tested = true;
+    links[side].awaitingTouch = false;
+    message = 'Pulso confirmado en la muñeca ' + sides[side].toLowerCase() + '.';
+    render();
+  };
+}
+el('mode').onchange = () => {
+  message = '';
+  if (!physical()) {
+    for (const side of Object.keys(links)) { const link = links[side]; links[side] = null; link?.device.gatt.disconnect(); }
+    if (el('kind').value === 'trial') el('kind').value = 'route';
+  }
+  render();
+};
+el('kind').onchange = () => {
+  if (el('kind').value === 'trial') el('mode').value = 'ble';
+  message = ''; render();
+};
+el('start').onclick = start;
+el('pause').onclick = () => pause('Pausa manual.');
+el('finish').onclick = () => { if (!busy && active()) finish('Finalizada'); };
+el('signal').onclick = trialSignal;
+el('answers').onclick = e => {
+  const answer = e.target.dataset.answer;
+  if (!answer || busy || current?.state !== 'En curso') return;
+  const entry = current.events.find(e => completed(e) && !e.answer);
+  if (!entry) return;
+  entry.answer = answer;
+  save(current);
+  if (current.events.filter(e => e.answer).length === 10) finish('Completada');
+  else render();
+};
+document.addEventListener('visibilitychange', () => { if (document.hidden) pause('Pausa al salir de la página.'); });
+window.addEventListener('pagehide', () => pause('Página cerrada.'));
+if (new URLSearchParams(location.search).get('modo') === 'manual') {
+  el('kind').value = 'manual';
+  el('mode').value = 'ble';
+}
+render();
