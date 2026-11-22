@@ -304,3 +304,4 @@
 .lmap .leg text.h{font-weight:700;fill:var(--text-1)}
 .lmap .leg .pl{fill:var(--accent)} .lmap .leg .nx{fill:var(--ink);fill-opacity:.72}
 .latam{gap:40px}
+.chain2{grid-template-rows:1fr;padding-bottom:30px}
