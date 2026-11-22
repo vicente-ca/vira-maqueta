@@ -99,7 +99,8 @@
 .colh{font-family:var(--font-display);font-weight:600;font-size:42px;margin:0 0 20px;display:flex;align-items:center;gap:16px}
 .colh i{width:16px;height:16px;border-radius:50%;background:var(--accent);display:inline-block}
 .colh.todo i{background:transparent;border:3px solid var(--text-3)}
-.have{display:grid;grid-template-columns:1fr 250px;gap:22px;height:560px}
+.have{display:grid;grid-template-columns:1fr 290px;gap:24px;height:560px}
+.have figure{margin:0}
 .slot{position:relative;border-radius:22px;overflow:hidden;background:repeating-linear-gradient(135deg,#E6E1D9 0 18px,#ECE8E1 18px 36px);border:3px dashed #C9C2B7;display:grid;place-items:center;text-align:center}
 .slot span{font-size:24px;color:var(--text-2);padding:0 30px;line-height:1.3}
 .slot span b{display:block;font-size:20px;color:var(--ink);background:var(--amber);border-radius:16px;padding:4px 12px;margin:0 auto 10px;width:max-content}
