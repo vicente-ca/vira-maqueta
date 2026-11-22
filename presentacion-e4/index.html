@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vira · Pitch E4 · Grupo 08</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;700&family=Barlow+Semi+Condensed:wght@600&display=swap">
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" href="assets/animations/animations.css">
+<link rel="stylesheet" href="vira.css">
+<link rel="stylesheet" href="e4.css">
+</head>
+<body class="v" data-logo="img/logo.svg" data-logo-position="top-right" data-logo-size="40px" data-logo-opacity="1">
+<div class="deck">
+
+<!-- 1 · PORTADA (sin foto del prototipo ni eslogan, como pidió el equipo) -->
+<section class="slide dark" data-title="Vira" data-no-logo>
+  <div class="cov">
+    <div>
+      <div class="word">
+        <h1>Vira</h1>
+      </div>
+      <p class="course">Pitch final · Entrega 4<span>ING2030 Investigación, Innovación y Emprendimiento · Grupo 08</span></p>
+      <p class="team"><span>Vicente Carril</span><span>Alonso Casanova</span><span>María Martínez</span><span>Alexa Pastén</span><span>Martín Tapia</span></p>
+    </div>
+    <div class="wrists" aria-hidden="true">
+      <svg class="logo-big" viewBox="0 0 100 100"><path class="arc l" d="M36 18 A38 38 0 0 0 36 82"/><path class="arc r" d="M64 18 A38 38 0 0 1 64 82"/><circle class="dot" cx="50" cy="50" r="9"/></svg>
+    </div>
+  </div>
+  <div class="cov-foot"><img class="uc" src="img/logo_uc.png" alt="Logo Pontificia Universidad Católica de Chile"><span>Pontificia Universidad Católica de Chile · Escuela de Ingeniería<br>Noviembre de 2026</span></div>
+  <aside class="notes"><p>(Portada, sin hablar sobre ella: se pasa directo al problema.)</p></aside>
+</section>
+
+<!-- 2 · EL PROBLEMA -->
+<section class="slide" data-title="El problema">
+  <div class="rail"><span class="on">Problema</span><span>Solución</span><span>Implementación</span><span>Cierre</span></div>
+  <h2 class="ttl">El problema</h2>
+  <p class="lead">Aunque haya voz y soporte, a veces hay que mirar el mapa para confirmar dónde doblar.</p>
+  <div class="body2 prob-grid">
+    <figure class="ph"><img src="img/fotos/mapa_auto.jpg" alt="Celular con el mapa montado en el tablero de un auto mientras se conduce" style="object-position:40% 50%"><figcaption><span class="q-big">¿Doblo aquí o en la siguiente?</span><small>Foto: Shixart1985, CC BY 2.0</small></figcaption></figure>
+    <figure class="ph"><img src="img/fotos/glovo_madrid.jpg" alt="Repartidor en moto con caja de reparto en una avenida" style="object-position:50% 45%"><figcaption>Para un repartidor, es toda la jornada<small>Foto: Javier Pérez Montes, CC BY-SA 4.0</small></figcaption></figure>
+    <figure class="ph"><img src="img/fotos/hk_deliveroo.jpg" alt="Repartidor en moto detenido en una esquina, revisando la ruta" style="object-position:50% 62%"><figcaption>Sin carrocería que lo proteja<small>Foto: Sanddiea Zhumm, CC BY-SA 4.0</small></figcaption></figure>
+  </div>
+  <aside class="notes">
+    <p>Seguramente alguna vez han tenido que conducir en auto a algún lugar que no conocen y han tenido que ver el mapa en el celular. A pesar de tener comandos por voz y soportes del celular, a veces necesitamos desviar la mirada de la calle para confirmar dónde doblar.</p>
+    <p>Ahora imaginen que esto forma parte de su jornada de trabajo y que se desplazan en moto o bicicleta.</p>
+  </aside>
+</section>
+
+<!-- 3 · POR QUÉ DEBERÍA IMPORTARNOS -->
+<section class="slide" data-title="Por qué importa">
+  <div class="rail"><span class="on">Problema</span><span>Solución</span><span>Implementación</span><span>Cierre</span></div>
+  <h2 class="ttl">¿Por qué debería importarnos?</h2>
+  <div class="body2 why">
+    <div>
+      <div class="hero39" data-anim="fade-up">39<small>%</small></div>
+      <p class="hero-txt">de los atropellos de 2025 tuvo como causa identificada la <b>distracción del conductor</b>.</p>
+      <p class="hero-src">CONASET, 2025</p>
+    </div>
+    <div class="moto-card" data-anim="fade-left" style="animation-delay:.25s">
+      <p class="k2">Motociclistas en Chile, 2023</p>
+      <div class="pair">
+        <div><div class="n amb">241</div><div class="l">fallecidos</div></div>
+        <div><div class="n">1.832</div><div class="l">lesionados graves</div></div>
+      </div>
+      <p class="body-is">En moto o bicicleta, la carrocería es el propio cuerpo.</p>
+    </div>
+  </div>
+  <p class="src">Atropellos 2025: estudio de CONASET citado por el equipo. Motociclistas: CONASET, <a href="https://www.conaset.cl/wp-content/uploads/2024/09/Motocicletas-2023.pdf">«Motocicletas 2023»</a>, con registros de Carabineros (todas las causas). «La carrocería es el cuerpo»: entrevistas del equipo a la SIAT de Carabineros y a la Mutual de Seguridad (E1).</p>
+  <aside class="notes">
+    <p>Ya no tendrían una carrocería que los proteja ante un accidente, así que prestar atención al tránsito resulta vital: un estudio de Conaset encontró que casi el <b>39 %</b> de los atropellos en 2025 tuvo como causa identificada la distracción del conductor.</p>
+    <p>Es aquí donde identificamos una oportunidad concreta: <b>reducir la necesidad de mirar el celular para saber dónde doblar.</b></p>
+    <p>Si preguntan por motos: en 2023 murieron 241 motociclistas y 1.832 quedaron con lesiones graves en Chile (CONASET).</p>
+  </aside>
+</section>
+
+<!-- 4 · PROPONEMOS VIRA -->
+<section class="slide" data-title="Proponemos Vira">
+  <div class="rail"><span class="done">Problema</span><span class="on">Solución</span><span>Implementación</span><span>Cierre</span></div>
+  <h2 class="ttl">Proponemos Vira</h2>
+  <p class="lead">Un kit de dos pulseras que indican el próximo giro con una vibración.</p>
+  <div class="body2 prop">
+    <figure class="ph"><video src="img/vira-giros.mp4" poster="img/video_poster.jpg" autoplay muted loop playsinline aria-label="Animación 3D: al acercarse a un giro, vibra la pulsera del lado hacia el que hay que doblar"></video></figure>
+    <ol class="steps">
+      <li><b>Configura la ruta</b><span>en la aplicación, antes del trayecto</span></li>
+      <li><b>Guarda el celular</b><span>no necesita mirarlo durante el viaje</span></li>
+      <li><b>Siente el giro</b><span>vibra la pulsera del lado hacia el que debe doblar</span></li>
+    </ol>
+  </div>
+  <p class="src">Animación 3D del equipo. Demostración conceptual: no muestra el funcionamiento electrónico.</p>
+  <aside class="notes">
+    <p>Así es como creamos <b>Vira</b>, un kit de pulseras que indican el próximo giro mediante vibraciones.</p>
+    <p>Antes del trayecto, el repartidor configura la ruta en la aplicación y guarda el celular. Luego, las pulseras vibrarán según el lado al que le toque girar.</p>
+  </aside>
+</section>
+
+<!-- 5 · TENEMOS LO QUE SE NECESITA -->
+<section class="slide" data-title="Tecnología">
+  <div class="rail"><span class="done">Problema</span><span class="on">Solución</span><span>Implementación</span><span>Cierre</span></div>
+  <h2 class="ttl">Tenemos lo que se necesita</h2>
+  <div class="body2 tech">
+    <div class="flow">
+      <div class="node"><div class="im"><img class="phone" src="img/app_giro_derecha.png" alt="Pantalla de la app Vira indicando un giro a la derecha en 240 metros"></div><b>Celular</b><span>calcula la ruta y envía el giro</span></div>
+      <div class="link"><svg viewBox="0 0 300 60" preserveAspectRatio="none" aria-hidden="true"><path class="wave" d="M10 30 H280"/><path d="M266 16 L286 30 L266 44" fill="none" stroke="#4A62D6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="lbl">BLE</span><span class="lbl2">Bluetooth Low Energy</span></div>
+      <div class="node" style="position:relative"><div class="im"><img src="img/esp32c3.jpg" alt="Microcontrolador ESP32-C3"></div><b>ESP32-C3</b><span>recibe la orden en la pulsera</span><em class="x2">× 2</em></div>
+      <div class="link short"><svg viewBox="0 0 120 40" preserveAspectRatio="none" aria-hidden="true"><path class="wave" d="M6 20 H100"/><path d="M90 8 L108 20 L90 32" fill="none" stroke="#4A62D6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="node"><div class="im"><img src="img/motor_vibrador.jpg" alt="Motor vibrador de disco"></div><b>Módulo de vibración</b><span>hace vibrar la muñeca</span></div>
+    </div>
+    <div class="basis">
+      <div class="c"><p class="who">Kiss et al. (2018)</p><p>Probaron con motociclistas en ruta la navegación por vibración en el cuerpo, con la ruta enviada desde una app por Bluetooth.</p></div>
+      <div class="c"><p class="who">Politecnico di Milano</p><p>Diseñó una herramienta de navegación para ciclistas con un motor de vibración en cada muñeca.</p></div>
+    </div>
+  </div>
+  <p class="src">Imágenes de componentes: referenciales. Kiss, F., Boldt, R., Pfleging, B. y Schneegass, S. (2018). Navigation systems for motorcyclists. CHI 2018, <a href="https://doi.org/10.1145/3173574.3174191">doi:10.1145/3173574.3174191</a>. Politecnico di Milano, Design of a Wearable Haptic Navigation Tool for Cyclists, <a href="https://re.public.polimi.it/handle/11311/1034696">re.public.polimi.it/handle/11311/1034696</a>.</p>
+  <aside class="notes">
+    <p>Para lograr esto, ocupamos un <b>módulo de vibración controlado por una ESP32</b>, la cual vibra según las indicaciones del celular.</p>
+    <p>El celular se comunicará continuamente con las pulseras a través de tecnología <b>BLE, o Bluetooth Low Energy</b>.</p>
+    <p>Las bases técnicas ya existen: Kiss y colegas (2018) probaron en ruta un sistema de navegación por vibración para motociclistas, y el Politecnico di Milano diseñó uno para ciclistas con un motor en cada muñeca.</p>
+  </aside>
+</section>
+
+<!-- 6 · ACTUALMENTE -->
+<section class="slide" data-title="Actualmente">
+  <div class="rail"><span class="done">Problema</span><span class="on">Solución</span><span>Implementación</span><span>Cierre</span></div>
+  <h2 class="ttl">Actualmente</h2>
+  <div class="body2 now">
+    <div>
+      <p class="colh"><i></i>Lo que llevamos</p>
+      <div class="have" style="height:420px">
+        <figure class="slot"><span><b>Pendiente</b>Foto del prototipo físico: pulsera, ESP32-C3 y módulo de vibración</span><img src="img/prototipo_real.jpg" alt="Prototipo físico de la pulsera Vira" onerror="this.remove()"><figcaption>Pulsera activada desde el celular por Bluetooth</figcaption></figure>
+        <figure class="app-shot"><img src="img/app_giro_derecha.png" alt="App Vira con la ruta simulada"><figcaption>App con ruta simulada</figcaption></figure>
+      </div>
+      <div class="innov">
+        <svg viewBox="0 0 150 84" aria-hidden="true"><path d="M44 10 A34 34 0 0 0 44 74" fill="none" stroke="#F0B44C" stroke-width="9" stroke-linecap="round"/><path d="M106 10 A34 34 0 0 1 106 74" fill="none" stroke="#AFC0FF" stroke-width="9" stroke-linecap="round" opacity=".45"/><path d="M92 42 H58 M70 30 L58 42 L70 54" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p><b>Lo nuevo: el lado es la instrucción</b>Si vibra la muñeca izquierda, se dobla a la izquierda. No hay patrones que aprender.</p>
+      </div>
+    </div>
+    <div>
+      <p class="colh todo"><i></i>Lo que nos falta</p>
+      <ul class="todo-list">
+        <li><b>Integrar el GPS</b><span>que las pulseras sigan la ubicación real, no una ruta fija</span></li>
+        <li><b>Un protocolo de navegación confiable</b><span>avisar en el momento y con la precisión correctos</span></li>
+        <li class="eth"><b>Cuidar los riesgos éticos</b><span>no generar nuevas distracciones y proteger los datos personales del repartidor</span></li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes">
+    <p>Hasta ahora hemos conseguido <b>activar la pulsera física desde el celular mediante Bluetooth</b>, a través de una aplicación que simula una ruta fija.</p>
+    <p>Ahora faltaría <b>integrar el sistema de GPS</b> y asegurarse de que el protocolo de navegación resulte lo suficientemente confiable y preciso.</p>
+    <p>También es importante asegurarse de que el diseño final <b>evite generar nuevas distracciones</b>, además de <b>proteger los datos personales del repartidor</b>.</p>
+  </aside>
+</section>
+
+<!-- 7 · POR QUÉ INVERTIR EN NOSOTROS -->
+<section class="slide" data-title="Por qué invertir">
+  <div class="rail"><span class="done">Problema</span><span class="on">Solución</span><span>Implementación</span><span>Cierre</span></div>
+  <h2 class="ttl">¿Por qué invertir en nosotros?</h2>
+  <div class="body2 vs">
+    <div class="opt">
+      <figure class="ph"><img src="img/fotos/audifonos2.jpg" alt="Audífonos inalámbricos en su estuche" style="object-position:50% 55%"></figure>
+      <div class="tx"><h3>Navegación por voz</h3><ul><li>Depende del audio</li><li>Bajo el casco, el viento y el tránsito tapan la instrucción (78–90 dB)</li></ul></div>
+    </div>
+    <div class="opt">
+      <figure class="ph"><img src="img/fotos/reloj.jpg" alt="Reloj inteligente en la muñeca" style="object-position:50% 45%"></figure>
+      <div class="tx"><h3>Reloj inteligente</h3><ul><li>Más caro: cerca de $375.000</li><li>Una sola muñeca: hay que aprender varios patrones de vibración</li></ul></div>
+    </div>
+    <div class="opt us">
+      <figure class="ph"><img src="img/pulseras_sin_fondo.png" alt="Render 3D de las dos pulseras Vira"></figure>
+      <div class="tx"><h3>Vira</h3><ul><li>No depende del audio</li><li>$30.000 por el par de pulseras</li><li>Una pulsera por lado: el lado que vibra es el lado del giro</li></ul></div>
+    </div>
+  </div>
+  <p class="src">Ruido: Universidad de Southampton (ISVR), 78–90 dB(A) bajo el casco a 48 km/h; Binnington (1994). Reloj: precio de referencia de un Apple Watch en Chile, oct-2026. Fotos: MIKI Yoshihito, CC BY 2.0; Jonathan Cutrer, CC BY 2.0. Render de Vira: equipo.</p>
+  <aside class="notes">
+    <p>Ahora podrían preguntarse: ¿por qué los repartidores deberían usar Vira, si ya existe la navegación por voz con Google Maps o Waze? Porque Vira ofrece una <b>alternativa que no depende del audio</b>, cuyas indicaciones pueden resultar difíciles de escuchar entre el ruido del tránsito y el viento.</p>
+    <p>Otra opción son los <b>relojes inteligentes</b>, que al igual que Vira comunican los giros por señales de vibración. La diferencia, además de su <b>elevado costo</b> respecto a Vira, es que solo usan una pulsera, lo que podría dificultar el reconocimiento de indicaciones al tener que aprenderse <b>distintos patrones de vibración</b>.</p>
+  </aside>
+</section>
+
+<!-- 8 · USAMOS UN MÉTODO INVESTIGADO -->
+<section class="slide" data-title="Método investigado">
+  <div class="rail"><span class="done">Problema</span><span class="on">Solución</span><span>Implementación</span><span>Cierre</span></div>
+  <h2 class="ttl">Usamos un método investigado</h2>
+  <div class="body2 meth">
+    <div class="kiss">
+      <div class="big"><span class="n">1</span><span class="vsn">vs. 11</span></div>
+      <p class="cap">errores de giro con vibración en el cuerpo, frente a un navegador visual, en una prueba en ruta con 16 motociclistas.</p>
+      <div class="dots16" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="off"></i><i class="off"></i></div>
+      <p class="dots16-l"><b>14 de 16</b> prefirieron la vibración.</p>
+    </div>
+    <ol class="timeline">
+      <li><span class="yr">2014</span><b>HaptiMoto</b><span>chaleco con vibración para motociclistas</span></li>
+      <li><span class="yr">2018</span><b>Kiss et al., CHI 2018</b><span>cinturón con vibración, probado en ruta</span></li>
+      <li><span class="yr">Politecnico di Milano</span><b>Dos pulseras para ciclistas</b><span>un motor en cada muñeca</span></li>
+      <li class="us"><span class="yr">2026</span><b>Vira</b><span>dos pulseras, pensadas para el turno de reparto</span></li>
+    </ol>
+  </div>
+  <p class="src">Kiss, F. et al. (2018), CHI 2018, <a href="https://doi.org/10.1145/3173574.3174191">doi:10.1145/3173574.3174191</a>. Prasad, M. et al. (2014), HaptiMoto, CHI 2014, <a href="https://doi.org/10.1145/2556288.2557404">doi:10.1145/2556288.2557404</a>. Politecnico di Milano, <a href="https://re.public.polimi.it/handle/11311/1034696">Wearable Haptic Navigation Tool for Cyclists</a>.</p>
+  <aside class="notes">
+    <p>Así es como Vira se diferenciaría de otras soluciones: cambiando la forma de entregar indicaciones con un <b>método que ya tiene antecedentes científicos</b>.</p>
+    <p>Dato de respaldo: en el estudio de Kiss y colegas (2018), 16 motociclistas probaron en ruta un cinturón con vibración: hubo 1 error de giro, contra 11 con un navegador visual, y 14 de 16 prefirieron la vibración.</p>
+  </aside>
+</section>
+
+<!-- 9 · UNA OPORTUNIDAD REAL -->
+<section class="slide" data-title="Oportunidad">
+  <div class="rail"><span class="done">Problema</span><span class="done">Solución</span><span class="on">Implementación</span><span>Cierre</span></div>
+  <h2 class="ttl">Una oportunidad real</h2>
+  <div class="body2 opp">
+    <figure class="ph"><img src="img/fotos/flota_dominos2.jpg" alt="Motos de reparto de una cadena de pizzerías estacionadas frente al local" style="object-position:45% 60%"><figcaption><span class="q-big" style="font-size:40px">Modelo B2B</span>La empresa compra los kits; sus repartidores los usan<small>Foto: Mutney, CC0</small></figcaption></figure>
+    <div>
+      <div class="opp-r">
+        <div class="rings" aria-hidden="true"><div class="t">TAM</div><div class="s">SAM</div><div class="o">SOM</div></div>
+        <div class="mk-rows">
+          <div class="row"><span class="ac">TAM</span><span class="num">~28 mil</span><span class="d2">repartidores en dos ruedas en Chile</span></div>
+          <div class="row"><span class="ac">SAM</span><span class="num">~6 mil</span><span class="d2">repartidores de flotas con reparto propio</span></div>
+          <div class="row"><span class="ac">SOM</span><span class="num acc">400 kits</span><span class="d2">en el primer año</span></div>
+        </div>
+      </div>
+      <p class="fleet"><b>Primeros clientes: flotas de 50 a 250 repartidores</b>cadenas de restaurantes y empresas de última milla, partiendo con pilotos para medir la utilidad.</p>
+    </div>
+  </div>
+  <p class="src">TAM: estimación del equipo con boletas del SII (Ministerio del Trabajo, <a href="https://www.mintrab.gob.cl/wp-content/uploads/2025/07/2025_informe2_ley21431_ajustes.pdf">Segunda evaluación de la Ley 21.431</a>, 2025, y Tercera evaluación, 2026), uso de varias apps y tipo de vehículo; incluye flotas. SAM y SOM: estimaciones propias (modelo de negocio E4).</p>
+  <aside class="notes">
+    <p>Ahora, ¿cómo llevaremos Vira al mercado? Nuestro modelo es <b>B2B</b>: las empresas compran los kits y sus repartidores los usan.</p>
+    <p>Comenzaríamos por <b>cadenas de restaurantes y empresas de última milla con flotas de 50 a 250 trabajadores</b>. En Chile estimamos un mercado potencial de <b>cerca de 28 mil repartidores</b> en dos ruedas; unos 6 mil trabajan en flotas, y nuestra meta del primer año son 400 kits.</p>
+    <p>Nuestra estrategia inicial sería realizar <b>pilotos con flotas</b> y medir la utilidad del producto.</p>
+  </aside>
+</section>
+
+<!-- 10 · EL PROYECTO EN MARCHA -->
+<section class="slide" data-title="Proyecto en marcha">
+  <div class="rail"><span class="done">Problema</span><span class="done">Solución</span><span class="on">Implementación</span><span>Cierre</span></div>
+  <h2 class="ttl">El proyecto en marcha</h2>
+  <div class="body2 money">
+    <div class="mcard hl"><p class="k3">Venta del kit</p><div class="amt">$30.000</div><p>por el par de pulseras, precio neto</p><p class="foot">Una flota de 100 repartidores: $3 millones</p></div>
+    <div class="mcard"><p class="k3">Plan mensual</p><div class="amt">$1.000</div><p>por kit activo: actualizaciones de navegación y soporte técnico</p><p class="foot">Ingreso recurrente</p></div>
+    <div class="mcard"><p class="k3">Costo de producción por kit</p><div class="amt">$16.000</div><p>al inicio, y baja a medida que fabricamos más</p>
+      <div class="costbars">
+        <div class="cb"><span class="lb">Lotes de 500</span><span class="bar" style="width:53%" data-anim="growx">$16.000</span></div>
+        <div class="cb"><span class="lb">Lotes de 2.000</span><span class="bar" style="width:49%" data-anim="growx">$14.800</span></div>
+        <div class="cb"><span class="lb">Lotes de 5.000</span><span class="bar" style="width:45%" data-anim="growx">$13.500</span></div>
+        <div class="cb"><span class="lb">Precio</span><span class="bar p" style="width:100%" data-anim="growx">$30.000</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="src">Modelo de negocio del equipo (E4), escenario base, pesos chilenos sin IVA. El costo baja por compras en mayor volumen.</p>
+  <aside class="notes">
+    <p>Al principio, ofreceríamos cada kit por <b>30 mil pesos</b> y un <b>plan mensual de mil pesos por unidad activa</b>, donde vendrán incluidas actualizaciones de navegación y soporte técnico.</p>
+    <p>Estimamos un <b>costo de producción inicial de 16 mil pesos por kit</b>, pero esto podría disminuir a medida que aumentamos el volumen de fabricación.</p>
+  </aside>
+</section>
+
+<!-- 11 · INICIALMENTE -->
+<section class="slide" data-title="Proyecciones">
+  <div class="rail"><span class="done">Problema</span><span class="done">Solución</span><span class="on">Implementación</span><span>Cierre</span></div>
+  <h2 class="ttl">Inicialmente</h2>
+  <div class="body2 proj2">
+    <div class="chartbox">
+      <p class="ch">Kits vendidos por año, escenario base</p>
+      <svg viewBox="0 0 1000 560" role="img" aria-label="Kits vendidos: año 1, 400; año 2, 1.000; año 3, 3.100; año 4, 6.600; año 5, 9.600">
+        <line x1="20" y1="400" x2="980" y2="400" stroke="#D9D4CC" stroke-width="2"/>
+        <rect class="bar-r" x="45"  y="385.8" width="110" height="14.2" rx="6" style="animation-delay:.1s"/>
+        <rect class="bar-r" x="245" y="364.6" width="110" height="35.4" rx="6" style="animation-delay:.2s"/>
+        <rect class="bar-r" x="445" y="290.2" width="110" height="109.8" rx="6" style="animation-delay:.3s"/>
+        <rect class="bar-r" x="645" y="166.2" width="110" height="233.8" rx="6" style="animation-delay:.4s"/>
+        <rect class="bar-r" x="845" y="60"    width="110" height="340" rx="6" style="animation-delay:.5s"/>
+        <g text-anchor="middle">
+          <text class="bv" x="100" y="368">400</text><text class="bv" x="300" y="347">1.000</text><text class="bv" x="500" y="273">3.100</text><text class="bv" x="700" y="149">6.600</text><text class="bv" x="900" y="43">9.600</text>
+          <text class="yl" x="100" y="438">Año 1</text><text class="yl" x="300" y="438">Año 2</text><text class="yl" x="500" y="438">Año 3</text><text class="yl" x="700" y="438">Año 4</text><text class="yl" x="900" y="438">Año 5</text>
+        </g>
+        <line x1="20" y1="470" x2="980" y2="470" stroke="#D9D4CC" stroke-width="2" stroke-dasharray="6 6"/>
+        <text class="yl" x="20" y="500">Resultado operativo (EBITDA), millones de pesos</text>
+        <g text-anchor="middle">
+          <text class="eb" x="100" y="545" fill="#B5523B">−19,6</text><text class="eb" x="300" y="545" fill="#B5523B">−21,2</text><text class="eb" x="500" y="545" fill="#B5523B">−0,3</text><text class="eb" x="700" y="545" fill="#4A62D6">+40,1</text><text class="eb" x="900" y="545" fill="#4A62D6">+100</text>
+        </g>
+      </svg>
+    </div>
+    <div class="stack">
+      <div class="mcard hl"><p class="k3">Financiamiento necesario</p><div class="amt">$48 M</div><p>cerca de 48 millones de pesos</p></div>
+      <div class="mcard"><p class="k3">Resultado operativo positivo</p><div class="amt">Año 4</div><p>y la inversión se recupera en unos 4,1 años</p></div>
+    </div>
+  </div>
+  <p class="src">Modelo de negocio del equipo (E4), escenario base: flotas en Chile en los años 1 y 2, una plataforma en Chile desde el año 3 y otros países desde el año 4. Con ventas 30 % menores, la inversión no se recupera al quinto año.</p>
+  <aside class="notes">
+    <p>Bajo nuestro escenario base, pensamos vender <b>400 kits el primer año y 9.600 en el quinto</b>.</p>
+    <p>Estimamos alcanzar un <b>resultado operativo positivo en el cuarto año</b>, con una <b>necesidad de financiamiento de cerca de 48 millones de pesos</b>.</p>
+  </aside>
+</section>
+
+<!-- 12 · VIRA EN LA CADENA DE VALOR -->
+<section class="slide" data-title="Cadena de valor">
+  <div class="rail"><span class="done">Problema</span><span class="done">Solución</span><span class="on">Implementación</span><span>Cierre</span></div>
+  <h2 class="ttl">Vira en la cadena de valor</h2>
+  <div class="body2 chain2">
+    <svg viewBox="0 0 1700 520" role="img" aria-label="Cadena de valor: proveedores fabrican placas y carcasas; Vira diseña, ensambla, prueba y da soporte en Santiago; las flotas aliadas compran los kits; los repartidores los usan. Los datos del piloto vuelven a Vira como evidencia propia.">
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#8C857D"/></marker>
+      <marker id="ah2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#F0B44C"/></marker></defs>
+      <rect class="bx" x="0" y="70" width="330" height="240" rx="24"/>
+      <g><text class="t2" x="34" y="118">Por encargo</text><text class="t1" x="34" y="170">Proveedores</text><text class="t2" x="34" y="220">Placas electrónicas</text><text class="t2" x="34" y="254">y carcasas</text></g>
+      <rect class="bx us" x="420" y="40" width="420" height="300" rx="24"/>
+      <g class="us-t"><text class="t2" x="456" y="92">En Santiago</text><text class="t1" x="456" y="144">Vira</text><text class="t2" x="456" y="196">Diseño, app y firmware</text><text class="t2" x="456" y="232">Ensamblaje y pruebas</text><text class="t2" x="456" y="268">Soporte técnico</text></g>
+      <rect class="bx al" x="930" y="70" width="350" height="240" rx="24"/>
+      <g class="al-t"><text class="t2" x="964" y="118">Alianza · cliente</text><text class="t1" x="964" y="170">Flotas</text><text class="t2" x="964" y="220">Compran los kits</text><text class="t2" x="964" y="254">y el plan mensual</text></g>
+      <rect class="bx" x="1370" y="70" width="330" height="240" rx="24"/>
+      <g><text class="t2" x="1404" y="118">Usuario</text><text class="t1" x="1404" y="170">Repartidores</text><text class="t2" x="1404" y="220">Usan las pulseras</text><text class="t2" x="1404" y="254">en su turno</text></g>
+      <path class="ar" d="M334 190 H410" marker-end="url(#ah)"/>
+      <path class="ar" d="M844 190 H920" marker-end="url(#ah)"/>
+      <path class="ar" d="M1284 190 H1360" marker-end="url(#ah)"/>
+      <path class="lp" d="M1105 314 V430 H630 V352" marker-end="url(#ah2)"/>
+      <text class="lpt" x="868" y="474" text-anchor="middle">Datos de uso y desempeño de los pilotos</text>
+    </svg>
+    <div class="adv"><b>Ventaja competitiva</b><p>El hardware se puede copiar. Las alianzas con flotas y la evidencia propia sobre el desempeño del producto, no.</p></div>
+  </div>
+  <aside class="notes">
+    <p>Para hacerlo posible, <b>encargaríamos la fabricación de placas electrónicas y carcasas a proveedores</b>, mientras que el <b>ensamblaje, las pruebas y el soporte se realizarán en Santiago</b>.</p>
+    <p>Como el hardware puede ser replicado, buscaríamos construir una ventaja competitiva mediante <b>alianzas con flotas y evidencia propia sobre el desempeño del producto</b>.</p>
+  </aside>
+</section>
+
+<!-- 13 · VIRA COMO PROYECTO LATINOAMERICANO -->
+<section class="slide" data-title="Latinoamérica">
+  <div class="rail"><span class="done">Problema</span><span class="done">Solución</span><span class="on">Implementación</span><span>Cierre</span></div>
+  <h2 class="ttl">Vira como proyecto latinoamericano</h2>
+  <div class="body2 latam">
+    <div>
+      <p class="goal">La seguridad de los repartidores en Latinoamérica es nuestro objetivo</p>
+      <div class="press">
+        <p class="pub">The Economist<span>8 de octubre de 2026</span></p>
+        <h3>Latin America has caught motorcycle fever</h3>
+        <p>Las ventas anuales de motos en la región pasaron de unos 3 millones (2019) a casi 6 millones (2025).</p>
+      </div>
+    </div>
+    <div class="br">
+      <figure class="ph"><img src="img/fotos/entrega_br_auto.jpg" alt="Repartidores en moto en una calle de Brasil, vistos desde un auto" style="object-position:60% 40%"></figure>
+      <div class="stat"><span class="n">351 mil</span><span class="t">motociclistas trabajaban en plataformas digitales en Brasil en 2024</span><span class="g">+66 % desde 2022</span></div>
+    </div>
+  </div>
+  <p class="src">The Economist, «Latin America has caught motorcycle fever», 8-oct-2026. Brasil: IBGE, PNAD Contínua, módulo «Trabalho por meio de plataformas digitais» 2024 (publicado el 17-oct-2025); en 2022 eran unos 211 mil. Foto: Isabela Novelli, CC BY-SA 4.0.</p>
+  <aside class="notes">
+    <p>En Vira, nuestra visión va más allá de Chile: en Brasil, <b>más de 350 mil motociclistas trabajaban en plataformas digitales en 2024</b>, representando un <b>aumento del 66 %</b> respecto de 2022.</p>
+    <p>Esto refleja una oportunidad de expansión hacia otros países latinoamericanos, una vez que hayamos validado nuestra solución en Chile.</p>
+  </aside>
+</section>
+
+<!-- 14 · NUESTRA VISIÓN -->
+<section class="slide dark full" data-title="Nuestra visión" data-no-logo>
+  <img src="img/fotos/ubereats_madrid.jpg" alt="Repartidor en bicicleta de noche en una avenida iluminada"><svg class="scrim" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="sg" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#141A26" stop-opacity=".94"/><stop offset=".4" stop-color="#141A26" stop-opacity=".8"/><stop offset=".68" stop-color="#141A26" stop-opacity=".18"/><stop offset=".85" stop-color="#141A26" stop-opacity="0"/></linearGradient></defs><rect width="100" height="100" fill="url(#sg)"/></svg>
+  <div class="in">
+    <div class="rail"><span class="done">Problema</span><span class="done">Solución</span><span class="done">Implementación</span><span class="on">Cierre</span></div>
+    <h2 class="ttl">Nuestra visión</h2>
+    <div class="vq"><p>Llegar seguros a su casa al final del día también debe ser una prioridad.</p><span>Que se concentren en lo más importante: el camino.</span></div>
+  </div>
+  <p class="src">Foto: Javier Pérez Montes, CC BY-SA 4.0.</p>
+  <aside class="notes">
+    <p>Al comienzo les pedimos imaginar cómo sería conducir hacia un lugar desconocido. Para muchos repartidores, eso es parte de su día a día.</p>
+    <p>Con Vira, queremos que estos se concentren en lo más importante: <b>el camino</b>. Porque para quienes trabajan recorriendo las calles, <b>llegar seguros a su casa al final del día también debe ser una prioridad</b>.</p>
+  </aside>
+</section>
+
+<!-- 15 · MUCHAS GRACIAS -->
+<section class="slide dark" data-title="Muchas gracias" data-no-logo>
+  <div class="thanks">
+    <div class="top">
+      <svg class="logo-big" viewBox="0 0 100 100" aria-hidden="true"><path class="arc l" d="M36 18 A38 38 0 0 0 36 82"/><path class="arc r" d="M64 18 A38 38 0 0 1 64 82"/><circle class="dot" cx="50" cy="50" r="9"/></svg>
+      <h2>Muchas gracias</h2>
+    </div>
+    <div class="people">
+      <div class="person"><div class="av"><svg viewBox="0 0 100 90" aria-hidden="true"><circle cx="50" cy="32" r="20" fill="#AFC0FF"/><path d="M12 90 C12 64 30 56 50 56 C70 56 88 64 88 90 Z" fill="#AFC0FF"/></svg></div><b>Vicente Carril</b><span class="role">CEO</span><span class="maj">Ingeniería Industrial</span></div>
+      <div class="person"><div class="av"><svg viewBox="0 0 100 90" aria-hidden="true"><circle cx="50" cy="32" r="20" fill="#AFC0FF"/><path d="M12 90 C12 64 30 56 50 56 C70 56 88 64 88 90 Z" fill="#AFC0FF"/></svg></div><b>Alonso Casanova</b><span class="role">CFO</span><span class="maj">Matemática Computacional</span></div>
+      <div class="person"><div class="av"><svg viewBox="0 0 100 90" aria-hidden="true"><circle cx="50" cy="32" r="20" fill="#AFC0FF"/><path d="M12 90 C12 64 30 56 50 56 C70 56 88 64 88 90 Z" fill="#AFC0FF"/></svg></div><b>Alexa Pastén</b><span class="role">CTO</span><span class="maj">Ingeniería Eléctrica</span></div>
+      <div class="person"><div class="av"><svg viewBox="0 0 100 90" aria-hidden="true"><circle cx="50" cy="32" r="20" fill="#AFC0FF"/><path d="M12 90 C12 64 30 56 50 56 C70 56 88 64 88 90 Z" fill="#AFC0FF"/></svg></div><b>María Martínez</b><span class="role">CPO</span><span class="maj">Informática</span></div>
+      <div class="person"><div class="av"><svg viewBox="0 0 100 90" aria-hidden="true"><circle cx="50" cy="32" r="20" fill="#AFC0FF"/><path d="M12 90 C12 64 30 56 50 56 C70 56 88 64 88 90 Z" fill="#AFC0FF"/></svg></div><b>Martín Tapia</b><span class="role">COO</span><span class="maj">Ingeniería de Transporte</span></div>
+    </div>
+  </div>
+  <aside class="notes"><p>Muchas gracias.</p></aside>
+</section>
+
+</div>
+<script src="assets/runtime.js"></script>
+</body>
+</html>
