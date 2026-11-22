@@ -21,8 +21,16 @@ const physical = () => el('mode').value === 'ble';
 const connected = side => Boolean(links[side]?.device.gatt.connected);
 const active = () => current && ['En curso', 'En pausa'].includes(current.state);
 const usable = side => connected(side) && links[side].tested;
-const ready = () => !physical() || (el('kind').value === 'manual'
-  ? Object.keys(links).some(usable) : Object.keys(links).every(usable));
+function ready() {
+  if (!physical()) return true;
+  const kind = el('kind').value;
+  if (kind === 'trial') return Object.keys(links).every(usable);
+  // Una ruta en pausa se reanuda con las mismas pulseras con que partió. Para iniciarla basta una.
+  if (kind === 'route' && current?.kind === 'route' && current.state === 'En pausa' && current.sides) {
+    return current.sides.every(usable);
+  }
+  return Object.keys(links).some(usable);
+}
 const supportsBle = () => window.isSecureContext && Boolean(navigator.bluetooth);
 const timeLabel = t => new Date(t).toLocaleTimeString('es-CL');
 const completed = e => e.result === 'Enviada' || e.result === 'Simulada';
@@ -72,8 +80,10 @@ function tally(s) {
   const ok = signals.filter(completed).length;
   const failed = signals.filter(e => e.result === 'Fallida').length;
   const unclear = signals.filter(e => ['Sin confirmar', 'Pendiente'].includes(e.result)).length;
+  const absent = signals.filter(e => e.result === 'Sin pulsera').length;
   let text = ok + (s.mode === 'ble' ? ' enviadas por Bluetooth' : ' simuladas') + ' · ' + failed + ' fallidas';
   if (unclear) text += ' · ' + unclear + ' sin confirmar';
+  if (absent) text += ' · ' + absent + ' sin pulsera';
   if (s.kind === 'trial') {
     const answered = signals.filter(e => e.answer);
     text += ' · ' + answered.filter(e => e.answer === e.side).length + ' aciertos de ' + answered.length + ' respuestas';
@@ -209,7 +219,14 @@ async function emit(side, detail) {
   try {
     if (current.mode === 'ble') {
       // Una vuelta requiere que ambos dispositivos acepten su orden.
-      const targets = side === 'U' ? ['L','R'] : [side];
+      const wanted = side === 'U' ? ['L','R'] : [side];
+      // Una ruta iniciada con una sola pulsera muestra los giros del otro lado sin enviarlos.
+      const targets = current.sides ? wanted.filter(t => current.sides.includes(t)) : wanted;
+      if (!targets.length) {
+        entry.result = 'Sin pulsera';
+        return entry;
+      }
+      if (targets.length < wanted.length) entry.detail += ' · solo ' + sides[targets[0]];
       const results = await Promise.allSettled(targets.map(send));
       const received = targets.filter((_,i) => results[i].status === 'fulfilled');
       if (received.length !== targets.length) {
@@ -281,6 +298,7 @@ function start() {
     if (kind === 'route') {
       const parsed = prepRoute(OSM_CACHE[trip + '_' + profile]);
       route = {steps:parsed.steps.filter(s => s.side),len:parsed.len,position:0,next:0};
+      if (physical()) current.sides = Object.keys(links).filter(usable);
     } else if (kind === 'trial') {
       current.sequence = Array.from('LLLLLRRRRR');
       for (let i = 9; i > 0; i--) {
@@ -293,6 +311,9 @@ function start() {
     event('state','Iniciada');
   }
   message = '';
+  if (current.sides?.length === 1) {
+    message = 'Ruta con una sola pulsera: los giros a la ' + (current.sides[0] === 'L' ? 'derecha' : 'izquierda') + ' se muestran sin vibrar.';
+  }
   previousTick = performance.now();
   render();
   if (current.kind === 'route') advance();
