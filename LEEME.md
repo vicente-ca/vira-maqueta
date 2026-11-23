@@ -1,5 +1,15 @@
 # Vira · App de pulseras
 
+## Prototipo físico (E4)
+
+Las piezas de una pulsera, antes de armarla: batería LiPo de 3,7 V y 1000 mAh, cargador USB-C (TP4056), placa ESP32-C3 y módulo de motor vibrador conectado con cables. El programa de la placa está en `firmware/PulseraVira/PulseraVira.ino`.
+
+![Piezas del prototipo de la pulsera](prototipo/foto_prototipo_1.jpg)
+
+![Piezas del prototipo de la pulsera, otra toma](prototipo/foto_prototipo_2.jpg)
+
+Las fotos también se pueden ver directo: [foto 1](https://vicente-ca.github.io/vira-maqueta/prototipo/foto_prototipo_1.jpg) · [foto 2](https://vicente-ca.github.io/vira-maqueta/prototipo/foto_prototipo_2.jpg).
+
 ## Prueba funcional en el teléfono
 
 **Control manual.** En **Tus pulseras → Control manual de pulseras**, conecta una o las dos ESP32 por Bluetooth. Prueba y confirma cada lado conectado. Después, **Vibrar izquierda** o **Vibrar derecha** envía tres pulsos únicamente a esa muñeca. El primer toque abre la sesión y cada orden queda en el registro. Puedes probar el otro brazo mientras termina el primer pulso. Para ensayar la interfaz sin placas, selecciona **Simuladas**. Este ejercicio funciona sin ruta y sin GPS.
