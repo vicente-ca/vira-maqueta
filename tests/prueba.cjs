@@ -61,6 +61,7 @@ async function run() {
     const text = id => page.locator('#'+id).innerText();
     async function select(id,value) {
       await openScreen('prueba');
+      if (!await page.locator('#settingsDetails').evaluate(d => d.open)) await page.locator('#settingsDetails summary').click();
       await page.locator('#'+id).selectOption(value);
     }
     const records = () => page.evaluate(() => JSON.parse(localStorage.getItem('vira.prueba.v1.' + document.getElementById('history').value)));

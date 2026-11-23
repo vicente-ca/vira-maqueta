@@ -1,161 +1,149 @@
 :root {
   --ink: #1b2230;
-  --muted: #596171;
+  --muted: #535e70;
   --blue: #384fb8;
   --line: #deddd7;
+  --paper: #fffefa;
+  --tint: #e8edfc;
   --display: "Barlow Semi Condensed", Bahnschrift, "Arial Narrow", sans-serif;
-  color: var(--ink);
-  background: #f3f0eb;
+  --app-width: 480px;
+  --nav-height: calc(62px + env(safe-area-inset-bottom));
+  --action-height: 64px;
   font: 16px/1.45 "Atkinson Hyperlegible Next", "Segoe UI", system-ui, sans-serif;
+  color: var(--ink);
+  background: #e6e4de;
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-bottom: calc(var(--nav-height) + var(--action-height));
 }
 * { box-sizing: border-box }
 body, h1, h2, p, ol { margin: 0 }
 [hidden], :is(#message,#instruction,#counts,#events,#pulseResult):empty { display: none !important }
-.wrap { width: min(1120px, 100% - 48px); margin-inline: auto }
-.mast { border-bottom: 1px solid #d7d4ce }
-.mast-inner, .brand, .controls, .map-meta, .map-foot, .wrists, #bandFeedback { display: flex; align-items: center }
-.mast-inner { justify-content: space-between; min-height: 64px }
-.brand { gap: 7px; font: 700 27px/1 var(--display); letter-spacing: -.055em }
+body { width: min(100%, var(--app-width)); min-height: 100dvh; margin-inline: auto; background: #f3f0eb; padding-bottom: var(--nav-height); box-shadow: 0 0 32px #1b223010 }
+body:has(#prueba:not([hidden]) #routeView:not([hidden])) { padding-bottom: calc(var(--nav-height) + var(--action-height)) }
+.wrap { padding-inline: max(12px,env(safe-area-inset-left)) max(12px,env(safe-area-inset-right)) }
+.mast { padding-top: env(safe-area-inset-top); border-bottom: 1px solid var(--line) }
+.mast-inner, .brand, .controls, .map-meta, .map-foot, .wrists, #bandFeedback, .connection-status { display: flex; align-items: center }
+.mast-inner { justify-content: space-between; min-height: 48px }
+.brand { gap: 6px; font: 700 26px/1 var(--display); letter-spacing: -.05em }
+main { padding-block: 14px 18px }
 a { color: var(--blue); font-weight: 600; text-underline-offset: 3px }
-.mast a { text-decoration: none; padding-block: 12px }
-.mast a:hover { text-decoration: underline }
-main { padding: 30px 0 44px }
-h1, h2, .metrics strong, #turnText { font-family: var(--display); line-height: 1.1 }
-h1 { font-size: clamp(32px, 4vw, 54px); font-weight: 600; letter-spacing: -.045em; margin-bottom: 24px }
-h2 { font-size: 24px; letter-spacing: -.025em }
-.page-heading { display: flex; gap: 12px; align-items: baseline; justify-content: space-between }
-.page-heading { align-items: center; margin-bottom: 20px }
-.page-heading h1 { margin-bottom: 0 }
-.layout { display: grid; grid-template-columns: minmax(0,1.9fr) minmax(290px,1fr); align-items: start; gap: 20px }
-.card { background: #fffefa; border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 5px 20px -16px #252b45aa; min-width: 0 }
-.route-head, .settings, .records, .session-body { padding: 22px 26px }
-.route-head { padding-bottom: 17px }
-.eyebrow, .metrics span { color: var(--muted); font: 650 11px/1.35 "Segoe UI",sans-serif; letter-spacing: .09em; text-transform: uppercase }
-.route-head h2 { margin-top: 5px; font-size: clamp(23px, 2.5vw, 33px); text-wrap: balance }
-.map { position: relative; margin: 0 12px; border-radius: 13px; color: #f3f5ff; overflow: hidden; background-color: #202b45;
-  background-image: linear-gradient(90deg,#a4b6dc13 1px,transparent 1px),linear-gradient(#a4b6dc13 1px,transparent 1px),radial-gradient(ellipse at 25% 60%,#2e405e,transparent 80%); background-size: 24px 24px,24px 24px,100% 100% }
-#routeMap { width: 100%; height: clamp(200px, 23vw, 285px); display: block }
-.map-meta, .map-foot { padding: 12px 16px; justify-content: space-between; font-size: 12px; line-height: 1.2 }
-#mapState { border: 1px solid #8391ae75; padding: 4px 9px; border-radius: 999px; background: #1c273d }
-.north { letter-spacing: .09em; font-weight: 700 }
-.map-foot { color: #d2dbed; gap: 8px }
+h1, h2, .metrics strong, #turnText, .band-name strong { font-family: var(--display); line-height: 1.1 }
+h1 { font-size: clamp(29px,7vw,38px); font-weight: 600; letter-spacing: -.04em }
+h2 { font-size: 23px; letter-spacing: -.025em }
+#historial h1 { margin-bottom: 12px }
+.page-heading { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 10px }
+.card { min-width: 0; border: 1px solid var(--line); border-radius: 18px; background: var(--paper) }
+.controls, .wrists, #bandFeedback { gap: 8px; flex-wrap: wrap }
+button, select, summary, .next-action a, #sessionControls a { min-height: 48px; font: inherit; touch-action: manipulation }
+button, select { max-width: 100%; color: inherit; border: 1px solid #bfc3cd; border-radius: 10px; background: var(--paper) }
+button { padding: 8px 12px; cursor: pointer; font-weight: 600 }
+button:active:enabled { transform: translateY(1px) }
+button:disabled, select:disabled { opacity: .55; cursor: default }
+.primary, #pause, #sessionControls a, .band button, .pairing:has(.ready) .next-action a { color: white; background: var(--blue); border-color: var(--blue) }
+:focus-visible { outline: 3px solid #4a62d6; outline-offset: 2px }
+label { display: grid; gap: 5px; margin-top: 12px; font-size: 14px; font-weight: 650 }
+select { width: 100%; padding: 7px 10px; font-size: 16px; font-weight: 400 }
+.app-nav, .session:has(#routeView:not([hidden])) #sessionControls {
+  position: fixed; inset-inline: 0; width: min(100%,var(--app-width)); margin: 0 auto; z-index: 3;
+  background: var(--paper); border-top: 1px solid var(--line);
+  padding-inline: max(8px,env(safe-area-inset-left)) max(8px,env(safe-area-inset-right));
+}
+.app-nav { display: flex; align-items: center; gap: 4px; bottom: 0; height: var(--nav-height); padding-block: 4px calc(4px + env(safe-area-inset-bottom)) }
+.app-nav a { flex: 1; display: grid; justify-items: center; align-content: center; gap: 2px; min-height: 48px; color: var(--muted); border-radius: 12px; text-decoration: none; font-size: 13px }
+.app-nav svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round }
+.app-nav a[aria-current] { color: #2f459f; background: var(--tint) }
+.connection-status, .band > span { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: 13px }
+.connection-status::before, .band > span::before, .wrists i, .map-foot i { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #9297a1 }
+.connection-status.ready::before, .band.ready > span::before { background: #247456 }
+.band-hero { display: grid; grid-template-columns: 1fr .85fr; align-items: center; gap: 10px; padding: 18px; border-radius: 20px; background: radial-gradient(ellipse at 82% 65%,#d0daff,transparent 60%),#e8ecfa }
+.band-hero img { width: 100%; height: auto }
+.band-hero p { margin-top: 6px; color: #3c4866 }
+.pairing, .records, .session-body { padding: 14px }
+.pairing { margin-top: 12px }
+.pairing > p, .settings p, .records p { margin-block: 6px 12px; color: var(--muted) }
+.band-pair, .layout { display: grid; gap: 10px }
+.band { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 4px 8px; padding: 12px; border: 1px solid var(--line); border-radius: 13px }
+.band.ready { border-color: #9cc8b8; background: #f2f9f5 }
+.band-name strong, .band-name small { display: block }
+.band-name strong { font-size: 19px }
+.band-name small { color: var(--muted); margin-top: 3px }
+.band > span { grid-column: 1 }
+.band .controls { grid-column: 2; grid-row: 1/3 }
+.band .controls:has(button[id^=confirm]:not([hidden])) { grid-column: 1/-1; grid-row: auto; margin-top: 6px }
+.band .controls:has(button[id^=confirm]:not([hidden])) button[id^=test] { background: var(--paper); color: var(--blue) }
+.next-action { margin-top: 12px }
+.next-action a, #sessionControls a { display: grid; place-items: center; padding: 9px; border-radius: 10px; text-decoration: none; text-align: center; font-weight: 650 }
+.next-action a { background: var(--tint) }
+.settings { grid-row: 1; padding: 0 14px }
+.settings details { padding-block: 2px }
+.settings summary { align-content: center; color: var(--blue); cursor: pointer; font-weight: 650 }
+.settings details[open] { padding-bottom: 10px }
+.settings #manualControls, .settings #trialHelp { padding-bottom: 10px }
+#routeHelp { margin-top: 12px; font-size: 14px }
+#prueba:is(.expanded,.live-route) .settings { display: none }
+#presentRoute { flex: none; color: var(--blue); font-size: 14px }
+#presentRoute[aria-pressed=true] { background: var(--tint) }
+.route-head { padding: 12px 14px 8px }
+.route-head h2 { font-size: 21px; margin-top: 2px }
+.eyebrow, .metrics span { color: var(--muted); font: 650 11px/1.35 "Segoe UI",sans-serif; letter-spacing: .06em; text-transform: uppercase }
+#routeCue { display: flex; align-items: center; gap: 12px; margin: 0 7px 7px; padding: 9px 12px; border-radius: 12px; background: var(--tint) }
+#turnArrow { flex: none; color: var(--blue); font: 700 32px/1 "Segoe UI Symbol",sans-serif }
+#turnText { display: block; margin-top: 2px; font-size: 24px; font-weight: 650 }
+.map { position: relative; margin-inline: 7px; overflow: hidden; border-radius: 12px; color: #f3f5ff; background: #202b45 }
+#routeMap { display: block; width: 100%; height: clamp(135px, 27dvh, 260px) }
+#prueba.expanded #routeMap { height: clamp(170px, 40dvh, 440px) }
+#prueba.live-route #routeMap { height: clamp(125px, calc(100dvh - 550px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 310px) }
+#prueba.live-route.expanded #routeMap { height: clamp(140px, calc(100dvh - 410px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 480px) }
+.map-meta, .map-foot { padding: 6px 10px; justify-content: space-between; gap: 8px; font-size: 11px }
+#mapState { border-radius: 99px; border: 1px solid #8391ae75; padding: 2px 8px }
+.north { font-weight: 700 }
+.map-foot { color: #d2dbed }
+.map-foot i { background: #ffcb74 }
 .map-foot a { color: inherit; font-weight: inherit }
-.map-foot small { text-align: right }
-.map-foot i, .wrists i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; background: #ffcb74 }
+.map-foot small { text-align: end }
 .pin-label { fill: white; font: 600 12px "Segoe UI",sans-serif; paint-order: stroke; stroke: #202b45; stroke-width: 4px; stroke-linejoin: round }
-.metrics { display: grid; grid-template-columns: repeat(3,1fr); margin: 18px 26px 12px }
-.metrics div + div { border-left: 1px solid var(--line); padding-left: 20% }
-.metrics strong { display: block; font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 4px }
-progress { display: block; appearance: none; width: calc(100% - 52px); height: 4px; margin: 0 auto; border: 0; border-radius: 6px; overflow: hidden; background: #e4e6ed; color: var(--blue) }
+.metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin: 10px 14px }
+.metrics strong { display: block; margin-top: 2px; font-size: 22px; font-variant-numeric: tabular-nums }
+.metrics div + div { border-left: 1px solid var(--line); padding-left: 12% }
+progress { display: block; appearance: none; width: calc(100% - 28px); height: 4px; margin: 0 auto; border: 0; border-radius: 5px; overflow: hidden; background: #e4e6ed; color: var(--blue) }
 progress::-webkit-progress-bar { background: #e4e6ed }
 progress::-webkit-progress-value { background: var(--blue) }
 progress::-moz-progress-bar { background: var(--blue) }
-.session-body > * + * { margin-top: 12px }
-.session-body #state { margin-top: 3px; color: var(--muted); font-size: 14px }
-.session:has(#routeView:not([hidden])) :is(#now, #state) {
-  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap
-}
-.session:has(#routeView:not([hidden])) #routeCue { margin-top: 0 }
-#routeCue { display: flex; gap: 13px; align-items: center; min-height: 54px }
-#turnArrow { flex: none; display: grid; place-items: center; width: 47px; height: 47px; color: var(--blue); font: 700 32px/1 "Segoe UI Symbol",sans-serif; background: #e9edfc; border-radius: 13px }
-#turnText { display: block; margin-top: 3px; font-size: 21px; font-weight: 600 }
-#bandFeedback { flex-wrap: wrap; gap: 6px 12px }
-.wrists { gap: 6px }
-.wrists span { background: #f3f2ed; border-radius: 16px; padding: 5px 9px; font-size: 13px }
-.wrists i { background: #a8abb2; width: 7px; height: 7px }
+.session-body > * + * { margin-top: 10px }
+.session:has(#routeView:not([hidden])) :is(#now,#state) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%) }
+.session:has(#routeView:not([hidden])) #sessionControls { bottom: var(--nav-height); min-height: var(--action-height); padding-block: 7px; flex-wrap: nowrap; box-shadow: 0 -3px 14px #1b223010 }
+#sessionControls > * { flex: 1; min-width: 0 }
+#sessionControls:has(#connectNeeded:not([hidden])) #start:disabled { display: none }
+#bandFeedback { gap: 5px 8px }
+.wrists { gap: 5px }
+.wrists span { padding: 4px 8px; border-radius: 99px; background: #f3f2ed; font-size: 13px }
+.wrists i { margin-right: 4px }
 .wrists .lit { background: #ffebc1; color: #563608 }
 .wrists .lit i { background: #976000; animation: signal .65s ease-out 3 }
 @keyframes signal { 25% { box-shadow: 0 0 0 4px #b17a203b } 100% { box-shadow: 0 0 0 0 #b17a2000 } }
-#pulseResult, #counts, #instruction, #summary, .settings p { color: var(--muted); font-size: 14px }
+#pulseResult, #counts, #instruction, #state, #summary { color: var(--muted); font-size: 14px }
 #counts { display: block }
-.controls { flex-wrap: wrap; gap: 8px }
-button, select { max-width: 100%; min-height: 44px; color: inherit; font: inherit; border: 1px solid #bfc3cd; border-radius: 10px; background: #fffefa }
-button { padding: 8px 16px; cursor: pointer; font-weight: 600; transition: background-color .16s, transform .16s }
-button:hover:enabled { background: #eeeff4 }
-button:active:enabled { transform: translateY(1px) }
-.primary, #pause { background: var(--blue); border-color: var(--blue); color: white }
-.primary:hover:enabled, #pause:hover:enabled { background: #293d99 }
-button:disabled, select:disabled { opacity: .6; cursor: default }
-:focus-visible { outline: 3px solid #4a62d6; outline-offset: 3px }
-label { display: grid; gap: 5px; margin-top: 16px; font-size: 14px; font-weight: 650 }
-select { width: 100%; padding: 7px 10px; font-size: 16px; font-weight: 400 }
-.settings p, .records p, .settings .controls { margin-top: 12px }
-.note { padding-top: 14px; border-top: 1px solid var(--line) }
-#message { color: #783e12; background: #fff1d9; padding: 10px 13px; border-radius: 8px }
-.records { margin-top: 20px }
-.records label { max-width: 42rem }
-#events { padding: 0 0 0 1.65em; margin-top: 10px; max-height: 16rem; overflow: auto; scrollbar-width: thin }
-#events li { padding: 6px 3px; font-size: 14px; border-top: 1px solid var(--line) }
-#events li::marker { color: var(--muted); font-variant-numeric: tabular-nums }
-@media(max-width: 760px) {
-  .settings { grid-row: 1 }
-  .wrap { width: min(100% - 24px, 580px) }
-  .mast-inner { min-height: 52px }
-  main { padding-top: 18px }
-  h1 { margin-bottom: 14px }
-  .layout { grid-template-columns: minmax(0,1fr); gap: 12px }
-  .route-head, .settings, .records, .session-body { padding: 16px }
-  .map { margin-inline: 6px }
-  .metrics { margin: 14px 16px 10px }
-  .metrics div + div { padding-left: 12% }
-  .metrics span { font-size: 10px; letter-spacing: .055em }
-  progress { width: calc(100% - 32px) }
-  .records { margin-top: 12px }
+#message { margin-top: 12px; padding: 10px 13px; border-radius: 10px; background: #fff1d9; color: #783e12 }
+#events { padding-left: 22px; margin-top: 10px }
+#events li { border-top: 1px solid var(--line); padding-block: 7px; font-size: 14px }
+@media (max-height: 640px) {
+  .mast-inner { min-height: 40px }
+  main { padding-top: 8px }
+  .band-hero { padding: 12px }
+  .route-head .eyebrow { display: none }
+  .route-head h2 { font-size: 18px }
+  #prueba.live-route .page-heading { margin-bottom: 5px }
 }
-.app-nav { display: flex; gap: 4px; padding: 4px; background: #e9e6e0; border-radius: 14px }
-.mast .app-nav a { display: grid; place-items: center; min-height: 40px; padding: 7px 20px; color: var(--muted); border-radius: 10px }
-.mast .app-nav a[aria-current] { color: #253b93; background: #fffefa; box-shadow: 0 1px 4px #1b22301a }
-.connection-status, .band > span { display: inline-flex; gap: 7px; align-items: center; font-size: 13px; color: var(--muted) }
-.connection-status::before, .band > span::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #9297a1 }
-.connection-status.ready::before, .band.ready > span::before { background: #247456 }
-.band-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: center; padding: clamp(20px, 4vw, 50px); overflow: hidden; border-radius: 24px; background: radial-gradient(ellipse at 78% 64%, #d1daff, transparent 56%), #e8ecfa }
-.band-hero h1 { margin: 0 0 12px; font-size: clamp(36px, 5vw, 66px) }
-.band-hero p { max-width: 32ch; font-size: clamp(16px, 1.8vw, 22px); color: #3c4866 }
-.band-hero img { width: 100%; height: auto; max-height: 210px; object-fit: contain }
-.pairing { padding: clamp(16px, 3vw, 32px); margin-top: 16px }
-.pairing > p { margin: 6px 0 18px; color: var(--muted) }
-.band-pair { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px }
-.band { padding: 15px 18px; border: 1px solid var(--line); border-radius: 14px; display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start }
-.band.ready { border-color: #9cc8b8; background: #f2f9f5 }
-.band-name strong, .band-name small { display: block }
-.band-name strong { font: 600 20px/1.2 var(--display) }
-.band-name small { color: var(--muted); margin-top: 3px }
-.band .controls { grid-column: 1/-1 }
-.band .controls:has(> :not([hidden])) button { background: var(--blue); color: white; border-color: var(--blue) }
-.next-action { text-align: end; margin-top: 14px }
-.next-action a, #connectNeeded { display: inline-block; padding-block: 10px }
-#message { margin-block: 12px }
-.records { margin-top: 0 }
-#prueba.expanded .layout { grid-template-columns: minmax(0,1fr) }
-#prueba.expanded .settings { display: none }
-#prueba.expanded #routeMap { height: clamp(210px, 42vh, 540px) }
-#prueba.expanded #turnText { font-size: clamp(24px, 4vw, 46px) }
-#prueba.expanded #routeCue { margin: 0 12px 12px; padding: 12px 16px; border-radius: 12px; background: #e9edfc }
-.pairing:has(.band.ready) .next-action a { padding: 11px 18px; border-radius: 10px; background: var(--blue); color: white; text-decoration: none }
-#presentRoute[aria-pressed=true] { background: #e5eafb; color: var(--blue) }
-@media(max-width: 760px) {
-  body { padding-bottom: calc(64px + env(safe-area-inset-bottom)) }
-  .app-nav { position: fixed; bottom: 0; inset-inline: 0; z-index: 2; justify-content: center; border-radius: 0; border-top: 1px solid var(--line); background: #fffefa; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)) }
-  .mast .app-nav a { flex: 1; max-width: 180px; min-height: 44px; padding-inline: 8px }
-  .mast .app-nav a[aria-current] { background: #e8edfc; box-shadow: none }
-  .band-hero { gap: 9px; padding: 18px; grid-template-columns: 1fr .9fr }
-  .band-hero h1 { font-size: clamp(30px, 7vw, 40px) }
-  .band-hero p { font-size: 15px }
-  .band-pair { grid-template-columns: 1fr }
-  .band { padding: 12px; align-items: center; gap: 3px 8px }
-  .band > span { grid-column: 1 }
-  .band .controls { grid-column: 2; grid-row: 1/3 }
-  .band .controls:has(button[id^=confirm]:not([hidden])) { grid-column: 1/-1; grid-row: auto; margin-top: 8px }
-  .band button { padding-inline: 10px; font-size: 14px }
-  #prueba.expanded #routeMap { height: clamp(200px, 34vh, 340px) }
-  .next-action { text-align: start }
-}
-@media(min-width: 761px) {
-  .session:has(#routeView:not([hidden])) .session-body { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center }
-  .session-body > * { grid-column: 1 / -1 }
-  .session:has(#routeView:not([hidden])) #routeCue { grid-column: 1 }
-  .session:has(#routeView:not([hidden])) #sessionControls { grid-column: 2; margin: 0 }
-}
-@media(prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important }
+}
+@media (orientation: landscape) and (max-height: 500px) and (min-width: 560px) {
+  :root { --app-width: 760px }
+  #prueba.live-route #routeView { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0,1.3fr); align-items: center; padding: 7px; gap: 4px 8px }
+  #prueba.live-route #routeView > * { grid-column: 1; min-width: 0 }
+  #prueba.live-route #routeView .map { grid-column: 2; grid-row: 1/5; margin: 0 }
+  #prueba.live-route .metrics { margin: 0 7px }
+  #prueba.live-route .route-head { padding: 3px 7px }
+  #prueba.live-route #routeCue { margin: 0; padding: 5px 8px }
+  #prueba.live-route #routeMap { height: clamp(95px, calc(100dvh - 278px), 200px) }
 }

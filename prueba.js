@@ -122,8 +122,6 @@ function setExpanded(expanded) {
   el('prueba').classList.toggle('expanded', expanded);
   el('presentRoute').setAttribute('aria-pressed', String(expanded));
   el('presentRoute').textContent = expanded ? 'Reducir mapa' : 'Ampliar mapa';
-  const anchor = expanded ? el('routeMap').parentElement : el('sessionControls');
-  anchor.before(el('routeCue'));
 }
 
 function render() {
@@ -131,6 +129,7 @@ function render() {
   const trial = el('kind').value === 'trial';
   const manual = el('kind').value === 'manual';
   const showingRoute = !manual && !trial;
+  el('prueba').classList.toggle('live-route', showingRoute && locked);
   const confirmed = Object.keys(links).filter(usable).length;
   const paired = Object.keys(links).filter(connected).length;
   el('linkSummary').textContent = confirmed === 2 ? '2 pulseras listas' : confirmed ? '1 pulsera lista' : paired ? 'Falta probar el pulso' : 'Sin conexión';
@@ -138,10 +137,10 @@ function render() {
   el('pairTitle').textContent = confirmed ? 'Tus conexiones' : 'Conecta tu pulsera';
   el('toExercise').textContent = active() ? 'Volver a la prueba →' : ready() ? 'Continuar a la prueba →' : showingRoute ? 'Ver la ruta antes de conectar →' : 'Ver la prueba →';
   el('connectNeeded').hidden = ready();
-  el('connectNeeded').textContent = current?.state === 'En pausa' ? 'Revisar la conexión para reanudar →' : trial ? 'Preparar ambas pulseras para empezar →' : 'Preparar una pulsera para empezar →';
+  el('connectNeeded').textContent = current?.state === 'En pausa' ? 'Reconectar pulsera' : trial ? 'Preparar las dos pulseras' : 'Conectar pulsera';
   el('presentRoute').hidden = !showingRoute;
   if (!showingRoute) setExpanded(false);
-  el('pageTitle').textContent = manual ? 'Control manual' : trial ? 'Prueba de tacto' : 'Prueba de ruta';
+  el('pageTitle').textContent = manual ? 'Control manual' : trial ? 'Prueba de tacto' : locked ? (current.state === 'En pausa' ? 'Ruta en pausa' : 'En ruta') : 'Prueba de ruta';
   for (const id of ['routeView','routeCue','bandFeedback','routeHelp']) el(id).hidden = !showingRoute;
   if (showingRoute) {
     routeMap.select(el('trip').value, el('profile').value);
@@ -379,7 +378,11 @@ function start() {
   previousTick = performance.now();
   el('instruction').textContent = '';
   render();
-  if (current.kind === 'route') advance();
+  if (current.kind === 'route') {
+    el('settingsDetails').open = false;
+    window.scrollTo(0, 0);
+    advance();
+  }
   else el('instruction').textContent = current.kind === 'manual' ? 'Elige el lado.' : 'El participante mantiene la vista fuera de la pantalla.';
 }
 
