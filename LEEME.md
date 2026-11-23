@@ -14,7 +14,7 @@ Las fotos también se pueden ver directo: [foto 1](https://vicente-ca.github.io/
 
 **Control manual.** En **Tus pulseras → Control manual de pulseras**, conecta una o las dos ESP32 por Bluetooth. Prueba y confirma cada lado conectado. Después, **Vibrar izquierda** o **Vibrar derecha** envía tres pulsos únicamente a esa muñeca. El primer toque abre la sesión y cada orden queda en el registro. Puedes probar el otro brazo mientras termina el primer pulso. Para ensayar la interfaz sin placas, selecciona **Simuladas**. Este ejercicio funciona sin ruta y sin GPS.
 
-Desde **Tus pulseras → Abrir prueba de ruta** se entra a `prueba.html`. Copiar la carpeta completa. Para probar sin hardware, elegir **Simuladas**, seleccionar uno de los tres trayectos y pulsar **Iniciar ruta**. El recorrido usa las seis variantes ya guardadas, funciona sin red y avanza a velocidad acelerada. Pausar conserva la posición. Al cambiar de aplicación también queda en pausa.
+Desde **Tus pulseras → Abrir prueba de ruta** se entra a `prueba.html`. Copiar la carpeta completa. Para probar sin hardware, elegir **Simuladas**, seleccionar uno de los tres trayectos y pulsar **Iniciar ruta**. El mapa anima la posición sobre las calles de Santiago, marca la distancia recorrida y muestra el próximo giro y la última señal de las pulseras. Las seis variantes guardadas funcionan sin red y avanzan a 10×. Pausar conserva la posición. Al cambiar de aplicación también queda en pausa.
 
 **Pulseras físicas.** Servir la carpeta por HTTPS y abrirla en Chrome para Android. Cada placa ESP32-C3 necesita el programa `firmware/PulseraVira/PulseraVira.ino`. En Arduino IDE (paquete esp32 3.3.x) seleccionar la placa ESP32C3 Dev Module con **USB CDC On Boot: Enabled** y la biblioteca NimBLE-Arduino **2.5.2**. Con la 2.3.7 la placa se reinicia en bucle al iniciar el Bluetooth. Para cada placa, configurar `VIRA_SIDE` como 'L' o 'R' según la muñeca, y verificar que `motorPin` corresponde a la entrada de control del módulo con MOSFET (valor inicial GPIO4). Con PlatformIO, ejecutar `pio run -d firmware` para compilar las variantes izquierda y derecha sin editar el código. El programa anuncia Vira-L o Vira-R. Cada señal son tres pulsos de 500 ms separados por 200 ms.
 
@@ -69,7 +69,7 @@ Qué es real y qué no: **los giros y las calles son reales** (los calcula OpenS
 
 El fondo del mapa es el estilo «positron» de **OpenFreeMap** (datos de OpenStreetMap, gratis y sin clave). **El sector de Santiago de los tres trayectos viene guardado en `vendor/mapa_santiago.js`** (teselas, tipografías e íconos, 4,3 MB), así que el mapa se ve **sin internet** y abriendo con doble clic. Fuera de esa zona, el mapa se completa desde OpenFreeMap si hay conexión. La librería del mapa también está en `vendor/` (MapLibre GL JS 4.7.1).
 
-**Hay que copiar la carpeta completa** (incluidos `rutas.js`, `prueba.html`, `prueba.js` y `vendor/`), no solo el HTML.
+**Hay que copiar la carpeta completa** (incluidos `rutas.js`, `prueba.html`, `prueba.css`, `prueba-mapa.js`, `prueba.js` y `vendor/`), no solo el HTML.
 
 Para regenerar el paquete (otra zona o datos más nuevos): `node vendor/build_mapa_santiago.mjs vendor/mapa_santiago.js` (necesita Node e internet). El área y los zooms se cambian al inicio del script. No se usa PMTiles porque pide el archivo por partes y eso no funciona al abrir con doble clic (`file://`).
 

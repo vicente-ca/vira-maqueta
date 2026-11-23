@@ -1,0 +1,117 @@
+:root {
+  --ink: #1b2230;
+  --muted: #596171;
+  --blue: #384fb8;
+  --line: #deddd7;
+  --display: "Barlow Semi Condensed", Bahnschrift, "Arial Narrow", sans-serif;
+  color: var(--ink);
+  background: #f3f0eb;
+  font: 16px/1.45 "Atkinson Hyperlegible Next", "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box }
+body, h1, h2, p, ol { margin: 0 }
+[hidden], :is(#message,#instruction,#counts,#events,#pulseResult):empty { display: none !important }
+.wrap { width: min(1120px, 100% - 48px); margin-inline: auto }
+.mast { border-bottom: 1px solid #d7d4ce }
+.mast-inner, .brand, .controls, .map-meta, .map-foot, .wrists, #bandFeedback { display: flex; align-items: center }
+.mast-inner { justify-content: space-between; min-height: 64px }
+.brand { gap: 7px; font: 700 27px/1 var(--display); letter-spacing: -.055em }
+a { color: var(--blue); font-weight: 600; text-underline-offset: 3px }
+.mast a { text-decoration: none; padding-block: 12px }
+.mast a:hover { text-decoration: underline }
+main { padding: 30px 0 44px }
+h1, h2, .metrics strong, #turnText { font-family: var(--display); line-height: 1.1 }
+h1 { font-size: clamp(32px, 4vw, 54px); font-weight: 600; letter-spacing: -.045em; margin-bottom: 24px }
+h2 { font-size: 24px; letter-spacing: -.025em }
+.page-heading { display: flex; gap: 12px; align-items: baseline; justify-content: space-between }
+.page-heading a { display: none }
+.layout { display: grid; grid-template-columns: minmax(0,1.9fr) minmax(290px,1fr); align-items: start; gap: 20px }
+.card { background: #fffefa; border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 5px 20px -16px #252b45aa; min-width: 0 }
+.route-head, .settings, .records, .session-body { padding: 22px 26px }
+.route-head { padding-bottom: 17px }
+.eyebrow, .metrics span { color: var(--muted); font: 650 11px/1.35 "Segoe UI",sans-serif; letter-spacing: .09em; text-transform: uppercase }
+.route-head h2 { margin-top: 5px; font-size: clamp(23px, 2.5vw, 33px); text-wrap: balance }
+.map { position: relative; margin: 0 12px; border-radius: 13px; color: #f3f5ff; overflow: hidden; background-color: #202b45;
+  background-image: linear-gradient(90deg,#a4b6dc13 1px,transparent 1px),linear-gradient(#a4b6dc13 1px,transparent 1px),radial-gradient(ellipse at 25% 60%,#2e405e,transparent 80%); background-size: 24px 24px,24px 24px,100% 100% }
+#routeMap { width: 100%; height: clamp(200px, 23vw, 285px); display: block }
+.map-meta, .map-foot { padding: 12px 16px; justify-content: space-between; font-size: 12px; line-height: 1.2 }
+#mapState { border: 1px solid #8391ae75; padding: 4px 9px; border-radius: 999px; background: #1c273d }
+.north { letter-spacing: .09em; font-weight: 700 }
+.map-foot { color: #d2dbed; gap: 8px }
+.map-foot a { color: inherit; font-weight: inherit }
+.map-foot small { text-align: right }
+.map-foot i, .wrists i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; background: #ffcb74 }
+.pin-label { fill: white; font: 600 12px "Segoe UI",sans-serif; paint-order: stroke; stroke: #202b45; stroke-width: 4px; stroke-linejoin: round }
+.metrics { display: grid; grid-template-columns: repeat(3,1fr); margin: 18px 26px 12px }
+.metrics div + div { border-left: 1px solid var(--line); padding-left: 20% }
+.metrics strong { display: block; font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 4px }
+progress { display: block; appearance: none; width: calc(100% - 52px); height: 4px; margin: 0 auto; border: 0; border-radius: 6px; overflow: hidden; background: #e4e6ed; color: var(--blue) }
+progress::-webkit-progress-bar { background: #e4e6ed }
+progress::-webkit-progress-value { background: var(--blue) }
+progress::-moz-progress-bar { background: var(--blue) }
+.session-body > * + * { margin-top: 12px }
+.session-body #state { margin-top: 3px; color: var(--muted); font-size: 14px }
+.session:has(#routeView:not([hidden])) :is(#now, #state) {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap
+}
+.session:has(#routeView:not([hidden])) #routeCue { margin-top: 0 }
+#routeHelp a { display: none }
+#routeCue { display: flex; gap: 13px; align-items: center; min-height: 54px }
+#turnArrow { flex: none; display: grid; place-items: center; width: 47px; height: 47px; color: var(--blue); font: 700 32px/1 "Segoe UI Symbol",sans-serif; background: #e9edfc; border-radius: 13px }
+#turnText { display: block; margin-top: 3px; font-size: 21px; font-weight: 600 }
+#bandFeedback { flex-wrap: wrap; gap: 6px 12px }
+.wrists { gap: 6px }
+.wrists span { background: #f3f2ed; border-radius: 16px; padding: 5px 9px; font-size: 13px }
+.wrists i { background: #a8abb2; width: 7px; height: 7px }
+.wrists .lit { background: #ffebc1; color: #563608 }
+.wrists .lit i { background: #976000; animation: signal .65s ease-out 3 }
+@keyframes signal { 25% { box-shadow: 0 0 0 4px #b17a203b } 100% { box-shadow: 0 0 0 0 #b17a2000 } }
+#pulseResult, #counts, #instruction, #summary, .settings p { color: var(--muted); font-size: 14px }
+#counts { display: block }
+.controls { flex-wrap: wrap; gap: 8px }
+button, select { max-width: 100%; min-height: 44px; color: inherit; font: inherit; border: 1px solid #bfc3cd; border-radius: 10px; background: #fffefa }
+button { padding: 8px 16px; cursor: pointer; font-weight: 600; transition: background-color .16s, transform .16s }
+button:hover:enabled { background: #eeeff4 }
+button:active:enabled { transform: translateY(1px) }
+.primary, #pause { background: var(--blue); border-color: var(--blue); color: white }
+.primary:hover:enabled, #pause:hover:enabled { background: #293d99 }
+button:disabled, select:disabled { opacity: .6; cursor: default }
+:focus-visible { outline: 3px solid #4a62d6; outline-offset: 3px }
+label { display: grid; gap: 5px; margin-top: 16px; font-size: 14px; font-weight: 650 }
+select { width: 100%; padding: 7px 10px; font-size: 16px; font-weight: 400 }
+.settings p, .records p, .settings .controls { margin-top: 12px }
+.note, .band { padding-top: 14px; border-top: 1px solid var(--line) }
+.band { margin-top: 14px }
+.band > span { float: right; font-size: 14px; color: var(--muted) }
+#message { color: #783e12; background: #fff1d9; padding: 10px 13px; border-radius: 8px }
+.records { margin-top: 20px }
+.records label { max-width: 42rem }
+#events { padding: 0 0 0 1.65em; margin-top: 10px; max-height: 16rem; overflow: auto; scrollbar-width: thin }
+#events li { padding: 6px 3px; font-size: 14px; border-top: 1px solid var(--line) }
+#events li::marker { color: var(--muted); font-variant-numeric: tabular-nums }
+@media(max-width: 760px) {
+  #routeHelp a { display: inline-block; padding-block: 6px }
+  .page-heading a { display: inline; font-size: 14px }
+  .layout:has(#routeView[hidden]) .settings { grid-row: 1 }
+  .wrap { width: min(100% - 24px, 580px) }
+  .mast-inner { min-height: 52px }
+  main { padding-top: 18px }
+  h1 { margin-bottom: 14px }
+  .layout { grid-template-columns: minmax(0,1fr); gap: 12px }
+  .route-head, .settings, .records, .session-body { padding: 16px }
+  .map { margin-inline: 6px }
+  .metrics { margin: 14px 16px 10px }
+  .metrics div + div { padding-left: 12% }
+  .metrics span { font-size: 10px; letter-spacing: .055em }
+  progress { width: calc(100% - 32px) }
+  .records { margin-top: 12px }
+}
+@media(min-width: 761px) {
+  .session:has(#routeView:not([hidden])) .session-body { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center }
+  .session-body > * { grid-column: 1 / -1 }
+  .session:has(#routeView:not([hidden])) #routeCue { grid-column: 1 }
+  .session:has(#routeView:not([hidden])) #sessionControls { grid-column: 2; margin: 0 }
+}
+@media(prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important }
+}

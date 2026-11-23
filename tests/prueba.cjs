@@ -60,15 +60,24 @@ async function run() {
     ]) {
       await select('trip',trip);
       await select('profile',profile);
+      const rider = () => page.locator('#mapRider').getAttribute('transform');
+      assert.equal(await text('turnCount'), String(expected));
+      const origin = await rider();
       await click('start');
+      await page.clock.runFor(1200);
       await click('pause');
       const paused = await records();
+      const stopped = await rider();
+      assert.notEqual(stopped, origin);
       await page.clock.runFor(2000);
+      assert.equal(await rider(), stopped);
       assert.deepEqual((await records()).events,paused.events);
       await click('start');
       await page.clock.runFor(70000);
       const s = await records();
       assert.equal(s.state,'Completada');
+      assert.equal(await page.locator('#routeProgress').evaluate(p => p.value), 100);
+      assert.equal(await text('turnText'), 'Destino alcanzado');
       assert.equal(s.events.filter(e => e.result === 'Simulada').length,expected);
     }
     assert.equal(await page.locator('#history option').count(),6);
@@ -111,6 +120,7 @@ async function run() {
       await page.clock.runFor(2000);
       await click('signal');
       assert(await page.locator('#records').isHidden());
+      assert(await page.locator('#bandFeedback').isHidden());
       const side=await page.evaluate(()=>window.writes.at(-1));
       await page.locator('[data-answer="'+(i===9?'none':side)+'"]').click();
     }

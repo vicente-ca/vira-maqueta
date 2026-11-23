@@ -8,6 +8,7 @@ const storagePrefix = 'vira.prueba.v1.';
 const links = { L: null, R: null };
 const connecting = new Set();
 const sessions = new Map();
+const routeMap = createRouteMap();
 let current = null;
 let route = null;
 let timer = 0;
@@ -101,6 +102,15 @@ function render() {
   const locked = Boolean(active());
   const trial = el('kind').value === 'trial';
   const manual = el('kind').value === 'manual';
+  const showingRoute = !manual && !trial;
+  el('pageTitle').textContent = manual ? 'Control manual' : trial ? 'Prueba de tacto' : 'Prueba de ruta';
+  for (const id of ['routeView','routeCue','bandFeedback','routeHelp']) el(id).hidden = !showingRoute;
+  if (showingRoute) {
+    routeMap.select(el('trip').value, el('profile').value);
+    routeMap.paint(route?.position || 0, true);
+    el('mapState').textContent = current?.state || 'Vista previa';
+  }
+  el('historyLabel').hidden = !sessions.size;
   for (const id of ['mode','kind','trip','profile']) el(id).disabled = locked || busy || connecting.size > 0;
   el('hardware').hidden = !physical();
   el('routeOptions').hidden = manual || trial;
@@ -121,7 +131,7 @@ function render() {
   el('pause').hidden = current?.state !== 'En curso';
   el('finish').hidden = !locked;
   el('finish').disabled = busy;
-  el('state').textContent = current ? current.state + ' · ' + title(current) : 'Lista para empezar.';
+  el('state').textContent = current ? current.state + ' · ' + (physical() ? 'Pulseras físicas' : 'Pulseras simuladas') : 'Lista para empezar.';
   el('counts').textContent = current ? tally(current) : '';
   el('trialControls').hidden = !locked || !trial || current.state !== 'En curso';
   const waiting = current?.events.find(e => e.type === 'signal' && completed(e) && !e.answer);
@@ -142,7 +152,7 @@ function event(type, result, side = '', detail = '') {
 
 function pause(reason) {
   if (current?.state !== 'En curso') return;
-  clearTimeout(timer);
+  cancelAnimationFrame(timer);
   current.state = 'En pausa';
   event('state', 'Pausa', '', reason);
   el('instruction').textContent = reason;
@@ -214,6 +224,7 @@ async function testSide(side) {
 
 async function emit(side, detail) {
   const entry = event('signal','Pendiente',side,detail);
+  let signaled = [];
   busy = true;
   render();
   try {
@@ -229,6 +240,7 @@ async function emit(side, detail) {
       if (targets.length < wanted.length) entry.detail += ' · solo ' + sides[targets[0]];
       const results = await Promise.allSettled(targets.map(send));
       const received = targets.filter((_,i) => results[i].status === 'fulfilled');
+      signaled = received;
       if (received.length !== targets.length) {
         if (received.length) entry.detail += ' · escritura aceptada solo en ' + sides[received[0]];
         for (const target of targets.filter(t => !received.includes(t))) {
@@ -241,12 +253,14 @@ async function emit(side, detail) {
       coolingUntil = performance.now() + 1900;
     } else {
       entry.result = 'Simulada';
+      signaled = side === 'U' ? ['L','R'] : [side];
     }
   } catch (err) {
     entry.result = err.name === 'TimeoutError' ? 'Sin confirmar' : 'Fallida';
     pause('No se confirmó la orden. Prueba las pulseras antes de reanudar.');
   } finally {
     busy = false;
+    if (current.kind === 'route') routeMap.showSignal(entry, signaled);
     save(current);
     render();
   }
@@ -254,7 +268,7 @@ async function emit(side, detail) {
 }
 
 function finish(state) {
-  clearTimeout(timer);
+  cancelAnimationFrame(timer);
   current.state = state;
   event('state', state);
   el('instruction').textContent = state === 'Completada' ? (current.kind === 'trial' ? 'Diez respuestas registradas.' : 'Llegaste al destino.') : 'Prueba finalizada.';
@@ -266,12 +280,12 @@ async function advance() {
   const now = performance.now();
   const elapsed = Math.min(500, now - previousTick);
   previousTick = now;
-  route.position += elapsed / 1000 * OSM_PROF[current.profile].kmh / 3.6 * OSM_SPEEDUP;
+  route.position = Math.min(route.len, route.position + elapsed / 1000 * OSM_PROF[current.profile].kmh / 3.6 * OSM_SPEEDUP);
+  routeMap.paint(route.position);
   const step = route.steps[route.next];
   if (step) {
     const distance = Math.max(0, Math.round(step.at - route.position));
     const name = step.name || 'la siguiente calle';
-    el('instruction').textContent = sides[step.side] + ' en ' + distance + ' m · ' + name;
     if (distance <= OSM_PROF[current.profile].warn && now >= coolingUntil) {
       route.next++;
       await emit(step.side, name);
@@ -279,8 +293,8 @@ async function advance() {
   } else if (route.position >= route.len) {
     finish('Completada');
     return;
-  } else { el('instruction').textContent = 'Continúa hasta el destino.'; }
-  if (current.state === 'En curso') timer = setTimeout(advance, 150);
+  }
+  if (current.state === 'En curso') timer = requestAnimationFrame(advance);
 }
 
 function start() {
@@ -296,8 +310,9 @@ function start() {
     current = {id,started:Date.now(),mode:el('mode').value,kind,trip,profile,state:'En curso',events:[]};
     sessions.set(id,current);
     if (kind === 'route') {
-      const parsed = prepRoute(OSM_CACHE[trip + '_' + profile]);
-      route = {steps:parsed.steps.filter(s => s.side),len:parsed.len,position:0,next:0};
+      const parsed = routeMap.select(trip, profile);
+      route = {steps:parsed.steps,len:parsed.len,position:0,next:0};
+      routeMap.showSignal(null);
       if (physical()) current.sides = Object.keys(links).filter(usable);
     } else if (kind === 'trial') {
       current.sequence = Array.from('LLLLLRRRRR');
@@ -315,6 +330,7 @@ function start() {
     message = 'Ruta con una sola pulsera: los giros a la ' + (current.sides[0] === 'L' ? 'derecha' : 'izquierda') + ' se muestran sin vibrar.';
   }
   previousTick = performance.now();
+  el('instruction').textContent = '';
   render();
   if (current.kind === 'route') advance();
   else el('instruction').textContent = current.kind === 'manual' ? 'Elige el lado.' : 'El participante mantiene la vista fuera de la pantalla.';
@@ -354,6 +370,14 @@ for (const s of [...sessions.values()].sort((a,b) => a.started-b.started)) {
 }
 el('history').selectedIndex = 0;
 el('history').onchange = renderHistory;
+function resetPreview() {
+  if (active()) return;
+  current = null;
+  route = null;
+  routeMap.showSignal(null);
+  el('instruction').textContent = '';
+}
+for (const id of ['trip','profile']) el(id).onchange = () => { resetPreview(); render(); };
 for (const side of Object.keys(links)) {
   el('manual'+side).onclick = () => manualSignal(side);
   el('connect'+side).onclick = () => connect(side);
@@ -367,6 +391,7 @@ for (const side of Object.keys(links)) {
   };
 }
 el('mode').onchange = () => {
+  resetPreview();
   message = '';
   if (!physical()) {
     for (const side of Object.keys(links)) { const link = links[side]; links[side] = null; link?.device.gatt.disconnect(); }
@@ -375,6 +400,7 @@ el('mode').onchange = () => {
   render();
 };
 el('kind').onchange = () => {
+  resetPreview();
   if (el('kind').value === 'trial') el('mode').value = 'ble';
   message = ''; render();
 };

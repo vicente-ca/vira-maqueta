@@ -3,43 +3,80 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#F3F0EB">
+  <meta name="theme-color" content="#f3f0eb">
   <title>Vira · Prueba de ruta</title>
-  <style>
-    *{box-sizing:border-box}body{margin:0;background:#f3f0eb;color:#1b2230;font:1rem/1.5 "Segoe UI",system-ui,sans-serif}
-    main{max-width:42rem;margin:auto;padding:1rem}header,.controls,.band{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap}
-    header{justify-content:space-between}section{background:white;border-radius:12px;padding:1rem;margin:1rem 0}
-    h1,h2,p{margin:.35rem 0 .75rem}h1{font-size:1.65rem}h2{font-size:1.2rem}a{color:#3048a7}
-    button,select{font:inherit;max-width:100%;min-height:44px;border:1px solid #aaa9a6;border-radius:8px;background:#fff;color:inherit;padding:.45rem .7rem}
-    label{display:grid;gap:.25rem;margin:.6rem 0}.primary{background:#4055b8;color:white;border-color:#4055b8}button:disabled{opacity:.55}
-    .band{margin:.5rem 0}.band strong{min-width:5rem}[hidden]{display:none!important}li{margin:.35rem 0}
-    #message{color:#713718}#instruction{font-size:1.2rem;font-weight:600}summary{cursor:pointer}output{display:block}
-  </style>
+  <link rel="stylesheet" href="prueba.css">
   <script defer src="rutas.js"></script>
+  <script defer src="prueba-mapa.js"></script>
   <script defer src="prueba.js"></script>
 </head>
-<body><main>
-  <header><h1>Vira · Prueba de ruta</h1><a href="index.html">Ver maqueta</a></header>
-  <section aria-labelledby="setup"><h2 id="setup">Preparar la prueba</h2>
-    <label>Pulseras<select id="mode"><option value="sim">Simuladas</option><option value="ble">Físicas · Bluetooth</option></select></label>
-    <div id="hardware" hidden><p>Conecta y prueba cada lado con el vehículo detenido.</p>
-      <div class="band"><strong>Izquierda</strong><button id="connectL">Conectar izquierda</button><button id="testL">Probar izquierda</button><button id="confirmL" hidden>Sentí el pulso</button><span id="stateL"></span></div>
-      <div class="band"><strong>Derecha</strong><button id="connectR">Conectar derecha</button><button id="testR">Probar derecha</button><button id="confirmR" hidden>Sentí el pulso</button><span id="stateR"></span></div>
+<body>
+  <header class="mast"><div class="wrap mast-inner">
+    <div class="brand"><svg width="31" height="31" viewBox="0 0 100 100" aria-hidden="true"><path d="M36 18 A38 38 0 0 0 36 82 M64 18 A38 38 0 0 1 64 82" fill="none" stroke="#4a62d6" stroke-width="10"/><circle cx="50" cy="50" r="9" fill="#f0b44c"/></svg>Vira</div>
+    <a href="index.html"><span aria-hidden="true">←</span> Ver maqueta</a>
+  </div></header>
+  <main class="wrap">
+    <div class="page-heading"><h1 id="pageTitle">Prueba de ruta</h1><a href="#setup">Configurar</a></div>
+    <div class="layout">
+      <section class="card session" aria-labelledby="now">
+        <div id="routeView">
+          <div class="route-head"><span class="eyebrow">Trayecto en Santiago</span><h2 id="tripTitle"></h2></div>
+          <div class="map">
+            <div class="map-meta"><span id="mapState">Vista previa</span><span class="north" aria-label="Norte arriba">↑ N</span></div>
+            <svg id="routeMap" role="img" aria-labelledby="mapTitle" preserveAspectRatio="xMidYMid meet">
+              <title id="mapTitle">Esquema del recorrido</title>
+              <image id="mapStreets" href="vendor/calles-santiago.webp" preserveAspectRatio="none" aria-hidden="true"/>
+              <g fill="none" stroke-linejoin="round" stroke-linecap="round">
+                <path id="mapTrack" stroke="#99a7d7" stroke-width="4"/>
+                <path id="mapDone" stroke="#ffcb74" stroke-width="4"/>
+              </g>
+              <g id="mapTurns"></g>
+              <g id="mapEnd"><circle r="7" fill="#202b45" stroke="#f7f5ed" stroke-width="2"/><circle r="2.3" fill="#fff"/></g>
+              <g id="mapRider"><circle r="15" fill="#ffcd78" opacity=".14"/><circle r="8" fill="#ffd184" stroke="#202b45" stroke-width="2.5"/><path id="mapHeading" d="M0 -4L3 3L0 1.6L-3 3Z" fill="#202b45"/></g>
+              <g class="pin-label"><text id="originLabel">Salida</text><text id="endLabel">Llegada</text></g>
+            </svg>
+            <div class="map-foot"><span><i></i> Posición simulada</span><small><a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a> · OpenMapTiles · OSRM</small></div>
+          </div>
+          <div class="metrics">
+            <div><span>Recorrido</span><strong id="travelled"></strong></div>
+            <div><span>Total</span><strong id="totalDistance"></strong></div>
+            <div><span>Giros</span><strong id="turnCount"></strong></div>
+          </div>
+          <progress id="routeProgress" value="0" max="100" aria-label="Avance del recorrido"></progress>
+        </div>
+        <div class="session-body">
+          <h2 class="eyebrow" id="now">Sesión</h2>
+          <p id="state" role="status">Lista para empezar.</p>
+          <p id="instruction" aria-live="polite"></p>
+          <div id="routeCue">
+            <span id="turnArrow" aria-hidden="true">↱</span>
+            <div><span class="eyebrow" id="cueLabel">Primer giro</span><strong id="turnText"></strong></div>
+          </div>
+          <div id="sessionControls" class="controls"><button id="start" class="primary">Iniciar ruta</button><button id="pause" hidden>Pausar</button><button id="finish" hidden>Finalizar</button></div>
+          <div id="bandFeedback" aria-label="Última señal de las pulseras">
+            <span class="eyebrow">Última señal</span>
+            <div class="wrists"><span id="wristL"><i></i>Izquierda</span><span id="wristR"><i></i>Derecha</span></div>
+            <span id="pulseResult" role="status">Sin avisos</span>
+          </div>
+          <div id="trialControls" hidden><button id="signal">Emitir señal</button><div id="answers" hidden><p>¿Qué lado sintió?</p><div class="controls"><button data-answer="L">Izquierda</button><button data-answer="R">Derecha</button><button data-answer="none">Ninguno</button></div></div></div>
+          <output id="counts"></output>
+          <p id="message" role="status"></p>
+        </div>
+      </section>
+      <section class="card settings" aria-labelledby="setup"><h2 id="setup">Preparar la prueba</h2>
+        <label>Ejercicio<select id="kind"><option value="route">Recorrer una ruta guardada</option><option value="manual">Control manual</option><option value="trial">Reconocer 10 giros por tacto</option></select></label>
+        <div id="routeOptions"><label>Trayecto<select id="trip"></select></label><label>Vehículo<select id="profile"><option value="bici">Bici</option><option value="moto">Moto</option></select></label></div>
+        <label>Pulseras<select id="mode"><option value="sim">Simuladas</option><option value="ble">Físicas · Bluetooth</option></select></label>
+        <div id="hardware" hidden><p>Conecta y prueba cada lado con el vehículo detenido.</p>
+          <div class="band"><strong>Izquierda</strong><span id="stateL"></span><div class="controls"><button id="connectL">Conectar izquierda</button><button id="testL">Probar izquierda</button><button id="confirmL" hidden>Sentí el pulso</button></div></div>
+          <div class="band"><strong>Derecha</strong><span id="stateR"></span><div class="controls"><button id="connectR">Conectar derecha</button><button id="testR">Probar derecha</button><button id="confirmR" hidden>Sentí el pulso</button></div></div>
+        </div>
+        <p id="routeHelp" class="note">El recorrido avanza a 10× y funciona sin GPS ni internet. Puedes pausarlo en cualquier punto. <a href="#pageTitle">Ver recorrido ↑</a></p>
+        <p id="trialHelp" hidden>Con las pulseras puestas y el vehículo detenido, el participante dice qué lado sintió sin mirar. El operador registra la respuesta.</p>
+        <div id="manualControls" hidden><p>Elige la muñeca que debe vibrar. Cada toque envía tres pulsos.</p><div class="controls"><button id="manualL">Vibrar izquierda</button><button id="manualR">Vibrar derecha</button></div></div>
+      </section>
     </div>
-    <label>Ejercicio<select id="kind"><option value="route">Recorrer una ruta guardada</option><option value="manual">Control manual</option><option value="trial">Reconocer 10 giros por tacto</option></select></label>
-    <div id="routeOptions"><label>Trayecto<select id="trip"></select></label><label>Vehículo<select id="profile"><option value="bici">Bici</option><option value="moto">Moto</option></select></label>
-    <p>El avance por la ruta es simulado y funciona sin GPS. Mantén la página abierta.</p></div>
-    <p id="trialHelp" hidden>Con las pulseras puestas y el vehículo detenido, el participante dice qué lado sintió sin mirar. El operador registra la respuesta.</p>
-    <div id="manualControls" hidden>
-      <p>Elige la muñeca que debe vibrar. Cada toque envía una señal de tres pulsos.</p>
-      <div class="controls"><button id="manualL">Vibrar izquierda</button><button id="manualR">Vibrar derecha</button></div>
-    </div>
-    <p id="message" role="status"></p>
-    <div class="controls"><button id="start" class="primary">Iniciar ruta</button><button id="pause" hidden>Pausar</button><button id="finish" hidden>Finalizar</button></div>
-  </section>
-  <section aria-labelledby="now"><h2 id="now">Sesión</h2><p id="state" role="status">Lista para empezar.</p><p id="instruction" aria-live="polite"></p>
-    <div id="trialControls" hidden><button id="signal">Emitir señal</button><div id="answers" hidden><p>¿Qué lado sintió?</p><div class="controls"><button data-answer="L">Izquierda</button><button data-answer="R">Derecha</button><button data-answer="none">Ninguno</button></div></div></div>
-    <output id="counts"></output>
-  </section>
-  <section id="records"><h2>Registro de pruebas</h2><label>Sesión guardada<select id="history"></select></label><p id="summary"></p><ol id="events"></ol></section>
-</main></body></html>
+    <section id="records" class="card records"><h2>Registro de pruebas</h2><label id="historyLabel">Sesión guardada<select id="history"></select></label><p id="summary"></p><ol id="events"></ol></section>
+  </main>
+</body>
+</html>
