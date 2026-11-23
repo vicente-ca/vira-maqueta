@@ -18,12 +18,10 @@ let coolingUntil = 0;
 const manualNext = {L:0, R:0};
 let message = '';
 
-const physical = () => el('mode').value === 'ble';
 const connected = side => Boolean(links[side]?.device.gatt.connected);
 const active = () => current && ['En curso', 'En pausa'].includes(current.state);
 const usable = side => connected(side) && links[side].tested;
 function ready() {
-  if (!physical()) return true;
   const kind = el('kind').value;
   if (kind === 'trial') return Object.keys(links).every(usable);
   // Una ruta en pausa se reanuda con las mismas pulseras con que partió. Para iniciarla basta una.
@@ -111,27 +109,31 @@ function render() {
     el('mapState').textContent = current?.state || 'Vista previa';
   }
   el('historyLabel').hidden = !sessions.size;
-  for (const id of ['mode','kind','trip','profile']) el(id).disabled = locked || busy || connecting.size > 0;
-  el('hardware').hidden = !physical();
+  for (const id of ['kind','trip','profile']) el(id).disabled = locked || busy || connecting.size > 0;
   el('routeOptions').hidden = manual || trial;
   el('manualControls').hidden = !manual;
   el('trialHelp').hidden = !trial;
   for (const side of Object.keys(links)) {
     el('manual' + side).disabled = busy || connecting.size > 0 || current?.state === 'En pausa' ||
-      (physical() && (!usable(side) || performance.now() < manualNext[side]));
+      !usable(side) || performance.now() < manualNext[side];
+    el('connect' + side).hidden = connected(side);
+    el('test' + side).hidden = !connected(side) || usable(side) || links[side].awaitingTouch;
     el('connect' + side).disabled = connected(side) || busy || connecting.size > 0 || !supportsBle();
     el('test' + side).disabled = !connected(side) || busy || (current?.state === 'En curso' && (!manual || usable(side)));
     el('confirm' + side).hidden = !links[side]?.awaitingTouch || busy;
-    el('state' + side).textContent = connecting.has(side) ? 'Conectando…' : connected(side) ? (links[side].tested ? 'Probada' : 'Por probar') : 'Sin conexión';
+    el('state' + side).textContent = connecting.has(side) ? 'Conectando…' : connected(side) ? (usable(side) ? 'Lista' : 'Conectada') : 'Sin conexión';
   }
-  el('message').textContent = physical() && !supportsBle() ? 'Para conectar pulseras abre esta página por HTTPS en Chrome para Android, o elige la simulación.' : message;
+  el('connectionHelp').textContent = !supportsBle() ? 'Este navegador no ofrece Bluetooth aquí. Abre la página HTTPS en Chrome para Android o en Edge de escritorio.' :
+    trial ? 'La prueba de tacto requiere conectar las dos pulseras y confirmar el pulso de cada lado.' :
+    'Conecta al menos una pulsera y confirma que sentiste el pulso. Haz la prueba con el vehículo detenido.';
+  el('message').textContent = message;
   el('start').hidden = current?.state === 'En curso' || (manual && current?.state !== 'En pausa');
-  el('start').disabled = busy || !ready() || (trial && !physical());
+  el('start').disabled = busy || connecting.size > 0 || !ready();
   el('start').textContent = locked ? 'Reanudar' : trial ? 'Iniciar prueba de tacto' : 'Iniciar ruta';
   el('pause').hidden = current?.state !== 'En curso';
   el('finish').hidden = !locked;
   el('finish').disabled = busy;
-  el('state').textContent = current ? current.state + ' · ' + (physical() ? 'Pulseras físicas' : 'Pulseras simuladas') : 'Lista para empezar.';
+  el('state').textContent = current ? current.state + ' · Prototipo Bluetooth' : ready() ? 'Lista para empezar.' : 'Esperando pulsera confirmada.';
   el('counts').textContent = current ? tally(current) : '';
   el('trialControls').hidden = !locked || !trial || current.state !== 'En curso';
   const waiting = current?.events.find(e => e.type === 'signal' && completed(e) && !e.answer);
@@ -160,7 +162,7 @@ function pause(reason) {
 }
 
 async function connect(side) {
-  if (connecting.size || connected(side)) return;
+  if (!supportsBle() || busy || connecting.size || connected(side)) return;
   connecting.add(side);
   message = '';
   render();
@@ -177,7 +179,7 @@ async function connect(side) {
       if (links[side]?.device !== device) return;
       links[side] = null;
       message = 'Pulsera ' + sides[side].toLowerCase() + ' desconectada. Conéctala y vuelve a probarla.';
-      if (active() && current.mode === 'ble') {
+      if (active() && (!current.sides || current.sides.includes(side))) {
         event('link','Desconexión',side);
         pause(message);
       }
@@ -185,7 +187,14 @@ async function connect(side) {
     }, {once:true});
   } catch (err) {
     device?.gatt.disconnect();
-    message = err.name === 'NotFoundError' ? 'No se seleccionó una pulsera.' : 'No se pudo conectar. Revisa el lado y el firmware de la pulsera.';
+    const name = 'Vira-' + side;
+    if (!device && err.name === 'NotFoundError') {
+      message = 'Enciende ' + name + ' y selecciónala en la lista Bluetooth del navegador.';
+    } else if (err.name === 'SecurityError' || err.name === 'NotAllowedError') {
+      message = 'El navegador bloqueó el acceso. Revisa el permiso de Bluetooth para este sitio y vuelve a conectar.';
+    } else {
+      message = 'No se pudo conectar con ' + name + '. Comprueba que esté encendida, libre de otra conexión y con el firmware de ese lado.';
+    }
   } finally { connecting.delete(side); render(); }
 }
 
@@ -228,33 +237,28 @@ async function emit(side, detail) {
   busy = true;
   render();
   try {
-    if (current.mode === 'ble') {
-      // Una vuelta requiere que ambos dispositivos acepten su orden.
-      const wanted = side === 'U' ? ['L','R'] : [side];
-      // Una ruta iniciada con una sola pulsera muestra los giros del otro lado sin enviarlos.
-      const targets = current.sides ? wanted.filter(t => current.sides.includes(t)) : wanted;
-      if (!targets.length) {
-        entry.result = 'Sin pulsera';
-        return entry;
-      }
-      if (targets.length < wanted.length) entry.detail += ' · solo ' + sides[targets[0]];
-      const results = await Promise.allSettled(targets.map(send));
-      const received = targets.filter((_,i) => results[i].status === 'fulfilled');
-      signaled = received;
-      if (received.length !== targets.length) {
-        if (received.length) entry.detail += ' · escritura aceptada solo en ' + sides[received[0]];
-        for (const target of targets.filter(t => !received.includes(t))) {
-          if (links[target]) links[target].tested = false;
-        }
-        throw results.find(result => result.status === 'rejected' && result.reason?.name === 'TimeoutError')?.reason ||
-          Error('Escritura fallida');
-      }
-      entry.result = 'Enviada';
-      coolingUntil = performance.now() + 1900;
-    } else {
-      entry.result = 'Simulada';
-      signaled = side === 'U' ? ['L','R'] : [side];
+    // Una vuelta requiere que ambos dispositivos acepten su orden.
+    const wanted = side === 'U' ? ['L','R'] : [side];
+    // Una ruta iniciada con una sola pulsera muestra los giros del otro lado sin enviarlos.
+    const targets = current.sides ? wanted.filter(t => current.sides.includes(t)) : wanted;
+    if (!targets.length) {
+      entry.result = 'Sin pulsera';
+      return entry;
     }
+    if (targets.length < wanted.length) entry.detail += ' · solo ' + sides[targets[0]];
+    const results = await Promise.allSettled(targets.map(send));
+    const received = targets.filter((_,i) => results[i].status === 'fulfilled');
+    signaled = received;
+    if (received.length !== targets.length) {
+      if (received.length) entry.detail += ' · escritura aceptada solo en ' + sides[received[0]];
+      for (const target of targets.filter(t => !received.includes(t))) {
+        if (links[target]) links[target].tested = false;
+      }
+      throw results.find(result => result.status === 'rejected' && result.reason?.name === 'TimeoutError')?.reason ||
+        Error('Escritura fallida');
+    }
+    entry.result = 'Enviada';
+    coolingUntil = performance.now() + 1900;
   } catch (err) {
     entry.result = err.name === 'TimeoutError' ? 'Sin confirmar' : 'Fallida';
     pause('No se confirmó la orden. Prueba las pulseras antes de reanudar.');
@@ -298,22 +302,21 @@ async function advance() {
 }
 
 function start() {
-  if (busy || !ready() || current?.state === 'En curso') return;
+  if (busy || connecting.size || !ready() || current?.state === 'En curso') return;
   if (current?.state === 'En pausa') {
     current.state = 'En curso';
     event('state','Reanudada');
   } else {
     const kind = el('kind').value;
-    if (kind === 'trial' && !physical()) return;
     const trip = el('trip').value, profile = el('profile').value;
     const id = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,9);
-    current = {id,started:Date.now(),mode:el('mode').value,kind,trip,profile,state:'En curso',events:[]};
+    current = {id,started:Date.now(),mode:'ble',kind,trip,profile,state:'En curso',events:[]};
     sessions.set(id,current);
     if (kind === 'route') {
       const parsed = routeMap.select(trip, profile);
       route = {steps:parsed.steps,len:parsed.len,position:0,next:0};
       routeMap.showSignal(null);
-      if (physical()) current.sides = Object.keys(links).filter(usable);
+      current.sides = Object.keys(links).filter(usable);
     } else if (kind === 'trial') {
       current.sequence = Array.from('LLLLLRRRRR');
       for (let i = 9; i > 0; i--) {
@@ -390,18 +393,8 @@ for (const side of Object.keys(links)) {
     render();
   };
 }
-el('mode').onchange = () => {
-  resetPreview();
-  message = '';
-  if (!physical()) {
-    for (const side of Object.keys(links)) { const link = links[side]; links[side] = null; link?.device.gatt.disconnect(); }
-    if (el('kind').value === 'trial') el('kind').value = 'route';
-  }
-  render();
-};
 el('kind').onchange = () => {
   resetPreview();
-  if (el('kind').value === 'trial') el('mode').value = 'ble';
   message = ''; render();
 };
 el('start').onclick = start;
@@ -422,6 +415,5 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) pause
 window.addEventListener('pagehide', () => pause('Página cerrada.'));
 if (new URLSearchParams(location.search).get('modo') === 'manual') {
   el('kind').value = 'manual';
-  el('mode').value = 'ble';
 }
 render();

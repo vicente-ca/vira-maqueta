@@ -48,12 +48,33 @@ async function run() {
     await page.route(/^https?:/, route => route.abort());
     await page.addInitScript(mockBands);
     await page.goto(pathToFileURL(path.join(__dirname,'..','index.html')).href);
-    await page.getByRole('link',{name:'Abrir prueba de ruta'}).click();
+    await page.waitForURL('**/prueba.html');
     await page.clock.install();
     const click = id => page.locator('#'+id).click();
     const text = id => page.locator('#'+id).innerText();
     const select = (id,value) => page.locator('#'+id).selectOption(value);
     const records = () => page.evaluate(() => JSON.parse(localStorage.getItem('vira.prueba.v1.' + document.getElementById('history').value)));
+    async function pair(side) {
+      await click('connect'+side);
+      await click('test'+side);
+      await page.clock.runFor(2000);
+      await click('confirm'+side);
+    }
+    assert.equal(await page.locator('#mode').count(),0);
+    assert(await page.locator('#start').isDisabled());
+    await page.evaluate(() => start());
+    assert.equal(await page.locator('#history option').count(),0);
+    await click('connectL');
+    assert(await page.locator('#start').isDisabled());
+    await click('testL');
+    await page.clock.runFor(2000);
+    assert(await page.locator('#start').isDisabled());
+    await click('confirmL');
+    assert(await page.locator('#start').isEnabled());
+    await select('kind','trial');
+    assert(await page.locator('#start').isDisabled());
+    await pair('R');
+    await select('kind','route');
     for (const [trip, profile, expected] of [
       ['lastarria','bici',9],['lastarria','moto',7],['yungay','bici',6],
       ['yungay','moto',2],['nunoa','bici',8],['nunoa','moto',5]
@@ -78,7 +99,8 @@ async function run() {
       assert.equal(s.state,'Completada');
       assert.equal(await page.locator('#routeProgress').evaluate(p => p.value), 100);
       assert.equal(await text('turnText'), 'Destino alcanzado');
-      assert.equal(s.events.filter(e => e.result === 'Simulada').length,expected);
+      assert.equal(s.mode,'ble');
+      assert.equal(s.events.filter(e => e.result === 'Enviada').length,expected);
     }
     assert.equal(await page.locator('#history option').count(),6);
     await page.reload();
@@ -86,14 +108,7 @@ async function run() {
     console.log('Seis rutas offline, 37 giros, pausa, reanudación y persistencia.');
     await select('trip','nunoa');
     await select('profile','moto');
-    await select('mode','ble');
     assert(await page.locator('#start').isDisabled());
-    async function pair(side) {
-      await click('connect'+side);
-      await click('test'+side);
-      await page.clock.runFor(2000);
-      await click('confirm'+side);
-    }
     await pair('L');await pair('R');
     await click('start');
     await page.evaluate(() => {window.failSide='R';});
@@ -138,7 +153,7 @@ async function run() {
     await page.reload();
     assert.equal(await page.locator('#history option').count(),10);
     assert((await text('summary')).includes('sin cierre'));
-    await select('mode','ble');await select('kind','route');
+    await select('kind','route');
     await select('trip','nunoa');await select('profile','moto');
     await pair('L');
     await page.evaluate(() => {window.writes.length=0;});
@@ -158,10 +173,10 @@ async function run() {
     console.log('Ruta con una sola pulsera: giros del otro lado anotados sin vibrar.');
     assert.deepEqual(errors,[]);
     console.log('Diez ensayos de tacto con respuestas simuladas, cierre manual, escritura sin respuesta y diez registros recuperados.');
-    await page.getByRole('link',{name:'Ver maqueta'}).click();
+    await page.goto(pathToFileURL(path.join(__dirname,'..','index.html')).href + '?vista=maqueta');
     await page.getByRole('link',{name:'Control manual de pulseras'}).click();
     assert.equal(await page.locator('#kind').inputValue(),'manual');
-    assert.equal(await page.locator('#mode').inputValue(),'ble');
+    assert.equal(await page.locator('#mode').count(),0);
     assert(await page.locator('#routeOptions').isHidden());
     assert(await page.locator('#manualL').isDisabled());
     await pair('L');
@@ -182,15 +197,17 @@ async function run() {
     await click('manualL');
     assert.equal((await records()).events.filter(e=>e.result==='Fallida').length,1);
     await click('finish');
-    await select('mode','sim');
+    await page.evaluate(() => {window.failSide='';});
+    await click('testL');await page.clock.runFor(2000);await click('confirmL');
+    await pair('R');
     await click('manualR');await click('pause');await click('start');await click('manualL');await click('finish');
     const manual=await records();
     assert.equal(manual.kind,'manual');
-    assert.deepEqual(manual.events.filter(e=>e.result==='Simulada').map(e=>e.side),['R','L']);
+    assert.deepEqual(manual.events.filter(e=>e.result==='Enviada').map(e=>e.side),['R','L']);
     await page.reload();
     assert((await page.locator('#history option').first().innerText()).includes('Control manual'));
     assert.deepEqual(errors,[]);
-    console.log('Botones manuales: acceso móvil, una y dos pulseras, orden por lado, bloqueo de doble pulso, pausa por desconexión, fallo y simulación guardados.');
+    console.log('Control manual con una y dos pulseras, bloqueo de doble pulso, pausa por desconexión y registro Bluetooth.');
   } finally {await browser.close();}
 }
 run().catch(e=>{console.error(e);process.exitCode=1;});

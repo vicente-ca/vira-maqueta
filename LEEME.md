@@ -12,13 +12,13 @@ Las fotos también se pueden ver directo: [foto 1](https://vicente-ca.github.io/
 
 ## Prueba funcional en el teléfono
 
-**Control manual.** En **Tus pulseras → Control manual de pulseras**, conecta una o las dos ESP32 por Bluetooth. Prueba y confirma cada lado conectado. Después, **Vibrar izquierda** o **Vibrar derecha** envía tres pulsos únicamente a esa muñeca. El primer toque abre la sesión y cada orden queda en el registro. Puedes probar el otro brazo mientras termina el primer pulso. Para ensayar la interfaz sin placas, selecciona **Simuladas**. Este ejercicio funciona sin ruta y sin GPS.
+**Control manual.** En **Tus pulseras → Control manual de pulseras**, conecta una o las dos ESP32 por Bluetooth. Prueba y confirma cada lado conectado. Después, **Vibrar izquierda** o **Vibrar derecha** envía tres pulsos únicamente a esa muñeca. El primer toque abre la sesión y cada orden queda en el registro. Puedes probar el otro brazo mientras termina el primer pulso. Este ejercicio funciona sin ruta y sin GPS.
 
-Desde **Tus pulseras → Abrir prueba de ruta** se entra a `prueba.html`. Copiar la carpeta completa. Para probar sin hardware, elegir **Simuladas**, seleccionar uno de los tres trayectos y pulsar **Iniciar ruta**. El mapa anima la posición sobre las calles de Santiago, marca la distancia recorrida y muestra el próximo giro y la última señal de las pulseras. Las seis variantes guardadas funcionan sin red y avanzan a 10×. Pausar conserva la posición. Al cambiar de aplicación también queda en pausa.
+La dirección principal abre la prueba del prototipo. Conecta una o dos pulseras, prueba el pulso de cada lado conectado y confirma que lo sentiste. Selecciona uno de los tres trayectos y pulsa **Iniciar ruta**. El mapa anima la posición sobre las calles de Santiago, marca la distancia recorrida y muestra el próximo giro y la última señal de las pulseras. Las seis variantes guardadas funcionan sin red y avanzan a 10×. Pausar conserva la posición. Al cambiar de aplicación también queda en pausa.
 
 **Pulseras físicas.** Servir la carpeta por HTTPS y abrirla en Chrome para Android. Cada placa ESP32-C3 necesita el programa `firmware/PulseraVira/PulseraVira.ino`. En Arduino IDE (paquete esp32 3.3.x) seleccionar la placa ESP32C3 Dev Module con **USB CDC On Boot: Enabled** y la biblioteca NimBLE-Arduino **2.5.2**. Con la 2.3.7 la placa se reinicia en bucle al iniciar el Bluetooth. Para cada placa, configurar `VIRA_SIDE` como 'L' o 'R' según la muñeca, y verificar que `motorPin` corresponde a la entrada de control del módulo con MOSFET (valor inicial GPIO4). Con PlatformIO, ejecutar `pio run -d firmware` para compilar las variantes izquierda y derecha sin editar el código. El programa anuncia Vira-L o Vira-R. Cada señal son tres pulsos de 500 ms separados por 200 ms.
 
-En **Físicas · Bluetooth**, conectar cada pulsera, pulsar **Probar** y confirmar en qué muñeca se sintió. Una ruta puede iniciarse con una sola pulsera: los giros del otro lado se muestran y quedan anotados como **Sin pulsera**, sin vibrar. La prueba de tacto necesita las dos. Si hay una desconexión, la sesión queda en pausa. Para reanudar, conectar de nuevo y repetir la prueba de ese lado. Si falla una escritura, el registro conserva el intento fallido y la ruta continúa con el giro siguiente al reanudar. Una escritura aceptada por la pulsera se cuenta como **enviada**. La percepción del pulso se mide en el ejercicio de tacto.
+En **Preparar la prueba**, elige **Conectar izquierda** para Vira-L o **Conectar derecha** para Vira-R. Pulsa **Probar** y luego **Sentí el pulso** cuando corresponda. Una ruta puede iniciarse con una sola pulsera: los giros del otro lado se muestran y quedan anotados como **Sin pulsera**, sin vibrar. La prueba de tacto necesita las dos. Si hay una desconexión, la sesión queda en pausa. Para reanudar, conectar de nuevo y repetir la prueba de ese lado. Si falla una escritura, el registro conserva el intento fallido y la ruta continúa con el giro siguiente al reanudar. Una escritura aceptada por la pulsera se cuenta como **enviada**. La percepción del pulso se mide en el ejercicio de tacto.
 
 **Prueba de tacto.** Con el vehículo detenido, elegir **Reconocer 10 giros por tacto**. Un operador emite cada señal y anota izquierda, derecha o ninguno según la respuesta. Se sortean cinco señales por lado. El orden se oculta durante el ejercicio. Al final aparecen aciertos y respuestas. La meta del equipo es 9 de 10 por participante.
 
@@ -28,12 +28,12 @@ En **Físicas · Bluetooth**, conectar cada pulsera, pulsar **Probar** y confirm
 
 ## Maqueta de presentación
 
-El archivo `index.html` conserva la presentación interactiva con datos simulados, el panel de flota y los accesos de captura. Los datos y la preparación de las rutas están en `rutas.js`, compartido con la prueba funcional.
+La dirección `index.html?vista=maqueta` abre la presentación interactiva con datos simulados, el panel de flota y los accesos de captura. Los datos y la preparación de las rutas están en `rutas.js`, compartido con la prueba funcional.
 
 ## Cómo abrirla
 
-- **En el computador:** abre `index.html` con Chrome o Edge (doble clic). La primera vez necesita internet para cargar las tipografías; sin internet usa Bahnschrift y Segoe UI, que se parecen.
-- **En un teléfono:** copia la carpeta completa al teléfono y ábrelo con Chrome. En pantallas angostas la app ocupa toda la pantalla, sin el marco, para probarla con repartidores. En Android, las vibraciones también hacen vibrar el teléfono.
+- **En el computador:** abre la dirección de presentación `?vista=maqueta` con Chrome o Edge. La primera vez necesita internet para cargar las tipografías; sin internet usa Bahnschrift y Segoe UI, que se parecen.
+- **En un teléfono:** abre la misma dirección de presentación en el teléfono. En pantallas angostas la app ocupa toda la pantalla, sin el marco, para probarla con repartidores. En Android, las vibraciones también hacen vibrar el teléfono.
 
 ## Qué tiene
 
@@ -85,16 +85,16 @@ Lo que vería Uber Eats, Rappi o PedidosYa: se abre con el botón **«Ver el pan
 
 ## Publicada en internet
 
-**https://vicente-ca.github.io/vira-maqueta/** (GitHub Pages, repositorio público [vicente-ca/vira-maqueta](https://github.com/vicente-ca/vira-maqueta)). Es la forma más simple de abrirla en cualquier teléfono, incluido el iPhone.
+**https://vicente-ca.github.io/vira-maqueta/** (GitHub Pages, repositorio público [vicente-ca/vira-maqueta](https://github.com/vicente-ca/vira-maqueta)). La prueba física requiere un navegador con Bluetooth web y una pulsera Vira encendida.
 
 Para publicar cambios: en esta carpeta, `git add -A`, `git commit -m "…"` y `git push`. GitHub Pages se actualiza solo en uno o dos minutos.
 
-## Abrirla en un iPhone sin internet público (por wifi)
+## Abrir la maqueta de presentación en un iPhone por wifi
 
 En el iPhone no sirve abrir `index.html` desde la app Archivos (la vista previa no carga `vendor/`). Si no quieres usar la versión publicada, hay que servirla desde el computador:
 
 1. En la carpeta `Innova`, ejecuta `npx --yes http-server "E2/Diseno_y_marca/App_Vira" -p 8767 -c-1` (o la configuración `app-vira-node` de `.claude/launch.json`).
-2. El comando muestra «Available on: http://10.x.x.x:8767». Abre esa dirección en Safari del iPhone, conectado **al mismo wifi** que el computador.
+2. El comando muestra «Available on: http://10.x.x.x:8767». Añade `/?vista=maqueta` a esa dirección y ábrela en Safari del iPhone, conectado **al mismo wifi** que el computador.
 3. Si no carga: en redes de la universidad suele estar bloqueado que dos aparatos se vean entre sí. Prueba en la casa, o activa el **compartir internet** del iPhone, conecta el computador a esa red y usa la nueva dirección que muestre el comando.
 
 En iPhone **el teléfono no vibra** (Safari no lo permite a las páginas web); las pulseras dibujadas y los bordes de la pantalla sí reaccionan.

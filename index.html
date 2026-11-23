@@ -2,6 +2,12 @@
 <html lang="es-CL">
 <head>
 <meta charset="utf-8">
+<script>
+  const entryParams = new URLSearchParams(location.search);
+  if (!['maqueta','plataforma'].includes(entryParams.get('vista')) && !entryParams.has('shot') && !entryParams.has('tour')) {
+    location.replace('prueba.html' + location.search + location.hash);
+  }
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#F3F0EB" id="themeColor">
 <title>Vira · maqueta de la app</title>

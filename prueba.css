@@ -92,7 +92,7 @@ select { width: 100%; padding: 7px 10px; font-size: 16px; font-weight: 400 }
 @media(max-width: 760px) {
   #routeHelp a { display: inline-block; padding-block: 6px }
   .page-heading a { display: inline; font-size: 14px }
-  .layout:has(#routeView[hidden]) .settings { grid-row: 1 }
+  .settings { grid-row: 1 }
   .wrap { width: min(100% - 24px, 580px) }
   .mast-inner { min-height: 52px }
   main { padding-top: 18px }
