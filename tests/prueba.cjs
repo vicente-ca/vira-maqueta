@@ -50,9 +50,19 @@ async function run() {
     await page.goto(pathToFileURL(path.join(__dirname,'..','index.html')).href);
     await page.waitForURL('**/prueba.html');
     await page.clock.install();
-    const click = id => page.locator('#'+id).click();
+    async function openScreen(name) {
+      if (await page.locator('#' + name).isHidden()) await page.locator('.app-nav a[href="#' + name + '"]').click();
+      await page.locator('#' + name).waitFor({state:'visible'});
+    }
+    async function click(id) {
+      await openScreen(/^(connect|test|confirm)[LR]$/.test(id) ? 'pulseras' : 'prueba');
+      await page.locator('#'+id).click();
+    }
     const text = id => page.locator('#'+id).innerText();
-    const select = (id,value) => page.locator('#'+id).selectOption(value);
+    async function select(id,value) {
+      await openScreen('prueba');
+      await page.locator('#'+id).selectOption(value);
+    }
     const records = () => page.evaluate(() => JSON.parse(localStorage.getItem('vira.prueba.v1.' + document.getElementById('history').value)));
     async function pair(side) {
       await click('connect'+side);
@@ -61,6 +71,13 @@ async function run() {
       await click('confirm'+side);
     }
     assert.equal(await page.locator('#mode').count(),0);
+    assert(await page.locator('#pulseras').isVisible());
+    await page.locator('#toExercise').click();
+    await click('presentRoute');
+    assert(await page.locator('.settings').isHidden());
+    assert.equal(await page.locator('#presentRoute').getAttribute('aria-pressed'),'true');
+    await page.locator('#connectNeeded').click();
+    await page.locator('#pulseras').waitFor({state:'visible'});
     assert(await page.locator('#start').isDisabled());
     await page.evaluate(() => start());
     assert.equal(await page.locator('#history option').count(),0);
@@ -135,6 +152,7 @@ async function run() {
       await page.clock.runFor(2000);
       await click('signal');
       assert(await page.locator('#records').isHidden());
+      assert(await page.locator('#historyNav').isHidden());
       assert(await page.locator('#bandFeedback').isHidden());
       const side=await page.evaluate(()=>window.writes.at(-1));
       await page.locator('[data-answer="'+(i===9?'none':side)+'"]').click();
@@ -205,6 +223,8 @@ async function run() {
     assert.equal(manual.kind,'manual');
     assert.deepEqual(manual.events.filter(e=>e.result==='Enviada').map(e=>e.side),['R','L']);
     await page.reload();
+    await openScreen('historial');
+    assert(await page.locator('#records').isVisible());
     assert((await page.locator('#history option').first().innerText()).includes('Control manual'));
     assert.deepEqual(errors,[]);
     console.log('Control manual con una y dos pulseras, bloqueo de doble pulso, pausa por desconexión y registro Bluetooth.');

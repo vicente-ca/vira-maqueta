@@ -96,11 +96,51 @@ function addHistoryOption(s) {
   el('history').prepend(new Option(date + ' · ' + title(s) + ' · ' + mode, s.id));
 }
 
+const screens = {pulseras:'bandsTitle', prueba:'pageTitle', historial:'historyTitle'};
+function showScreen(focusHeading = false) {
+  const requested = location.hash.slice(1);
+  let screen = Object.hasOwn(screens, requested) ? requested : 'pulseras';
+  if (screen === 'historial' && active() && current.kind === 'trial') {
+    screen = 'prueba';
+    window.history.replaceState(null, '', '#prueba');
+  }
+  for (const name of Object.keys(screens)) {
+    el(name).hidden = name !== screen;
+    const link = document.querySelector('.app-nav a[href="#' + name + '"]');
+    if (name === screen) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
+  }
+  if (screen !== 'prueba') setExpanded(false);
+  if (focusHeading) {
+    el(screens[screen]).focus({preventScroll:true});
+    window.scrollTo(0,0);
+  }
+}
+
+function setExpanded(expanded) {
+  if (el('prueba').classList.contains('expanded') === expanded) return;
+  el('prueba').classList.toggle('expanded', expanded);
+  el('presentRoute').setAttribute('aria-pressed', String(expanded));
+  el('presentRoute').textContent = expanded ? 'Reducir mapa' : 'Ampliar mapa';
+  const anchor = expanded ? el('routeMap').parentElement : el('sessionControls');
+  anchor.before(el('routeCue'));
+}
+
 function render() {
   const locked = Boolean(active());
   const trial = el('kind').value === 'trial';
   const manual = el('kind').value === 'manual';
   const showingRoute = !manual && !trial;
+  const confirmed = Object.keys(links).filter(usable).length;
+  const paired = Object.keys(links).filter(connected).length;
+  el('linkSummary').textContent = confirmed === 2 ? '2 pulseras listas' : confirmed ? '1 pulsera lista' : paired ? 'Falta probar el pulso' : 'Sin conexión';
+  el('linkSummary').classList.toggle('ready', confirmed > 0);
+  el('pairTitle').textContent = confirmed ? 'Tus conexiones' : 'Conecta tu pulsera';
+  el('toExercise').textContent = active() ? 'Volver a la prueba →' : ready() ? 'Continuar a la prueba →' : showingRoute ? 'Ver la ruta antes de conectar →' : 'Ver la prueba →';
+  el('connectNeeded').hidden = ready();
+  el('connectNeeded').textContent = current?.state === 'En pausa' ? 'Revisar la conexión para reanudar →' : trial ? 'Preparar ambas pulseras para empezar →' : 'Preparar una pulsera para empezar →';
+  el('presentRoute').hidden = !showingRoute;
+  if (!showingRoute) setExpanded(false);
   el('pageTitle').textContent = manual ? 'Control manual' : trial ? 'Prueba de tacto' : 'Prueba de ruta';
   for (const id of ['routeView','routeCue','bandFeedback','routeHelp']) el(id).hidden = !showingRoute;
   if (showingRoute) {
@@ -117,15 +157,18 @@ function render() {
     el('manual' + side).disabled = busy || connecting.size > 0 || current?.state === 'En pausa' ||
       !usable(side) || performance.now() < manualNext[side];
     el('connect' + side).hidden = connected(side);
-    el('test' + side).hidden = !connected(side) || usable(side) || links[side].awaitingTouch;
+    el('test' + side).hidden = !connected(side) || usable(side);
+    el('test' + side).textContent = links[side]?.awaitingTouch ? 'Repetir pulso' : 'Probar ' + sides[side].toLowerCase();
     el('connect' + side).disabled = connected(side) || busy || connecting.size > 0 || !supportsBle();
     el('test' + side).disabled = !connected(side) || busy || (current?.state === 'En curso' && (!manual || usable(side)));
     el('confirm' + side).hidden = !links[side]?.awaitingTouch || busy;
     el('state' + side).textContent = connecting.has(side) ? 'Conectando…' : connected(side) ? (usable(side) ? 'Lista' : 'Conectada') : 'Sin conexión';
+    el('state' + side).closest('.band').classList.toggle('ready', usable(side));
   }
   el('connectionHelp').textContent = !supportsBle() ? 'Este navegador no ofrece Bluetooth aquí. Abre la página HTTPS en Chrome para Android o en Edge de escritorio.' :
     trial ? 'La prueba de tacto requiere conectar las dos pulseras y confirmar el pulso de cada lado.' :
-    'Conecta al menos una pulsera y confirma que sentiste el pulso. Haz la prueba con el vehículo detenido.';
+    confirmed ? 'Puedes continuar con las pulseras listas. Haz la prueba con el vehículo detenido.' :
+    'Con el vehículo detenido, enciende una pulsera y elige su muñeca. Después prueba la vibración.';
   el('message').textContent = message;
   el('start').hidden = current?.state === 'En curso' || (manual && current?.state !== 'En pausa');
   el('start').disabled = busy || connecting.size > 0 || !ready();
@@ -142,6 +185,7 @@ function render() {
   el('signal').disabled = busy || !ready();
   // El operador registra primero la respuesta. Mostrar el lado antes arruinaría la prueba.
   el('records').hidden = locked && trial;
+  el('historyNav').hidden = locked && trial;
   renderHistory();
 }
 
@@ -397,6 +441,8 @@ el('kind').onchange = () => {
   resetPreview();
   message = ''; render();
 };
+el('presentRoute').onclick = () => setExpanded(!el('prueba').classList.contains('expanded'));
+window.addEventListener('hashchange', () => showScreen(true));
 el('start').onclick = start;
 el('pause').onclick = () => pause('Pausa manual.');
 el('finish').onclick = () => { if (!busy && active()) finish('Finalizada'); };
@@ -416,4 +462,5 @@ window.addEventListener('pagehide', () => pause('Página cerrada.'));
 if (new URLSearchParams(location.search).get('modo') === 'manual') {
   el('kind').value = 'manual';
 }
+showScreen();
 render();

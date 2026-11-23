@@ -13,10 +13,31 @@
 <body>
   <header class="mast"><div class="wrap mast-inner">
     <div class="brand"><svg width="31" height="31" viewBox="0 0 100 100" aria-hidden="true"><path d="M36 18 A38 38 0 0 0 36 82 M64 18 A38 38 0 0 1 64 82" fill="none" stroke="#4a62d6" stroke-width="10"/><circle cx="50" cy="50" r="9" fill="#f0b44c"/></svg>Vira</div>
-    <a href="#hardware">Pulseras del prototipo</a>
+    <nav class="app-nav" aria-label="Navegación principal">
+      <a href="#pulseras" aria-current="page">Pulseras</a>
+      <a href="#prueba">Prueba</a>
+      <a id="historyNav" href="#historial">Historial</a>
+    </nav>
+    <span id="linkSummary" class="connection-status" role="status">Sin conexión</span>
   </div></header>
   <main class="wrap">
-    <div class="page-heading"><h1 id="pageTitle">Prueba de ruta</h1><a href="#setup">Configurar</a></div>
+    <section id="pulseras" aria-labelledby="bandsTitle">
+      <div class="band-hero">
+        <div><h1 id="bandsTitle" tabindex="-1">Tus pulseras</h1><p>Cuando se acerca un giro, vibra la pulsera del lado hacia el que vas a doblar.</p></div>
+        <img src="vendor/pulseras-vira.webp" width="850" height="444" alt="Diseño de las dos pulseras Vira con correa azul">
+      </div>
+      <div class="card pairing" id="hardware">
+        <h2 id="pairTitle">Conecta tu pulsera</h2><p id="connectionHelp">Enciende la pulsera y elige en qué muñeca la llevas.</p>
+        <div class="band-pair">
+          <div class="band"><div class="band-name"><strong>Muñeca izquierda</strong><small>Vira-L</small></div><span id="stateL" role="status"></span><div class="controls"><button id="connectL" aria-label="Conectar pulsera izquierda">Conectar</button><button id="testL" hidden>Probar izquierda</button><button id="confirmL" hidden>Sentí el pulso</button></div></div>
+          <div class="band"><div class="band-name"><strong>Muñeca derecha</strong><small>Vira-R</small></div><span id="stateR" role="status"></span><div class="controls"><button id="connectR" aria-label="Conectar pulsera derecha">Conectar</button><button id="testR" hidden>Probar derecha</button><button id="confirmR" hidden>Sentí el pulso</button></div></div>
+        </div>
+        <div class="next-action"><a id="toExercise" href="#prueba">Ver vista previa de la ruta →</a></div>
+      </div>
+    </section>
+    <p id="message" role="status"></p>
+    <section id="prueba" hidden aria-labelledby="pageTitle">
+    <div class="page-heading"><h1 id="pageTitle" tabindex="-1">Prueba de ruta</h1><button id="presentRoute" aria-pressed="false">Ampliar mapa</button></div>
     <div class="layout">
       <section class="card session" aria-labelledby="now">
         <div id="routeView">
@@ -53,6 +74,7 @@
             <div><span class="eyebrow" id="cueLabel">Primer giro</span><strong id="turnText"></strong></div>
           </div>
           <div id="sessionControls" class="controls"><button id="start" class="primary" disabled>Iniciar ruta</button><button id="pause" hidden>Pausar</button><button id="finish" hidden>Finalizar</button></div>
+          <a id="connectNeeded" href="#pulseras">Conectar una pulsera para empezar →</a>
           <div id="bandFeedback" aria-label="Última señal de las pulseras">
             <span class="eyebrow">Última señal</span>
             <div class="wrists"><span id="wristL"><i></i>Izquierda</span><span id="wristR"><i></i>Derecha</span></div>
@@ -62,20 +84,16 @@
           <output id="counts"></output>
         </div>
       </section>
-      <section class="card settings" aria-labelledby="setup"><h2 id="setup">Preparar la prueba</h2>
-        <div id="hardware"><p id="connectionHelp">Conecta al menos una pulsera del prototipo por Bluetooth.</p>
-          <div class="band"><strong>Izquierda · Vira-L</strong><span id="stateL" role="status"></span><div class="controls"><button id="connectL">Conectar izquierda</button><button id="testL" hidden>Probar izquierda</button><button id="confirmL" hidden>Sentí el pulso</button></div></div>
-          <div class="band"><strong>Derecha · Vira-R</strong><span id="stateR" role="status"></span><div class="controls"><button id="connectR">Conectar derecha</button><button id="testR" hidden>Probar derecha</button><button id="confirmR" hidden>Sentí el pulso</button></div></div>
-          <p id="message" role="status"></p>
-        </div>
+      <section class="card settings" aria-labelledby="setup"><h2 id="setup">Elegir prueba</h2>
         <label>Ejercicio<select id="kind"><option value="route">Recorrer una ruta guardada</option><option value="manual">Control manual</option><option value="trial">Reconocer 10 giros por tacto</option></select></label>
         <div id="routeOptions"><label>Trayecto<select id="trip"></select></label><label>Vehículo<select id="profile"><option value="bici">Bici</option><option value="moto">Moto</option></select></label></div>
-        <p id="routeHelp" class="note">El recorrido avanza a 10× sin GPS. Los avisos se envían por Bluetooth a la pulsera del lado del giro. <a href="#routeView">Ver recorrido ↓</a></p>
+        <p id="routeHelp" class="note">El mapa recorre el trayecto a 10×. Los avisos llegan por Bluetooth a tu pulsera.</p>
         <p id="trialHelp" hidden>Con las pulseras puestas y el vehículo detenido, el participante dice qué lado sintió sin mirar. El operador registra la respuesta.</p>
         <div id="manualControls" hidden><p>Elige la muñeca que debe vibrar. Cada toque envía tres pulsos.</p><div class="controls"><button id="manualL">Vibrar izquierda</button><button id="manualR">Vibrar derecha</button></div></div>
       </section>
     </div>
-    <section id="records" class="card records"><h2>Registro de pruebas</h2><label id="historyLabel">Sesión guardada<select id="history"></select></label><p id="summary"></p><ol id="events"></ol></section>
+    </section>
+    <section id="historial" hidden aria-labelledby="historyTitle"><h1 id="historyTitle" tabindex="-1">Historial</h1><div id="records" class="card records"><h2>Registro de pruebas</h2><label id="historyLabel">Sesión guardada<select id="history"></select></label><p id="summary"></p><ol id="events"></ol></div></section>
   </main>
 </body>
 </html>
