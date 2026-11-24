@@ -62,6 +62,7 @@ select { width: 100%; padding: 7px 10px; font-size: 16px; font-weight: 400 }
 .pairing { margin-top: 12px }
 .pairing > p, .settings p, .records p { margin-block: 6px 12px; color: var(--muted) }
 .band-pair, .layout { display: grid; gap: 10px }
+.pairing label ~ .band-pair { margin-top: 12px }
 .band { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 4px 8px; padding: 12px; border: 1px solid var(--line); border-radius: 13px }
 .band.ready { border-color: #9cc8b8; background: #f2f9f5 }
 .band-name strong, .band-name small { display: block }

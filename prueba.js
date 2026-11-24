@@ -1,11 +1,13 @@
 'use strict';
 
 const el = id => document.getElementById(id);
-const sides = { L: 'Izquierda', R: 'Derecha', U: 'Vuelta' };
+const sides = { L: 'Izquierda', R: 'Derecha', U: 'Vuelta', S: 'Única' };
 const serviceId = '42aa0001-7331-4d61-b432-9b418a6297d1';
 const commandId = '42aa0002-7331-4d61-b432-9b418a6297d1';
 const storagePrefix = 'vira.prueba.v1.';
-const links = { L: null, R: null };
+const setupKey = 'vira.prueba.configuracion';
+// L y R son una pulsera por muñeca. S es la pulsera única (Vira-1): 1 vibración = izquierda, 2 = derecha.
+const links = { L: null, R: null, S: null };
 const connecting = new Set();
 const sessions = new Map();
 const routeMap = createRouteMap();
@@ -18,25 +20,32 @@ let coolingUntil = 0;
 const manualNext = {L:0, R:0};
 let message = '';
 
+const single = () => el('setup').value === 'single';
+const bands = () => single() ? ['S'] : ['L','R'];
+const bandFor = side => single() ? 'S' : side;
+const bandName = band => band === 'S' ? 'Vira-1' : 'Vira-' + band;
+// Con una pulsera hace falta un silencio claro entre avisos: 2 vibraciones y 1 seguidas parecerían 3.
+const gap = () => single() ? 3000 : 1900;
+const speedup = () => single() ? 4 : OSM_SPEEDUP;
 const connected = side => Boolean(links[side]?.device.gatt.connected);
 const active = () => current && ['En curso', 'En pausa'].includes(current.state);
 const usable = side => connected(side) && links[side].tested;
 function ready() {
   const kind = el('kind').value;
-  if (kind === 'trial') return Object.keys(links).every(usable);
+  if (kind === 'trial') return bands().every(usable);
   // Una ruta en pausa se reanuda con las mismas pulseras con que partió. Para iniciarla basta una.
   if (kind === 'route' && current?.kind === 'route' && current.state === 'En pausa' && current.sides) {
     return current.sides.every(usable);
   }
-  return Object.keys(links).some(usable);
+  return bands().some(usable);
 }
 const supportsBle = () => window.isSecureContext && Boolean(navigator.bluetooth);
 const timeLabel = t => new Date(t).toLocaleTimeString('es-CL');
 const completed = e => e.result === 'Enviada' || e.result === 'Simulada';
 function title(s) {
-  if (s.kind === 'manual') return 'Control manual';
-  if (s.kind === 'trial') return 'Prueba de tacto';
-  return OSM_TRIPS[s.trip].name + ' · ' + s.profile;
+  const name = s.kind === 'manual' ? 'Control manual' : s.kind === 'trial' ? 'Prueba de tacto' :
+    OSM_TRIPS[s.trip].name + ' · ' + s.profile;
+  return name + (s.setup === 'single' ? ' · una pulsera' : '');
 }
 
 function save(session) {
@@ -130,14 +139,15 @@ function render() {
   const manual = el('kind').value === 'manual';
   const showingRoute = !manual && !trial;
   el('prueba').classList.toggle('live-route', showingRoute && locked);
-  const confirmed = Object.keys(links).filter(usable).length;
-  const paired = Object.keys(links).filter(connected).length;
+  const one = single();
+  const confirmed = bands().filter(usable).length;
+  const paired = bands().filter(connected).length;
   el('linkSummary').textContent = confirmed === 2 ? '2 pulseras listas' : confirmed ? '1 pulsera lista' : paired ? 'Falta probar el pulso' : 'Sin conexión';
   el('linkSummary').classList.toggle('ready', confirmed > 0);
   el('pairTitle').textContent = confirmed ? 'Tus conexiones' : 'Conecta tu pulsera';
   el('toExercise').textContent = active() ? 'Volver a la prueba →' : ready() ? 'Continuar a la prueba →' : showingRoute ? 'Ver la ruta antes de conectar →' : 'Ver la prueba →';
   el('connectNeeded').hidden = ready();
-  el('connectNeeded').textContent = current?.state === 'En pausa' ? 'Reconectar pulsera' : trial ? 'Preparar las dos pulseras' : 'Conectar pulsera';
+  el('connectNeeded').textContent = current?.state === 'En pausa' ? 'Reconectar pulsera' : trial && !one ? 'Preparar las dos pulseras' : 'Conectar pulsera';
   el('presentRoute').hidden = !showingRoute;
   if (!showingRoute) setExpanded(false);
   el('pageTitle').textContent = manual ? 'Control manual' : trial ? 'Prueba de tacto' : locked ? (current.state === 'En pausa' ? 'Ruta en pausa' : 'En ruta') : 'Prueba de ruta';
@@ -148,16 +158,27 @@ function render() {
     el('mapState').textContent = current?.state || 'Vista previa';
   }
   el('historyLabel').hidden = !sessions.size;
-  for (const id of ['kind','trip','profile']) el(id).disabled = locked || busy || connecting.size > 0;
+  for (const id of ['setup','kind','trip','profile']) el(id).disabled = locked || busy || connecting.size > 0;
   el('routeOptions').hidden = manual || trial;
   el('manualControls').hidden = !manual;
   el('trialHelp').hidden = !trial;
-  for (const side of Object.keys(links)) {
+  el('bandsTwo').hidden = one;
+  el('bandsOne').hidden = !one;
+  el('heroHelp').textContent = one ? 'Antes de cada giro: 1 vibración a la izquierda, 2 a la derecha.' : 'Antes de cada giro, vibra la muñeca de ese lado.';
+  el('manualHelp').textContent = one ? 'Elige el giro. Izquierda envía 1 vibración y derecha envía 2.' : 'Elige la muñeca que debe vibrar. Cada toque envía tres pulsos.';
+  el('manualL').textContent = one ? 'Izquierda · 1 vibración' : 'Vibrar izquierda';
+  el('manualR').textContent = one ? 'Derecha · 2 vibraciones' : 'Vibrar derecha';
+  el('trialHelp').textContent = one ? 'Con la pulsera puesta y el vehículo detenido, el participante dice hacia qué lado es el giro sin mirar: 1 vibración es izquierda y 2 es derecha. El operador registra la respuesta.' :
+    'Con las pulseras puestas y el vehículo detenido, el participante dice qué lado sintió sin mirar. El operador registra la respuesta.';
+  el('routeHelp').textContent = 'El mapa recorre el trayecto a ' + speedup() + '×. Los avisos llegan por Bluetooth a tu pulsera.';
+  for (const side of ['L','R']) {
     el('manual' + side).disabled = busy || connecting.size > 0 || current?.state === 'En pausa' ||
-      !usable(side) || performance.now() < manualNext[side];
+      !usable(bandFor(side)) || performance.now() < manualNext[side];
+  }
+  for (const side of Object.keys(links)) {
     el('connect' + side).hidden = connected(side);
     el('test' + side).hidden = !connected(side) || usable(side);
-    el('test' + side).textContent = links[side]?.awaitingTouch ? 'Repetir pulso' : 'Probar ' + sides[side].toLowerCase();
+    el('test' + side).textContent = links[side]?.awaitingTouch ? 'Repetir pulso' : side === 'S' ? 'Probar pulsera' : 'Probar ' + sides[side].toLowerCase();
     el('connect' + side).disabled = connected(side) || busy || connecting.size > 0 || !supportsBle();
     el('test' + side).disabled = !connected(side) || busy || (current?.state === 'En curso' && (!manual || usable(side)));
     el('confirm' + side).hidden = !links[side]?.awaitingTouch || busy;
@@ -165,6 +186,8 @@ function render() {
     el('state' + side).closest('.band').classList.toggle('ready', usable(side));
   }
   el('connectionHelp').textContent = !supportsBle() ? 'Este navegador no ofrece Bluetooth aquí. Abre la página HTTPS en Chrome para Android o en Edge de escritorio.' :
+    one ? (confirmed ? 'Puedes continuar con la pulsera lista. Haz la prueba con el vehículo detenido.' :
+      'Con el vehículo detenido, enciende la pulsera y conéctala. La prueba vibra 1 vez y después 2 veces.') :
     trial ? 'La prueba de tacto requiere conectar las dos pulseras y confirmar el pulso de cada lado.' :
     confirmed ? 'Puedes continuar con las pulseras listas. Haz la prueba con el vehículo detenido.' :
     'Con el vehículo detenido, enciende una pulsera y elige su muñeca. Después prueba la vibración.';
@@ -211,7 +234,7 @@ async function connect(side) {
   render();
   let device;
   try {
-    device = await navigator.bluetooth.requestDevice({filters:[{name:'Vira-' + side}],optionalServices:[serviceId]});
+    device = await navigator.bluetooth.requestDevice({filters:[{name:bandName(side)}],optionalServices:[serviceId]});
     const server = await device.gatt.connect();
     const service = await server.getPrimaryService(serviceId);
     const command = await service.getCharacteristic(commandId);
@@ -230,18 +253,18 @@ async function connect(side) {
     }, {once:true});
   } catch (err) {
     device?.gatt.disconnect();
-    const name = 'Vira-' + side;
+    const name = bandName(side);
     if (!device && err.name === 'NotFoundError') {
       message = 'Enciende ' + name + ' y selecciónala en la lista Bluetooth del navegador.';
     } else if (err.name === 'SecurityError' || err.name === 'NotAllowedError') {
       message = 'El navegador bloqueó el acceso. Revisa el permiso de Bluetooth para este sitio y vuelve a conectar.';
     } else {
-      message = 'No se pudo conectar con ' + name + '. Comprueba que esté encendida, libre de otra conexión y con el firmware de ese lado.';
+      message = 'No se pudo conectar con ' + name + '. Comprueba que esté encendida, libre de otra conexión y con el firmware ' + (side === 'S' ? 'de una pulsera.' : 'de ese lado.');
     }
   } finally { connecting.delete(side); render(); }
 }
 
-async function send(side) {
+async function send(side, command = side) {
   const link = links[side];
   if (!link?.device.gatt.connected) throw Error('Pulsera sin conexión');
   let timeout;
@@ -252,7 +275,7 @@ async function send(side) {
     }, 6000);
   });
   try {
-    await Promise.race([link.command.writeValueWithResponse(new TextEncoder().encode(side)), deadline]);
+    await Promise.race([link.command.writeValueWithResponse(new TextEncoder().encode(command)), deadline]);
   } finally { clearTimeout(timeout); }
 }
 
@@ -264,10 +287,16 @@ async function testSide(side) {
   link.awaitingTouch = false;
   try {
     render();
-    await send(side);
+    if (side === 'S') {
+      // La prueba muestra los dos patrones para que se aprendan antes de usarlos.
+      await send(side, 'L');
+      await new Promise(resolve => setTimeout(resolve, gap()));
+    }
+    await send(side, side === 'S' ? 'R' : side);
     if (connected(side) && links[side] === link) {
       link.awaitingTouch = true;
-      message = 'Confirma solo si sentiste el pulso en la muñeca ' + sides[side].toLowerCase() + '.';
+      message = side === 'S' ? 'Confirma solo si sentiste 1 vibración y después 2.' :
+        'Confirma solo si sentiste el pulso en la muñeca ' + sides[side].toLowerCase() + '.';
       await new Promise(resolve => setTimeout(resolve, 1900));
     }
   } catch { link.tested = false; message = 'Falló la prueba de la pulsera ' + sides[side].toLowerCase() + '.'; }
@@ -281,7 +310,7 @@ async function emit(side, detail) {
   render();
   try {
     // Una vuelta requiere que ambos dispositivos acepten su orden.
-    const wanted = side === 'U' ? ['L','R'] : [side];
+    const wanted = single() ? (side === 'U' ? [] : ['S']) : side === 'U' ? ['L','R'] : [side];
     // Una ruta iniciada con una sola pulsera muestra los giros del otro lado sin enviarlos.
     const targets = current.sides ? wanted.filter(t => current.sides.includes(t)) : wanted;
     if (!targets.length) {
@@ -289,9 +318,9 @@ async function emit(side, detail) {
       return entry;
     }
     if (targets.length < wanted.length) entry.detail += ' · solo ' + sides[targets[0]];
-    const results = await Promise.allSettled(targets.map(send));
+    const results = await Promise.allSettled(targets.map(t => send(t, t === 'S' ? side : t)));
     const received = targets.filter((_,i) => results[i].status === 'fulfilled');
-    signaled = received;
+    signaled = received.map(t => t === 'S' ? side : t);
     if (received.length !== targets.length) {
       if (received.length) entry.detail += ' · escritura aceptada solo en ' + sides[received[0]];
       for (const target of targets.filter(t => !received.includes(t))) {
@@ -301,7 +330,7 @@ async function emit(side, detail) {
         Error('Escritura fallida');
     }
     entry.result = 'Enviada';
-    coolingUntil = performance.now() + 1900;
+    coolingUntil = performance.now() + gap();
   } catch (err) {
     entry.result = err.name === 'TimeoutError' ? 'Sin confirmar' : 'Fallida';
     pause('No se confirmó la orden. Prueba las pulseras antes de reanudar.');
@@ -327,7 +356,7 @@ async function advance() {
   const now = performance.now();
   const elapsed = Math.min(500, now - previousTick);
   previousTick = now;
-  route.position = Math.min(route.len, route.position + elapsed / 1000 * OSM_PROF[current.profile].kmh / 3.6 * OSM_SPEEDUP);
+  route.position = Math.min(route.len, route.position + elapsed / 1000 * OSM_PROF[current.profile].kmh / 3.6 * speedup());
   routeMap.paint(route.position);
   const step = route.steps[route.next];
   if (step) {
@@ -354,12 +383,13 @@ function start() {
     const trip = el('trip').value, profile = el('profile').value;
     const id = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,9);
     current = {id,started:Date.now(),mode:'ble',kind,trip,profile,state:'En curso',events:[]};
+    if (single()) current.setup = 'single';
     sessions.set(id,current);
     if (kind === 'route') {
       const parsed = routeMap.select(trip, profile);
       route = {steps:parsed.steps,len:parsed.len,position:0,next:0};
       routeMap.showSignal(null);
-      current.sides = Object.keys(links).filter(usable);
+      current.sides = bands().filter(usable);
     } else if (kind === 'trial') {
       current.sequence = Array.from('LLLLLRRRRR');
       for (let i = 9; i > 0; i--) {
@@ -372,7 +402,7 @@ function start() {
     event('state','Iniciada');
   }
   message = '';
-  if (current.sides?.length === 1) {
+  if (!single() && current.sides?.length === 1) {
     message = 'Ruta con una sola pulsera: los giros a la ' + (current.sides[0] === 'L' ? 'derecha' : 'izquierda') + ' se muestran sin vibrar.';
   }
   previousTick = performance.now();
@@ -392,8 +422,9 @@ async function manualSignal(side) {
   if (current?.kind !== 'manual' || current.state !== 'En curso') return;
   const entry = await emit(side, 'Botón manual');
   if (entry.result === 'Enviada') {
-    manualNext[side] = performance.now() + 1900;
-    setTimeout(render, 1900);
+    // En una sola muñeca, los dos botones esperan a que termine el aviso anterior.
+    for (const s of single() ? ['L','R'] : [side]) manualNext[s] = performance.now() + gap();
+    setTimeout(render, gap());
   }
   if (current.state === 'En curso') el('instruction').textContent = sides[side] + ' · ' + entry.result.toLowerCase();
   render();
@@ -428,18 +459,26 @@ function resetPreview() {
   el('instruction').textContent = '';
 }
 for (const id of ['trip','profile']) el(id).onchange = () => { resetPreview(); render(); };
+for (const side of ['L','R']) el('manual'+side).onclick = () => manualSignal(side);
 for (const side of Object.keys(links)) {
-  el('manual'+side).onclick = () => manualSignal(side);
   el('connect'+side).onclick = () => connect(side);
   el('test'+side).onclick = () => testSide(side);
   el('confirm'+side).onclick = () => {
     if (!connected(side) || !links[side].awaitingTouch) return;
     links[side].tested = true;
     links[side].awaitingTouch = false;
-    message = 'Pulso confirmado en la muñeca ' + sides[side].toLowerCase() + '.';
+    message = side === 'S' ? 'Pulsera confirmada: 1 vibración es izquierda y 2 es derecha.' :
+      'Pulso confirmado en la muñeca ' + sides[side].toLowerCase() + '.';
     render();
   };
 }
+el('setup').onchange = () => {
+  // Cada configuración usa su propio firmware: se sueltan las conexiones de la otra.
+  for (const side of Object.keys(links)) { const link = links[side]; links[side] = null; link?.device.gatt.disconnect(); }
+  try { localStorage.setItem(setupKey, el('setup').value); } catch {}
+  resetPreview();
+  message = ''; render();
+};
 el('kind').onchange = () => {
   resetPreview();
   message = ''; render();
@@ -462,6 +501,8 @@ el('answers').onclick = e => {
 };
 document.addEventListener('visibilitychange', () => { if (document.hidden) pause('Pausa al salir de la página.'); });
 window.addEventListener('pagehide', () => pause('Página cerrada.'));
+el('setup').value = 'two';
+try { if (localStorage.getItem(setupKey) === 'single') el('setup').value = 'single'; } catch {}
 if (new URLSearchParams(location.search).get('modo') === 'manual') {
   el('kind').value = 'manual';
 }

@@ -11,15 +11,17 @@ function mockBands() {
     async requestDevice({filters,optionalServices}) {
       const name = filters[0].name;
       const side = name.slice(-1);
+      // Vira-1 (una pulsera) acepta las dos órdenes. Las demás, solo la de su lado.
+      const accepted = side === '1' ? ['L','R'] : [side];
       const device = new EventTarget();
       device.id = name;
       const characteristic = {
         properties:{write:true},
         async writeValueWithResponse(bytes) {
           const command = new TextDecoder().decode(bytes);
-          if (command !== side || !device.gatt.connected || window.failSide === side) throw Error('Write failed');
+          if (!accepted.includes(command) || !device.gatt.connected || window.failSide === side) throw Error('Write failed');
           if (window.hangWrites) return new Promise(() => {});
-          window.writes.push(side);
+          window.writes.push(command);
         }
       };
       device.gatt = {
@@ -55,7 +57,7 @@ async function run() {
       await page.locator('#' + name).waitFor({state:'visible'});
     }
     async function click(id) {
-      await openScreen(/^(connect|test|confirm)[LR]$/.test(id) ? 'pulseras' : 'prueba');
+      await openScreen(/^(connect|test|confirm)[LRS]$/.test(id) ? 'pulseras' : 'prueba');
       await page.locator('#'+id).click();
     }
     const text = id => page.locator('#'+id).innerText();
@@ -228,6 +230,72 @@ async function run() {
     assert(await page.locator('#records').isVisible());
     assert((await page.locator('#history option').first().innerText()).includes('Control manual'));
     assert.deepEqual(errors,[]);
+    await openScreen('pulseras');
+    assert.equal(await page.locator('#setup').inputValue(),'two');
+    await pair('L');
+    await page.locator('#setup').selectOption('single');
+    assert(await page.locator('#bandsTwo').isHidden());
+    assert((await text('linkSummary')).includes('Sin conexión'));
+    assert(await page.evaluate(() => !links.L));
+    await page.reload();
+    assert.equal(await page.locator('#setup').inputValue(),'single');
+    await page.evaluate(() => {window.writes.length=0;});
+    await click('connectS');
+    assert(await page.locator('#start').isDisabled());
+    await click('testS');
+    await page.clock.runFor(1500);
+    assert.deepEqual(await page.evaluate(() => window.writes),['L']);
+    await page.clock.runFor(3700);
+    assert.deepEqual(await page.evaluate(() => window.writes),['L','R']);
+    await click('confirmS');
+    for (const [trip, profile, expected] of [['nunoa','moto','RRLRL'],['lastarria','bici','RRLRLRLLR']]) {
+      await select('kind','route');await select('trip',trip);await select('profile',profile);
+      await page.evaluate(() => {window.writes.length=0;});
+      await click('start');
+      assert(!(await page.locator('#message').innerText()).includes('una sola pulsera'));
+      assert(await page.evaluate(() => el('setup').disabled));
+      await page.clock.runFor(180000);
+      s=await records();
+      assert.equal(s.state,'Completada');
+      assert.equal(s.setup,'single');
+      assert.equal((await page.evaluate(() => window.writes)).join(''),expected);
+      const times=s.events.filter(e=>e.type==='signal').map(e=>e.time);
+      assert(times.every((t,i) => !i || t-times[i-1]>=2900));
+      assert(s.events.filter(e=>e.type==='signal').every(e=>e.result==='Enviada'));
+    }
+    await select('kind','route');
+    await click('start');await page.clock.runFor(1500);
+    await page.evaluate(() => window.dropBand('1'));
+    assert.equal((await records()).state,'En pausa');
+    await click('connectS');await click('testS');await page.clock.runFor(5200);await click('confirmS');
+    await click('start');
+    assert.equal((await records()).state,'En curso');
+    await click('finish');
+    await select('kind','manual');
+    await page.evaluate(() => {window.writes.length=0;});
+    await click('manualR');
+    assert(await page.locator('#manualL').isDisabled());
+    await page.clock.runFor(3100);
+    await click('manualL');
+    assert.deepEqual(await page.evaluate(() => window.writes),['R','L']);
+    await click('finish');
+    await select('kind','trial');
+    await page.clock.runFor(3100);
+    await click('start');
+    for (let i=0;i<10;i++) {
+      await click('signal');
+      const side=await page.evaluate(()=>window.writes.at(-1));
+      await page.locator('[data-answer="'+side+'"]').click();
+      await page.clock.runFor(3100);
+    }
+    assert((await text('counts')).includes('10 aciertos de 10 respuestas'));
+    await openScreen('historial');
+    assert((await page.locator('#history option').first().innerText()).includes('una pulsera'));
+    await openScreen('pulseras');
+    await page.locator('#setup').selectOption('two');
+    assert(await page.locator('#bandsOne').isHidden());
+    assert.deepEqual(errors,[]);
+    console.log('Configuración de una pulsera: 1 y 2 vibraciones en prueba, ruta, manual y tacto; la de dos pulseras sigue igual.');
     console.log('Control manual con una y dos pulseras, bloqueo de doble pulso, pausa por desconexión y registro Bluetooth.');
   } finally {await browser.close();}
 }

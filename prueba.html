@@ -23,14 +23,18 @@
   <main class="wrap">
     <section id="pulseras" aria-labelledby="bandsTitle">
       <div class="band-hero">
-        <div><h1 id="bandsTitle" tabindex="-1">Tus pulseras</h1><p>Antes de cada giro, vibra la muñeca de ese lado.</p></div>
+        <div><h1 id="bandsTitle" tabindex="-1">Tus pulseras</h1><p id="heroHelp">Antes de cada giro, vibra la muñeca de ese lado.</p></div>
         <img src="vendor/pulseras-vira.webp" width="850" height="444" alt="Diseño de las dos pulseras Vira con correa azul">
       </div>
       <div class="card pairing" id="hardware">
         <h2 id="pairTitle">Conecta tu pulsera</h2><p id="connectionHelp">Enciende la pulsera y elige en qué muñeca la llevas.</p>
-        <div class="band-pair">
+        <label>Configuración<select id="setup"><option value="two">Dos pulseras · una por muñeca</option><option value="single">Una pulsera · 1 izquierda, 2 derecha</option></select></label>
+        <div class="band-pair" id="bandsTwo">
           <div class="band"><div class="band-name"><strong>Muñeca izquierda</strong><small>Vira-L</small></div><span id="stateL" role="status"></span><div class="controls"><button id="connectL" aria-label="Conectar pulsera izquierda">Conectar</button><button id="testL" hidden>Probar izquierda</button><button id="confirmL" hidden>Sentí el pulso</button></div></div>
           <div class="band"><div class="band-name"><strong>Muñeca derecha</strong><small>Vira-R</small></div><span id="stateR" role="status"></span><div class="controls"><button id="connectR" aria-label="Conectar pulsera derecha">Conectar</button><button id="testR" hidden>Probar derecha</button><button id="confirmR" hidden>Sentí el pulso</button></div></div>
+        </div>
+        <div class="band-pair" id="bandsOne" hidden>
+          <div class="band"><div class="band-name"><strong>Pulsera única</strong><small>Vira-1</small></div><span id="stateS" role="status"></span><div class="controls"><button id="connectS" aria-label="Conectar pulsera única">Conectar</button><button id="testS" hidden>Probar pulsera</button><button id="confirmS" hidden>Sentí 1 y después 2</button></div></div>
         </div>
         <div class="next-action"><a id="toExercise" href="#prueba">Ver vista previa de la ruta →</a></div>
       </div>
@@ -89,7 +93,7 @@
         <p id="routeHelp" class="note">El mapa recorre el trayecto a 10×. Los avisos llegan por Bluetooth a tu pulsera.</p>
         </details>
         <p id="trialHelp" hidden>Con las pulseras puestas y el vehículo detenido, el participante dice qué lado sintió sin mirar. El operador registra la respuesta.</p>
-        <div id="manualControls" hidden><p>Elige la muñeca que debe vibrar. Cada toque envía tres pulsos.</p><div class="controls"><button id="manualL">Vibrar izquierda</button><button id="manualR">Vibrar derecha</button></div></div>
+        <div id="manualControls" hidden><p id="manualHelp">Elige la muñeca que debe vibrar. Cada toque envía tres pulsos.</p><div class="controls"><button id="manualL">Vibrar izquierda</button><button id="manualR">Vibrar derecha</button></div></div>
       </section>
     </div>
     </section>
